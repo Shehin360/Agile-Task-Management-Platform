@@ -1,0 +1,36 @@
+<div class="page">
+  <h1 class="title">Kanban Board</h1>
+<div class="board">
+
+  <div class="column">
+    <h3>To Do</h3>
+
+    @for (task of getTaskByStatus('todo'); track task.id) {
+      <div class="task" @taskAnim (click)="moveTask(task)">
+        {{ task.title }}
+      </div>
+    }
+  </div>
+
+  <div class="column">
+    <h3>In Progress</h3>
+
+    @for (task of getTaskByStatus('inprogress'); track task.id) {
+      <div class="task" @taskAnim (click)="moveTask(task)">
+        {{ task.title }}
+      </div>
+    }
+  </div>
+
+  <div class="column">
+    <h3>Done</h3>
+
+    @for (task of getTaskByStatus('done'); track task.id) {
+      <div class="task" @taskAnim (click)="moveTask(task)">
+        {{ task.title }}
+      </div>
+    }
+  </div>
+
+</div>
+</div>
