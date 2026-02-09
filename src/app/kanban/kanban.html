@@ -2,6 +2,17 @@
   <h1 class="title">Kanban Board</h1>
 <div class="board">
 
+  <div class="add-task">
+    <input
+      type="text"
+      placeholder="Enter new task"
+      [value]="newTaskTitle()"
+      (input)="newTaskTitle.set($any($event.target).value)"
+      />
+
+    <button (click)="addTask()">Add Task</button>
+  </div>
+
   <div class="column">
     <h3>To Do</h3>
 

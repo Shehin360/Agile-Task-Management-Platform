@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import {trigger,transition,style, animate} from '@angular/animations';
 
 
@@ -25,24 +25,46 @@ import {trigger,transition,style, animate} from '@angular/animations';
 })
 export class Kanban {
 
-  tasks = [
+  tasks = signal([
     {id:1, title: 'Design UI', status: 'todo'},
     {id:2,title:'Create API', status:'inprogress'},
     {id:3,title:'Fix Bugs', status:'done'},
     {id:4,title:'Write Tests',status:'todo'},
-  ]
+  ]);
+  newTaskTitle = signal('');
+  nextId = signal(5);
+
+  addTask() {
+  const title = this.newTaskTitle().trim();
+  if (!title) return;
+
+  this.tasks.update(tasks => [
+    ...tasks,
+    {
+      id: this.nextId(),
+      title,
+      status: 'todo'
+    }
+  ]);
+
+  this.nextId.update(id => id + 1);
+  this.newTaskTitle.set('');
+}
 
 
 getTaskByStatus(status: string){
-  return this.tasks.filter(task =>task.status===status)
+  return this.tasks().filter(task =>task.status===status)
 }
-  moveTask(task:any){
-    if(task.status === 'todo'){
-      task.status= 'inprogress';
 
-    }else if(task.status === 'inprogress'){
-      task.status= 'done';
-    }
-  }
+moveTask(task: any) {
+  this.tasks.update(tasks =>
+    tasks.map(t =>
+      t.id === task.id
+        ? { ...t, status: t.status === 'todo' ? 'inprogress' : 'done' }
+        : t
+    )
+  );
+}
+
 
 }
