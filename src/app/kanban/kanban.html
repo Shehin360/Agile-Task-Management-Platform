@@ -1,47 +1,95 @@
 <div class="page">
   <h1 class="title">Kanban Board</h1>
-<div class="board">
 
   <div class="add-task">
-    <input
-      type="text"
-      placeholder="Enter new task"
-      [value]="newTaskTitle()"
-      (input)="newTaskTitle.set($any($event.target).value)"
+    <div class="add-task-inputs">
+      <input
+        type="text"
+        class="task-input"
+        placeholder="Enter new task..."
+        [value]="newTaskTitle()"
+        (input)="newTaskTitle.set($any($event.target).value)"
+        (keyup.enter)="addTask()"
       />
+      <input
+        type="text"
+        class="task-input description-input"
+        placeholder="Add description (optional)..."
+        [value]="newTaskDescription()"
+        (input)="newTaskDescription.set($any($event.target).value)"
+        (keyup.enter)="addTask()"
+      />
+    </div>
 
-    <button (click)="addTask()">Add Task</button>
+    <button class="add-btn" (click)="addTask()" [class.pulse]="showPulse()">
+      <span class="plus-icon">+</span>
+    </button>
   </div>
 
-  <div class="column">
-    <h3>To Do</h3>
+  <div class="board">
+    <div class="column">
+      <h3>To Do</h3>
 
-    @for (task of getTaskByStatus('todo'); track task.id) {
-      <div class="task" @taskAnim (click)="moveTask(task)">
-        {{ task.title }}
+      @for (task of getTaskByStatus('todo'); track task.id) {
+      <div class="task" @taskAnim>
+        @if (editingTaskId() === task.id) {
+        <input
+          class="edit-input"
+          type="text"
+          placeholder="Task title..."
+          [value]="editingTitle()"
+          (input)="editingTitle.set($any($event.target).value)"
+          (keyup.enter)="saveEdit(task.id)"
+          (keyup.escape)="cancelEdit()"
+        />
+        <textarea
+          class="edit-input description-textarea"
+          placeholder="Description..."
+          [value]="editingDescription()"
+          (input)="editingDescription.set($any($event.target).value)"
+          (keyup.escape)="cancelEdit()"
+        ></textarea>
+        <div class="task-actions">
+          <button class="task-btn save-btn" (click)="saveEdit(task.id)">Save</button>
+          <button class="task-btn cancel-btn" (click)="cancelEdit()">Cancel</button>
+        </div>
+        } @else {
+        <div class="task-content" (click)="moveTask(task)">
+          <span class="task-title">{{ task.title }}</span>
+          @if (task.description) {
+          <span class="task-description">{{ task.description }}</span>
+          }
+        </div>
+        <button class="task-btn edit-btn" (click)="startEdit(task)">✎</button>
+        }
       </div>
-    }
-  </div>
+      }
+    </div>
 
-  <div class="column">
-    <h3>In Progress</h3>
+    <div class="column">
+      <h3>In Progress</h3>
 
-    @for (task of getTaskByStatus('inprogress'); track task.id) {
+      @for (task of getTaskByStatus('inprogress'); track task.id) {
       <div class="task" @taskAnim (click)="moveTask(task)">
-        {{ task.title }}
+        <span class="task-title">{{ task.title }}</span>
+        @if (task.description) {
+        <span class="task-description">{{ task.description }}</span>
+        }
       </div>
-    }
-  </div>
+      }
+    </div>
 
-  <div class="column">
-    <h3>Done</h3>
+    <div class="column">
+      <h3>Done</h3>
 
-    @for (task of getTaskByStatus('done'); track task.id) {
-      <div class="task" @taskAnim (click)="moveTask(task)">
-        {{ task.title }}
+      @for (task of getTaskByStatus('done'); track task.id) {
+      <div class="task" @taskAnim>
+        <span class="task-title">{{ task.title }}</span>
+        @if (task.description) {
+        <span class="task-description">{{ task.description }}</span>
+        }
       </div>
-    }
+      }
+    </div>
   </div>
-
-</div>
 </div>
