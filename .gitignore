@@ -90,3 +90,6 @@ Thumbs.db
 # Optional: Add these if you use them
 .vscode/settings.json
 .idea/
+
+
+./changelog.md

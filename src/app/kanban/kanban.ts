@@ -36,13 +36,16 @@ export class Kanban {
 
   tasks = signal<Task[]>(this.loadTasks());
 
+  //popup signal
+  showAddTaskModal = signal(false);
+
   // tasks = signal([
   //   {id:1, title: 'Design UI', status: 'todo'},
   //   {id:2,title:'Create API', status:'inprogress'},
   //   {id:3,title:'Fix Bugs', status:'done'},
   //   {id:4,title:'Write Tests',status:'todo'},
   // ]);
-  
+
   newTaskTitle = signal('');
   newTaskDescription = signal('');
   nextId = signal(this.getNextId());

@@ -1,30 +1,5 @@
 <div class="page">
-  <h1 class="title">Kanban Board</h1>
-
-  <div class="add-task">
-    <div class="add-task-inputs">
-      <input
-        type="text"
-        class="task-input"
-        placeholder="Enter new task..."
-        [value]="newTaskTitle()"
-        (input)="newTaskTitle.set($any($event.target).value)"
-        (keyup.enter)="addTask()"
-      />
-      <input
-        type="text"
-        class="task-input description-input"
-        placeholder="Add description (optional)..."
-        [value]="newTaskDescription()"
-        (input)="newTaskDescription.set($any($event.target).value)"
-        (keyup.enter)="addTask()"
-      />
-    </div>
-
-    <button class="add-btn" (click)="addTask()" [class.pulse]="showPulse()">
-      <span class="plus-icon">+</span>
-    </button>
-  </div>
+  <h1 class="title">KANBAN BOARD</h1>
 
   <div class="board">
     <div class="column">
@@ -70,40 +45,80 @@
         </div>
         }
       </div>
+
+      <!-- Newly added task button -->
+      <button class="column-add-btn" (click)="showAddTaskModal.set(true)">+ Add Task</button>
     </div>
 
     <div class="column">
       <h3 class="column-header">In Progress</h3>
       <div class="column-body">
-      @for (task of getTaskByStatus('inprogress'); track task.id) {
-      <div class="task" @taskAnim>
-        <div class="task-content" (click)="moveTask(task)">
-          <span class="task-title">{{ task.title }}</span>
-          @if (task.description) {
-          <span class="task-description">{{ task.description }}</span>
-          }
+        @for (task of getTaskByStatus('inprogress'); track task.id) {
+        <div class="task" @taskAnim>
+          <div class="task-content" (click)="moveTask(task)">
+            <span class="task-title">{{ task.title }}</span>
+            @if (task.description) {
+            <span class="task-description">{{ task.description }}</span>
+            }
+          </div>
+          <button class="task-btn delete-btn" (click)="deleteTask(task.id)">✕</button>
         </div>
-        <button class="task-btn delete-btn" (click)="deleteTask(task.id)">✕</button>
+        }
       </div>
-      }
-    </div>
     </div>
 
     <div class="column">
       <h3 class="column-header">Done</h3>
       <div class="column-body">
-      @for (task of getTaskByStatus('done'); track task.id) {
-      <div class="task" @taskAnim>
-        <div class="task-content">
-          <span class="task-title">{{ task.title }}</span>
-          @if (task.description) {
-          <span class="task-description">{{ task.description }}</span>
-          }
+        @for (task of getTaskByStatus('done'); track task.id) {
+        <div class="task" @taskAnim>
+          <div class="task-content">
+            <span class="task-title">{{ task.title }}</span>
+            @if (task.description) {
+            <span class="task-description">{{ task.description }}</span>
+            }
+          </div>
+          <button class="task-btn delete-btn" (click)="deleteTask(task.id)">✕</button>
         </div>
-        <button class="task-btn delete-btn" (click)="deleteTask(task.id)">✕</button>
+        }
       </div>
-      }
     </div>
   </div>
+  @if (showAddTaskModal()) {
+  <div class="modal-backdrop" (click)="showAddTaskModal.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Add New Task</h2>
+        <button class="modal-close" (click)="showAddTaskModal.set(false)">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <label class="modal-label">Title</label>
+        <input
+          class="modal-input"
+          type="text"
+          placeholder="Enter task title..."
+          [value]="newTaskTitle()"
+          (input)="newTaskTitle.set($any($event.target).value)"
+          (keyup.enter)="addTask(); showAddTaskModal.set(false)"
+        />
+
+        <label class="modal-label">Description</label>
+        <textarea
+          class="modal-textarea"
+          placeholder="Enter description (optional)..."
+          [value]="newTaskDescription()"
+          (input)="newTaskDescription.set($any($event.target).value)"
+        ></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn cancel" (click)="showAddTaskModal.set(false)">Cancel</button>
+        <button class="modal-btn add" (click)="addTask(); showAddTaskModal.set(false)">
+          Add Task
+        </button>
+      </div>
+    </div>
   </div>
+  }
 </div>
