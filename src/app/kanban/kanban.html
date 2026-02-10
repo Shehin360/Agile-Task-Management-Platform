@@ -28,50 +28,53 @@
 
   <div class="board">
     <div class="column">
-      <h3>To Do</h3>
+      <!-- <h3>To Do</h3> -->
+      <h3 class="column-header">To Do</h3>
 
-      @for (task of getTaskByStatus('todo'); track task.id) {
-      <div class="task" @taskAnim>
-        @if (editingTaskId() === task.id) {
-        <input
-          class="edit-input"
-          type="text"
-          placeholder="Task title..."
-          [value]="editingTitle()"
-          (input)="editingTitle.set($any($event.target).value)"
-          (keyup.enter)="saveEdit(task.id)"
-          (keyup.escape)="cancelEdit()"
-        />
-        <textarea
-          class="edit-input description-textarea"
-          placeholder="Description..."
-          [value]="editingDescription()"
-          (input)="editingDescription.set($any($event.target).value)"
-          (keyup.escape)="cancelEdit()"
-        ></textarea>
-        <div class="task-actions">
-          <button class="task-btn save-btn" (click)="saveEdit(task.id)">Save</button>
-          <button class="task-btn cancel-btn" (click)="cancelEdit()">Cancel</button>
-        </div>
-        } @else {
-        <div class="task-content" (click)="moveTask(task)">
-          <span class="task-title">{{ task.title }}</span>
-          @if (task.description) {
-          <span class="task-description">{{ task.description }}</span>
+      <div class="column-body">
+        @for (task of getTaskByStatus('todo'); track task.id) {
+        <div class="task" @taskAnim>
+          @if (editingTaskId() === task.id) {
+          <input
+            class="edit-input"
+            type="text"
+            placeholder="Task title..."
+            [value]="editingTitle()"
+            (input)="editingTitle.set($any($event.target).value)"
+            (keyup.enter)="saveEdit(task.id)"
+            (keyup.escape)="cancelEdit()"
+          />
+          <textarea
+            class="edit-input description-textarea"
+            placeholder="Description..."
+            [value]="editingDescription()"
+            (input)="editingDescription.set($any($event.target).value)"
+            (keyup.escape)="cancelEdit()"
+          ></textarea>
+          <div class="task-actions">
+            <button class="task-btn save-btn" (click)="saveEdit(task.id)">Save</button>
+            <button class="task-btn cancel-btn" (click)="cancelEdit()">Cancel</button>
+          </div>
+          } @else {
+          <div class="task-content" (click)="moveTask(task)">
+            <span class="task-title">{{ task.title }}</span>
+            @if (task.description) {
+            <span class="task-description">{{ task.description }}</span>
+            }
+          </div>
+          <div class="task-actions">
+            <button class="task-btn edit-btn" (click)="startEdit(task)">✎</button>
+            <button class="task-btn delete-btn" (click)="deleteTask(task.id)">✕</button>
+          </div>
           }
-        </div>
-        <div class="task-actions">
-          <button class="task-btn edit-btn" (click)="startEdit(task)">✎</button>
-          <button class="task-btn delete-btn" (click)="deleteTask(task.id)">✕</button>
         </div>
         }
       </div>
-      }
     </div>
 
     <div class="column">
-      <h3>In Progress</h3>
-
+      <h3 class="column-header">In Progress</h3>
+      <div class="column-body">
       @for (task of getTaskByStatus('inprogress'); track task.id) {
       <div class="task" @taskAnim>
         <div class="task-content" (click)="moveTask(task)">
@@ -84,10 +87,11 @@
       </div>
       }
     </div>
+    </div>
 
     <div class="column">
-      <h3>Done</h3>
-
+      <h3 class="column-header">Done</h3>
+      <div class="column-body">
       @for (task of getTaskByStatus('done'); track task.id) {
       <div class="task" @taskAnim>
         <div class="task-content">
@@ -100,5 +104,6 @@
       </div>
       }
     </div>
+  </div>
   </div>
 </div>
