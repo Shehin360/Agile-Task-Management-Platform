@@ -43,15 +43,20 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .task:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
+
+.task-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .task-title {
@@ -94,18 +99,15 @@
   border-color: #4caf50;
 }
 
-.task-actions {
-  display: flex;
-  gap: 6px;
-}
-
 .task-btn {
   border: none;
   border-radius: 6px;
-  padding: 4px 10px;
+  padding: 6px 12px;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  font-weight: bold;
   transition: background 0.2s ease, transform 0.1s ease;
+  min-width: 32px;
 }
 
 .task-btn:active {
@@ -137,6 +139,15 @@
 
 .cancel-btn:hover {
   background: #757575;
+}
+
+.delete-btn {
+  background: #f44336;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #d32f2f;
 }
 .title {
   text-align: center;
