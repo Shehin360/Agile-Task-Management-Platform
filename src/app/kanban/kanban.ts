@@ -42,6 +42,7 @@ export class Kanban {
   //   {id:3,title:'Fix Bugs', status:'done'},
   //   {id:4,title:'Write Tests',status:'todo'},
   // ]);
+  
   newTaskTitle = signal('');
   newTaskDescription = signal('');
   nextId = signal(this.getNextId());
@@ -114,6 +115,15 @@ export class Kanban {
     });
 
     this.cancelEdit();
+  }
+
+  // Delete a task
+  deleteTask(taskId: number) {
+    this.tasks.update((tasks: Task[]) => {
+      const updated: Task[] = tasks.filter((t: Task) => t.id !== taskId);
+      this.saveTasks(updated);
+      return updated;
+    });
   }
 
   moveTask(task: Task) {
