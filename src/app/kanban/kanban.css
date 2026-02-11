@@ -447,3 +447,44 @@
   outline-color: #0abde3;
   box-shadow: 0 0 20px rgba(10, 189, 227, 0.25);
 }
+
+
+/* To stack columns in vertically for samller screens 768px */
+
+@media (max-width: 1024px) {
+  .board {
+    flex-direction: column;
+    gap:16px;
+  }
+
+  .column{
+    width: 100%;
+  }
+
+  .title{
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+  }
+}
+
+/* Mobile View */
+
+@media(max-width: 480px){
+
+  .page{
+    padding: 16px;
+  }
+
+  .modal{
+    width: 90vw;
+    max-width: 400px;
+  }
+
+  .icon-btn , .task-btn{
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .task{
+    padding: 12px;
+  }
+}
