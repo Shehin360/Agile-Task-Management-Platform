@@ -53,9 +53,15 @@
   text-transform: uppercase;
 }
 
-.column:nth-child(1) .column-header { background: linear-gradient(135deg, #e94560, #c23152); }
-.column:nth-child(2) .column-header { background: linear-gradient(135deg, #0f9b58, #0d8a4e); }
-.column:nth-child(3) .column-header { background: linear-gradient(135deg, #0abde3, #0984a3); }
+.column:nth-child(1) .column-header {
+  background: linear-gradient(135deg, #e94560, #c23152);
+}
+.column:nth-child(2) .column-header {
+  background: linear-gradient(135deg, #0f9b58, #0d8a4e);
+}
+.column:nth-child(3) .column-header {
+  background: linear-gradient(135deg, #0abde3, #0984a3);
+}
 
 .column-body {
   display: flex;
@@ -79,8 +85,12 @@
   border-left: 4px solid #e94560;
 }
 
-.column:nth-child(2) .task { border-left-color: #0f9b58; }
-.column:nth-child(3) .task { border-left-color: #0abde3; }
+.column:nth-child(2) .task {
+  border-left-color: #0f9b58;
+}
+.column:nth-child(3) .task {
+  border-left-color: #0abde3;
+}
 
 .task:hover {
   transform: translateY(-2px);
@@ -129,25 +139,54 @@
   transition: all 0.2s ease;
 }
 
-.task-btn:active { transform: scale(0.9); }
+.task-btn:active {
+  transform: scale(0.9);
+}
 
-.edit-btn { background: #ffeaa7; color: #d68910; }
-.edit-btn:hover { background: #fdcb6e; transform: scale(1.1); }
+.edit-btn {
+  background: #ffeaa7;
+  color: #d68910;
+}
+.edit-btn:hover {
+  background: #fdcb6e;
+  transform: scale(1.1);
+}
 
 .save-btn {
-  background: #55efc4; color: #00856f;
-  width: auto; padding: 6px 14px; font-size: 0.85rem; font-weight: 600;
+  background: #55efc4;
+  color: #00856f;
+  width: auto;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
-.save-btn:hover { background: #00b894; color: white; }
+.save-btn:hover {
+  background: #00b894;
+  color: white;
+}
 
 .cancel-btn {
-  background: #dfe6e9; color: #636e72;
-  width: auto; padding: 6px 14px; font-size: 0.85rem; font-weight: 600;
+  background: #dfe6e9;
+  color: #636e72;
+  width: auto;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
-.cancel-btn:hover { background: #b2bec3; color: white; }
+.cancel-btn:hover {
+  background: #b2bec3;
+  color: white;
+}
 
-.delete-btn { background: #fab1a0; color: #d63031; }
-.delete-btn:hover { background: #e17055; color: white; transform: scale(1.1); }
+.delete-btn {
+  background: #fab1a0;
+  color: #d63031;
+}
+.delete-btn:hover {
+  background: #e17055;
+  color: white;
+  transform: scale(1.1);
+}
 
 /* ========== EDIT FORM ========== */
 .edit-input {
@@ -161,7 +200,9 @@
   margin-bottom: 8px;
   transition: border-color 0.2s ease;
 }
-.edit-input:focus { border-color: #e94560; }
+.edit-input:focus {
+  border-color: #e94560;
+}
 
 .description-textarea {
   min-height: 60px;
@@ -191,13 +232,17 @@
   box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4);
 }
 
-.column-add-btn:active { transform: translateY(0); }
+.column-add-btn:active {
+  transform: translateY(0);
+}
 
 /* ========== MODAL POPUP ========== */
 .modal-backdrop {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   display: flex;
@@ -236,7 +281,8 @@
   background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
-  width: 32px; height: 32px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   font-size: 16px;
   cursor: pointer;
@@ -245,7 +291,9 @@
   justify-content: center;
   transition: background 0.2s ease;
 }
-.modal-close:hover { background: rgba(255, 255, 255, 0.3); }
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
 
 .modal-body {
   padding: 24px;
@@ -275,7 +323,9 @@
   color: white;
   transition: border-color 0.2s ease;
 }
-.modal-input:focus { border-color: #e94560; }
+.modal-input:focus {
+  border-color: #e94560;
+}
 
 .modal-textarea {
   width: 100%;
@@ -292,7 +342,9 @@
   font-family: inherit;
   transition: border-color 0.2s ease;
 }
-.modal-textarea:focus { border-color: #e94560; }
+.modal-textarea:focus {
+  border-color: #e94560;
+}
 
 .modal-actions {
   display: flex;
@@ -312,10 +364,19 @@
   letter-spacing: 0.5px;
 }
 
-.modal-btn.cancel { background: #233554; color: #a8b2d1; }
-.modal-btn.cancel:hover { background: #2d4a7a; color: white; }
+.modal-btn.cancel {
+  background: #233554;
+  color: #a8b2d1;
+}
+.modal-btn.cancel:hover {
+  background: #2d4a7a;
+  color: white;
+}
 
-.modal-btn.add { background: linear-gradient(135deg, #e94560, #c23152); color: white; }
+.modal-btn.add {
+  background: linear-gradient(135deg, #e94560, #c23152);
+  color: white;
+}
 .modal-btn.add:hover {
   background: linear-gradient(135deg, #ff6b81, #e94560);
   transform: translateY(-1px);
@@ -324,11 +385,65 @@
 
 /* ========== ANIMATIONS ========== */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== DRAG & DROP ========== */
+.task[draggable='true'] {
+  cursor: grab;
+}
+
+.task[draggable='true']:active {
+  cursor: grabbing;
+}
+
+.task.dragging {
+  opacity: 0.4;
+  transform: scale(0.95);
+  box-shadow: 0 8px 24px rgba(233, 69, 96, 0.3);
+  border-left-color: #e94560 !important;
+}
+
+.column-body {
+  min-height: 80px;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 8px;
+}
+
+/* Visual feedback when dragging over a column */
+.column {
+  transition: box-shadow 0.3s ease, outline 0.2s ease;
+  outline: 2px solid transparent;
+}
+
+.column.drag-over {
+  outline: 2px dashed #e94560;
+  box-shadow: 0 0 20px rgba(233, 69, 96, 0.25);
+  background: #1a2747;
+}
+
+.column:nth-child(2).drag-over {
+  outline-color: #0f9b58;
+  box-shadow: 0 0 20px rgba(15, 155, 88, 0.25);
+}
+
+.column:nth-child(3).drag-over {
+  outline-color: #0abde3;
+  box-shadow: 0 0 20px rgba(10, 189, 227, 0.25);
 }

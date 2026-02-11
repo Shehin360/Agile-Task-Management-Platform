@@ -36,6 +36,57 @@ export class Kanban {
 
   tasks = signal<Task[]>(this.loadTasks());
 
+  //drag task funtion
+
+  draggedTaskId = signal<number | null>(null);
+  dragOverColumn = signal<TaskStatus | null>(null);
+
+  onDragStart(event: DragEvent, taskId: number) {
+    this.draggedTaskId.set(taskId);
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', taskId.toString());
+    }
+  }
+
+  //drag end
+
+  onDragEnd() {
+    this.draggedTaskId.set(null);
+    this.dragOverColumn.set(null);
+  }
+
+  //ondrag funtion
+
+  onDragOver(event: DragEvent, column: TaskStatus) {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+    this.dragOverColumn.set(column);
+  }
+
+  onDragLeave() {
+    this.dragOverColumn.set(null);
+  }
+
+  //ondrop funtion
+  onDrop(event: DragEvent, newStatus: TaskStatus) {
+    event.preventDefault();
+    const taskId = this.draggedTaskId();
+    if (taskId == null) return;
+
+    this.tasks.update((tasks: Task[]) => {
+      const updated: Task[] = tasks.map((t: Task) =>
+        t.id === taskId ? { ...t, status: newStatus } : t
+      );
+      this.saveTasks(updated);
+      return updated;
+    });
+    this.draggedTaskId.set(null);
+    this.dragOverColumn.set(null);
+  }
+
   //popup signal
   showAddTaskModal = signal(false);
 
@@ -129,22 +180,22 @@ export class Kanban {
     });
   }
 
-  moveTask(task: Task) {
-    this.tasks.update((tasks: Task[]) => {
-      const updated: Task[] = tasks.map((t) =>
-        t.id === task.id
-          ? {
-              ...t,
-              status:
-                t.status === 'todo' ? 'inprogress' : t.status === 'inprogress' ? 'done' : 'done',
-            }
-          : t
-      );
+  // moveTask(task: Task) {
+  //   this.tasks.update((tasks: Task[]) => {
+  //     const updated: Task[] = tasks.map((t) =>
+  //       t.id === task.id
+  //         ? {
+  //             ...t,
+  //             status:
+  //               t.status === 'todo' ? 'inprogress' : t.status === 'inprogress' ? 'done' : 'done',
+  //           }
+  //         : t
+  //     );
 
-      this.saveTasks(updated);
-      return updated;
-    });
-  }
+  //     this.saveTasks(updated);
+  //     return updated;
+  //   });
+  // }
 
   private loadTasks(): Task[] {
     const stored = this.isBrowser ? localStorage.getItem(STORAGE_KEY) : null;

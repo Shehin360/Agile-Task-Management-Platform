@@ -1,14 +1,27 @@
 <div class="page">
-  <h1 class="title">KANBAN BOARD</h1>
+  <h1 class="title">AGILE TASK BOARD</h1>
 
   <div class="board">
-    <div class="column">
-      <!-- <h3>To Do</h3> -->
+    <!-- TO DO COLUMN -->
+    <div
+      class="column"
+      [class.drag-over]="dragOverColumn() === 'todo'"
+      (dragover)="onDragOver($event, 'todo')"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event, 'todo')"
+    >
       <h3 class="column-header">To Do</h3>
 
       <div class="column-body">
         @for (task of getTaskByStatus('todo'); track task.id) {
-        <div class="task" @taskAnim>
+        <div
+          class="task"
+          @taskAnim
+          draggable="true"
+          [class.dragging]="draggedTaskId() === task.id"
+          (dragstart)="onDragStart($event, task.id)"
+          (dragend)="onDragEnd()"
+        >
           @if (editingTaskId() === task.id) {
           <input
             class="edit-input"
@@ -31,7 +44,7 @@
             <button class="task-btn cancel-btn" (click)="cancelEdit()">Cancel</button>
           </div>
           } @else {
-          <div class="task-content" (click)="moveTask(task)">
+          <div class="task-content">
             <span class="task-title">{{ task.title }}</span>
             @if (task.description) {
             <span class="task-description">{{ task.description }}</span>
@@ -50,12 +63,26 @@
       <button class="column-add-btn" (click)="showAddTaskModal.set(true)">+ Add Task</button>
     </div>
 
-    <div class="column">
+    <!-- IN PROGRESS COLUMN -->
+    <div
+      class="column"
+      [class.drag-over]="dragOverColumn() === 'inprogress'"
+      (dragover)="onDragOver($event, 'inprogress')"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event, 'inprogress')"
+    >
       <h3 class="column-header">In Progress</h3>
       <div class="column-body">
         @for (task of getTaskByStatus('inprogress'); track task.id) {
-        <div class="task" @taskAnim>
-          <div class="task-content" (click)="moveTask(task)">
+        <div
+          class="task"
+          @taskAnim
+          draggable="true"
+          [class.dragging]="draggedTaskId() === task.id"
+          (dragstart)="onDragStart($event, task.id)"
+          (dragend)="onDragEnd()"
+        >
+          <div class="task-content">
             <span class="task-title">{{ task.title }}</span>
             @if (task.description) {
             <span class="task-description">{{ task.description }}</span>
@@ -67,11 +94,25 @@
       </div>
     </div>
 
-    <div class="column">
+    <!-- DONE COLUMN -->
+    <div
+      class="column"
+      [class.drag-over]="dragOverColumn() === 'done'"
+      (dragover)="onDragOver($event, 'done')"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event, 'done')"
+    >
       <h3 class="column-header">Done</h3>
       <div class="column-body">
         @for (task of getTaskByStatus('done'); track task.id) {
-        <div class="task" @taskAnim>
+        <div
+          class="task"
+          @taskAnim
+          draggable="true"
+          [class.dragging]="draggedTaskId() === task.id"
+          (dragstart)="onDragStart($event, task.id)"
+          (dragend)="onDragEnd()"
+        >
           <div class="task-content">
             <span class="task-title">{{ task.title }}</span>
             @if (task.description) {
@@ -84,6 +125,8 @@
       </div>
     </div>
   </div>
+
+  <!-- MODAL -->
   @if (showAddTaskModal()) {
   <div class="modal-backdrop" (click)="showAddTaskModal.set(false)">
     <div class="modal" (click)="$event.stopPropagation()">
