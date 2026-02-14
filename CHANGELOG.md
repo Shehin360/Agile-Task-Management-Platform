@@ -4,6 +4,144 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [v5.0] - 14 February 2026
+
+### 📱 Responsive Design
+
+**Files edited:** `kanban.css`
+
+#### Media Queries Added:
+
+```css
+/* Tablet/iPad (≤1024px) - Stack columns vertically */
+@media (max-width: 1024px) {
+  .board {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .column {
+    width: 100%;
+  }
+  .title {
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+  }
+}
+
+/* Mobile (≤480px) - Optimize spacing */
+@media (max-width: 480px) {
+  .page {
+    padding: 16px;
+  }
+  .modal {
+    width: 90vw;
+    max-width: 400px;
+  }
+  .task-btn {
+    min-width: 44px;
+    min-height: 44px; /* Bigger tap targets */
+  }
+}
+```
+
+#### Result:
+
+- ✅ Columns stack vertically on tablets/phones (no horizontal scrolling)
+- ✅ Touch-friendly 44px button size on mobile
+- ✅ Modal scales to 90% viewport width
+- ✅ Reduced padding on small screens
+
+---
+
+## [v4.1] - 14 February 2026
+
+### 🪟 Modal Popup for Editing Tasks
+
+**Files edited:** `kanban.ts`, `kanban.html`
+
+#### Summary
+
+Replaced inline editing form with a modal popup (same style as "Add Task" modal). Now clicking ✏️ on any task opens a popup instead of showing inline inputs.
+
+#### Before → After
+
+| Feature | Before                           | After                                    |
+| ------- | -------------------------------- | ---------------------------------------- |
+| Edit UI | Inline form appears in task card | Modal popup (like Add Task)              |
+| Editing | Only in To Do column             | All 3 columns (To Do, In Progress, Done) |
+| UX      | Task card expands with inputs    | Clean popup, task stays compact          |
+
+#### TypeScript changes (`kanban.ts`):
+
+```typescript
+// Added modal signal
+showEditTaskModal = signal(false);
+
+// Updated methods to show/hide modal
+startEdit(task: Task) {
+  this.editingTaskId.set(task.id);
+  this.editingTitle.set(task.title);
+  this.editingDescription.set(task.description);
+  this.showEditTaskModal.set(true); // ← NEW
+}
+
+cancelEdit() {
+  // ...existing code...
+  this.showEditTaskModal.set(false); // ← NEW
+}
+
+saveEdit(taskId: number) {
+  // ...existing code...
+  this.cancelEdit(); // Closes modal after saving
+}
+```
+
+#### HTML changes (`kanban.html`):
+
+**Removed:** Inline `@if (editingTaskId() === task.id)` forms from all task cards
+
+**Added:** Edit Task modal (after Add Task modal):
+
+```html
+@if (showEditTaskModal()) {
+<div class="modal-backdrop" (click)="cancelEdit()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Edit Task</h2>
+      <button class="modal-close" (click)="cancelEdit()">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>Title</label>
+      <input
+        [value]="editingTitle()"
+        (input)="editingTitle.set($any($event.target).value)"
+        (keyup.enter)="saveEdit(editingTaskId()!)"
+      />
+
+      <label>Description</label>
+      <textarea
+        [value]="editingDescription()"
+        (input)="editingDescription.set($any($event.target).value)"
+      >
+      </textarea>
+    </div>
+    <div class="modal-actions">
+      <button (click)="cancelEdit()">Cancel</button>
+      <button (click)="saveEdit(editingTaskId()!)">Save Changes</button>
+    </div>
+  </div>
+</div>
+}
+```
+
+#### Benefits:
+
+- ✅ Consistent UI (both Add and Edit use modals)
+- ✅ Cleaner task cards (no expanding inline forms)
+- ✅ Can edit tasks from any column
+- ✅ Keyboard shortcuts: Enter to save, Escape to cancel
+
+---
+
 ## [v4.0] - 10 February 2026
 
 ### 🖱️ Drag & Drop Task Movement

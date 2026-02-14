@@ -4,12 +4,14 @@ import { trigger, transition, style, animate } from '@angular/animations';
 
 const STORAGE_KEY = 'kanban_tasks';
 type TaskStatus = 'todo' | 'inprogress' | 'done';
+type TaskPriority = 'low' | 'medium' | 'high'
 
 interface Task {
   id: number;
   title: string;
   description: string;
   status: TaskStatus;
+  priority: TaskPriority;
 }
 
 @Component({
@@ -87,8 +89,9 @@ export class Kanban {
     this.dragOverColumn.set(null);
   }
 
-  //popup signal
+  //popup signals
   showAddTaskModal = signal(false);
+  showEditTaskModal = signal(false);
 
   // tasks = signal([
   //   {id:1, title: 'Design UI', status: 'todo'},
@@ -144,6 +147,7 @@ export class Kanban {
     this.editingTaskId.set(task.id);
     this.editingTitle.set(task.title);
     this.editingDescription.set(task.description);
+    this.showEditTaskModal.set(true);
   }
 
   // Cancel editing
@@ -151,6 +155,7 @@ export class Kanban {
     this.editingTaskId.set(null);
     this.editingTitle.set('');
     this.editingDescription.set('');
+    this.showEditTaskModal.set(false);
   }
 
   // Save edited task
