@@ -1,4 +1,4 @@
-import { Component, signal, PLATFORM_ID, inject } from '@angular/core';
+import { Component, signal, computed, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { trigger, transition, style, animate } from '@angular/animations';
 
@@ -38,7 +38,12 @@ export class Kanban {
 
   tasks = signal<Task[]>(this.loadTasks());
 
-  //drag task funtion
+  // Computed task lists — efficient, only recalculate when tasks signal changes
+  todoTasks = computed(() => this.tasks().filter((t) => t.status === 'todo'));
+  inprogressTasks = computed(() => this.tasks().filter((t) => t.status === 'inprogress'));
+  doneTasks = computed(() => this.tasks().filter((t) => t.status === 'done'));
+
+  // Drag state
 
   draggedTaskId = signal<number | null>(null);
   dragOverColumn = signal<TaskStatus | null>(null);
@@ -51,15 +56,13 @@ export class Kanban {
     }
   }
 
-  //drag end
-
+  // Drag end
   onDragEnd() {
     this.draggedTaskId.set(null);
     this.dragOverColumn.set(null);
   }
 
-  //ondrag funtion
-
+  // Drag over
   onDragOver(event: DragEvent, column: TaskStatus) {
     event.preventDefault();
     if (event.dataTransfer) {
@@ -72,7 +75,7 @@ export class Kanban {
     this.dragOverColumn.set(null);
   }
 
-  //ondrop funtion
+  // Drop handler
   onDrop(event: DragEvent, newStatus: TaskStatus) {
     event.preventDefault();
     const taskId = this.draggedTaskId();
@@ -89,22 +92,15 @@ export class Kanban {
     this.dragOverColumn.set(null);
   }
 
-  //popup signals
+  // Modal state
   showAddTaskModal = signal(false);
   showEditTaskModal = signal(false);
 
-  // tasks = signal([
-  //   {id:1, title: 'Design UI', status: 'todo'},
-  //   {id:2,title:'Create API', status:'inprogress'},
-  //   {id:3,title:'Fix Bugs', status:'done'},
-  //   {id:4,title:'Write Tests',status:'todo'},
-  // ]);
-
+  // New task form state
   newTaskTitle = signal('');
   newTaskDescription = signal('');
   newTaskPriority = signal<TaskPriority>('medium');
   nextId = signal(this.getNextId());
-  showPulse = signal(false);
 
   // Editing state
   editingTaskId = signal<number | null>(null);
@@ -138,13 +134,6 @@ export class Kanban {
     this.newTaskTitle.set('');
     this.newTaskDescription.set('');
     this.newTaskPriority.set('medium');
-
-    this.showPulse.set(true);
-    setTimeout(() => this.showPulse.set(false), 600);
-  }
-
-  getTaskByStatus(status: TaskStatus): Task[] {
-    return this.tasks().filter((task) => task.status === status);
   }
 
   // Start editing a task
@@ -173,20 +162,12 @@ export class Kanban {
     const newDescription = (this.editingDescription() || '').trim();
     const newPriority = this.editingPriority() || 'medium';
 
-    console.log('Saving task:', {
-      taskId,
-      newTitle,
-      newDescription,
-      newPriority,
-    });
-
     this.tasks.update((tasks: Task[]) => {
       const updated: Task[] = tasks.map((t: Task) =>
         t.id === taskId
           ? { ...t, title: newTitle, description: newDescription, priority: newPriority }
           : t
       );
-      // console.log('Updated tasks:', updated);
       this.saveTasks(updated);
       return updated;
     });
@@ -202,23 +183,6 @@ export class Kanban {
       return updated;
     });
   }
-
-  // moveTask(task: Task) {
-  //   this.tasks.update((tasks: Task[]) => {
-  //     const updated: Task[] = tasks.map((t) =>
-  //       t.id === task.id
-  //         ? {
-  //             ...t,
-  //             status:
-  //               t.status === 'todo' ? 'inprogress' : t.status === 'inprogress' ? 'done' : 'done',
-  //           }
-  //         : t
-  //     );
-
-  //     this.saveTasks(updated);
-  //     return updated;
-  //   });
-  // }
 
   private loadTasks(): Task[] {
     const stored = this.isBrowser ? localStorage.getItem(STORAGE_KEY) : null;

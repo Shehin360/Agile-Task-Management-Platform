@@ -4,6 +4,230 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [v7.1] - 14 February 2026
+
+### 🧹 Code Optimization & Cleanup
+
+**Files edited:** `kanban.ts`, `kanban.html`, `kanban.css`
+
+#### Summary
+
+Full code audit and optimization pass. Removed all dead code, improved performance with Angular `computed()` signals, and cleaned up unused CSS.
+
+#### Performance Optimization — `computed()` signals (`kanban.ts`):
+
+**Before (inefficient):** `getTaskByStatus()` method ran on every change detection cycle.
+
+```typescript
+// OLD — re-filters on every render
+getTaskByStatus(status: TaskStatus): Task[] {
+  return this.tasks().filter((task) => task.status === status);
+}
+```
+
+**After (optimized):** `computed()` signals cache results and only recalculate when `tasks` signal changes.
+
+```typescript
+// NEW — cached, only recalculates when tasks change
+todoTasks = computed(() => this.tasks().filter((t) => t.status === 'todo'));
+inprogressTasks = computed(() => this.tasks().filter((t) => t.status === 'inprogress'));
+doneTasks = computed(() => this.tasks().filter((t) => t.status === 'done'));
+```
+
+#### HTML Updated (`kanban.html`):
+
+```html
+<!-- Before -->
+@for (task of getTaskByStatus('todo'); track task.id) { ... }
+
+<!-- After -->
+@for (task of todoTasks(); track task.id) { ... }
+```
+
+#### Dead Code Removed (`kanban.ts`):
+
+| Removed                                   | Reason                                 |
+| ----------------------------------------- | -------------------------------------- |
+| `console.log()` in `saveEdit()`           | Debug logging not needed in production |
+| `showPulse` signal + `setTimeout`         | Signal was never read in template      |
+| Commented-out `moveTask()` method         | Replaced by drag & drop in v4.0        |
+| Commented-out old `tasks = signal([...])` | Replaced by `loadTasks()` in v1.2      |
+
+#### Dead CSS Removed (`kanban.css`):
+
+| Removed                                        | Reason                                        |
+| ---------------------------------------------- | --------------------------------------------- |
+| `.save-btn` / `.cancel-btn` styles             | Inline edit buttons replaced by modal in v4.1 |
+| `.edit-input` / `.description-textarea` styles | Inline edit form replaced by modal in v4.1    |
+| Duplicate `.column { transition }` rule        | Already defined in main `.column` block       |
+
+#### Result:
+
+- ✅ TypeScript: 248 → 212 lines (−36 lines)
+- ✅ CSS: ~80 lines of dead rules removed
+- ✅ Performance: `computed()` caching instead of per-render filtering
+- ✅ Zero compile errors, zero lint warnings
+- ✅ Clean comments (fixed typos like "funtion" → proper labels)
+
+---
+
+## [v7.0] - 14 February 2026
+
+### 🎨 Complete Visual Redesign — Modern Glassmorphism UI
+
+**Files edited:** `kanban.css`, `styles.css`, `index.html`
+
+#### Summary
+
+Complete CSS overhaul transforming the board into a cutting-edge, visually stunning dark UI with glassmorphism, animated backgrounds, glowing accents, and modern micro-interactions — inspired by the latest web design trends.
+
+#### Font & Global Styles:
+
+**`index.html`** — Added Google Fonts Inter (weights 400–900):
+
+```html
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+  rel="stylesheet"
+/>
+```
+
+**`styles.css`** — Global resets, font smoothing, custom scrollbar:
+
+```css
+html,
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+```
+
+#### Animated Background (`kanban.css`):
+
+```css
+.page {
+  background: #0a0a1a;
+  background-image: radial-gradient(ellipse 80% 50% at 20% 40%, rgba(120, 40, 200, 0.25)...),
+    radial-gradient(ellipse 60% 40% at 80% 20%, rgba(0, 180, 220, 0.2)...), radial-gradient(
+      ellipse 50% 60% at 60% 80%,
+      rgba(233, 69, 96, 0.15)...
+    ), radial-gradient(ellipse 40% 40% at 10% 90%, rgba(15, 155, 88, 0.12)...);
+}
+```
+
+**Floating ambient orbs** (2 pseudo-elements with slow infinite animations):
+
+```css
+.page::before {
+  animation: floatOrb1 20s ease-in-out infinite;
+}
+.page::after {
+  animation: floatOrb2 25s ease-in-out infinite;
+}
+```
+
+#### Title — Animated Gradient Text:
+
+```css
+.title {
+  background: linear-gradient(135deg, #ff6b9d, #c44dff, #00d4ff, #ff6b9d);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 6s ease-in-out infinite;
+}
+```
+
+#### Columns — Glassmorphism:
+
+```css
+.column {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+}
+```
+
+**Column headers** — Vibrant color-coded gradients:
+
+| Column      | Gradient            | Glow             |
+| ----------- | ------------------- | ---------------- |
+| To Do       | `#e94560 → #c44dff` | Pink/purple glow |
+| In Progress | `#00b4d8 → #7c3aed` | Cyan/blue glow   |
+| Done        | `#10b981 → #06b6d4` | Green/teal glow  |
+
+#### Task Cards — Glass Effect + Glowing Borders:
+
+```css
+.task {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+}
+.task::before {
+  /* 3px glowing left border, color-coded per column */
+}
+.task:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+```
+
+#### Priority Badges — Glowing Pills:
+
+| Priority | Background                 | Text      | Glow       |
+| -------- | -------------------------- | --------- | ---------- |
+| Low      | `rgba(16, 185, 129, 0.15)` | `#6ee7b7` | Green glow |
+| Medium   | `rgba(251, 191, 36, 0.15)` | `#fcd34d` | Amber glow |
+| High     | `rgba(239, 68, 68, 0.15)`  | `#fca5a5` | Red glow   |
+
+#### Modal — Frosted Glass Popup:
+
+```css
+.modal-backdrop {
+  backdrop-filter: blur(10px);
+}
+.modal {
+  background: rgba(20, 20, 40, 0.85);
+  backdrop-filter: blur(40px);
+  border-radius: 24px;
+  animation: modalSlideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+```
+
+#### Drag & Drop — Glowing Feedback:
+
+```css
+.task.dragging {
+  opacity: 0.35;
+  transform: scale(0.95) rotate(1deg);
+}
+.column.drag-over {
+  outline: 2px dashed rgba(196, 77, 255, 0.5);
+}
+```
+
+#### Micro-Interactions:
+
+- Column hover: lift + shadow
+- Task hover: lift + scale + glow
+- Button hover: scale + color glow
+- Button active: squish effect (`scale(0.88)`)
+- Action buttons: fade in on task hover
+
+#### Responsive Design:
+
+- **Tablet (≤1024px):** Columns stack vertically, fluid title sizing
+- **Mobile (≤480px):** Compact padding, larger tap targets, scaled modal
+
+---
+
 ## [v6.0] - 14 February 2026
 
 ### ⭐ Task Priority Levels

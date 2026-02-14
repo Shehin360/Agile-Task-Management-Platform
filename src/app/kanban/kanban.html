@@ -13,7 +13,7 @@
       <h3 class="column-header">To Do</h3>
 
       <div class="column-body">
-        @for (task of getTaskByStatus('todo'); track task.id) {
+        @for (task of todoTasks(); track task.id) {
         <div
           class="task"
           @taskAnim
@@ -55,7 +55,7 @@
     >
       <h3 class="column-header">In Progress</h3>
       <div class="column-body">
-        @for (task of getTaskByStatus('inprogress'); track task.id) {
+        @for (task of inprogressTasks(); track task.id) {
         <div
           class="task"
           @taskAnim
@@ -94,7 +94,7 @@
     >
       <h3 class="column-header">Done</h3>
       <div class="column-body">
-        @for (task of getTaskByStatus('done'); track task.id) {
+        @for (task of doneTasks(); track task.id) {
         <div
           class="task"
           @taskAnim
