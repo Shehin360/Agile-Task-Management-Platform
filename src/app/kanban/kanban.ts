@@ -4,7 +4,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
 
 const STORAGE_KEY = 'kanban_tasks';
 type TaskStatus = 'todo' | 'inprogress' | 'done';
-type TaskPriority = 'low' | 'medium' | 'high'
+type TaskPriority = 'low' | 'medium' | 'high';
 
 interface Task {
   id: number;
@@ -150,9 +150,9 @@ export class Kanban {
   // Start editing a task
   startEdit(task: Task) {
     this.editingTaskId.set(task.id);
-    this.editingTitle.set(task.title);
-    this.editingDescription.set(task.description);
-    this.editingPriority.set(task.priority);
+    this.editingTitle.set(task.title || '');
+    this.editingDescription.set(task.description || '');
+    this.editingPriority.set(task.priority || 'medium');
     this.showEditTaskModal.set(true);
   }
 
@@ -161,7 +161,7 @@ export class Kanban {
     this.editingTaskId.set(null);
     this.editingTitle.set('');
     this.editingDescription.set('');
-    this.editingPriority.set('medium')
+    this.editingPriority.set('medium');
     this.showEditTaskModal.set(false);
   }
 
@@ -170,13 +170,23 @@ export class Kanban {
     const newTitle = this.editingTitle().trim();
     if (!newTitle) return;
 
-    const newDescription = this.editingDescription().trim();
-    const newPriority = this.editingPriority();
+    const newDescription = (this.editingDescription() || '').trim();
+    const newPriority = this.editingPriority() || 'medium';
+
+    console.log('Saving task:', {
+      taskId,
+      newTitle,
+      newDescription,
+      newPriority,
+    });
 
     this.tasks.update((tasks: Task[]) => {
       const updated: Task[] = tasks.map((t: Task) =>
-        t.id === taskId ? { ...t, title: newTitle, description: newDescription } : t
+        t.id === taskId
+          ? { ...t, title: newTitle, description: newDescription, priority: newPriority }
+          : t
       );
+      // console.log('Updated tasks:', updated);
       this.saveTasks(updated);
       return updated;
     });
@@ -212,7 +222,15 @@ export class Kanban {
 
   private loadTasks(): Task[] {
     const stored = this.isBrowser ? localStorage.getItem(STORAGE_KEY) : null;
-    return stored ? (JSON.parse(stored) as Task[]) : [];
+    if (!stored) return [];
+
+    const tasks = JSON.parse(stored) as Task[];
+    // Migrate old tasks to ensure all fields exist with defaults
+    return tasks.map((task) => ({
+      ...task,
+      description: task.description || '',
+      priority: task.priority || 'medium',
+    }));
   }
 
   private saveTasks(tasks: Task[]) {

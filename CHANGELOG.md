@@ -4,6 +4,196 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [v6.0] - 14 February 2026
+
+### ⭐ Task Priority Levels
+
+**Files edited:** `kanban.ts`, `kanban.html`, `kanban.css`
+
+#### Summary
+
+Added **Low**, **Medium**, and **High** priority levels to tasks. Each task now displays a colored priority badge, and priority can be set when creating or editing tasks.
+
+#### TypeScript Changes (`kanban.ts`):
+
+```typescript
+// Added priority type
+type TaskPriority = 'low' | 'medium' | 'high';
+
+// Updated Task interface
+interface Task {
+  id: number;
+  title: string;
+  description: string;
+  status: TaskStatus;
+  priority: TaskPriority; // NEW
+}
+
+// Added priority signals
+newTaskPriority = signal<TaskPriority>('medium');
+editingPriority = signal<TaskPriority>('medium');
+
+// Updated addTask() to include priority
+addTask() {
+  const priority = this.newTaskPriority();
+  this.tasks.update((tasks) => {
+    const updated: Task[] = [
+      ...tasks,
+      {
+        id: this.nextId(),
+        title,
+        description,
+        status: 'todo',
+        priority, // NEW
+      },
+    ];
+    // ...
+  });
+  this.newTaskPriority.set('medium'); // Reset to default
+}
+
+// Updated startEdit() to load task priority
+startEdit(task: Task) {
+  // ...existing code...
+  this.editingPriority.set(task.priority);
+}
+
+// Updated saveEdit() to save priority
+saveEdit(taskId: number) {
+  const newPriority = this.editingPriority();
+  this.tasks.update((tasks: Task[]) => {
+    const updated: Task[] = tasks.map((t: Task) =>
+      t.id === taskId
+        ? { ...t, title: newTitle, description: newDescription, priority: newPriority }
+        : t
+    );
+    // ...
+  });
+}
+```
+
+#### HTML Changes (`kanban.html`):
+
+**1) Added priority badge to all task cards:**
+
+```html
+<div class="task-content">
+  <div class="task-header">
+    <span class="task-title">{{ task.title }}</span>
+    <span class="priority-badge" [class]="'priority-' + task.priority">
+      {{ task.priority.toUpperCase() }}
+    </span>
+  </div>
+  @if (task.description) {
+  <span class="task-description">{{ task.description }}</span>
+  }
+</div>
+```
+
+**2) Added priority dropdown to Add Task modal:**
+
+```html
+<label class="modal-label">Priority</label>
+<select
+  class="modal-select"
+  [value]="newTaskPriority()"
+  (change)="newTaskPriority.set($any($event.target).value)"
+>
+  <option value="low">Low</option>
+  <option value="medium">Medium</option>
+  <option value="high">High</option>
+</select>
+```
+
+**3) Added priority dropdown to Edit Task modal** (same structure as Add Task)
+
+#### CSS Changes (`kanban.css`):
+
+**Task header layout:**
+
+```css
+.task-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.task-title {
+  flex: 1; /* Takes remaining space */
+}
+```
+
+**Priority badge styles:**
+
+```css
+.priority-badge {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.priority-low {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.priority-medium {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.priority-high {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+```
+
+**Select dropdown styles (dark theme):**
+
+```css
+.modal-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #233554;
+  border-radius: 10px;
+  background: #0f3460;
+  color: white;
+  cursor: pointer;
+}
+
+.modal-select:hover {
+  border-color: #4a5568;
+}
+
+.modal-select:focus {
+  border-color: #e94560;
+}
+```
+
+#### Visual Result:
+
+| Priority   | Badge Color              | Border        | Text Color       |
+| ---------- | ------------------------ | ------------- | ---------------- |
+| **LOW**    | Light Green (`#d4edda`)  | Green border  | Dark green text  |
+| **MEDIUM** | Light Yellow (`#fff3cd`) | Yellow border | Dark orange text |
+| **HIGH**   | Light Red (`#f8d7da`)    | Red border    | Dark red text    |
+
+#### User Flow:
+
+1. **Add Task**: Select priority from dropdown (default: Medium) → Task created with colored badge
+2. **Edit Task**: Click ✏️ → Modal opens with current priority pre-selected → Change and save
+3. **View Tasks**: Priority badge displayed next to task title in all columns
+
+---
+
 ## [v5.0] - 14 February 2026
 
 ### 📱 Responsive Design

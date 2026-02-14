@@ -23,7 +23,12 @@
           (dragend)="onDragEnd()"
         >
           <div class="task-content">
-            <span class="task-title">{{ task.title }}</span>
+            <div class="task-header">
+              <span class="task-title">{{ task.title }}</span>
+              <span class="priority-badge" [class]="'priority-' + task.priority">
+                {{ task.priority.toUpperCase() }}
+              </span>
+            </div>
             @if (task.description) {
             <span class="task-description">{{ task.description }}</span>
             }
@@ -60,7 +65,12 @@
           (dragend)="onDragEnd()"
         >
           <div class="task-content">
-            <span class="task-title">{{ task.title }}</span>
+            <div class="task-header">
+              <span class="task-title">{{ task.title }}</span>
+              <span class="priority-badge" [class]="'priority-' + task.priority">
+                {{ task.priority.toUpperCase() }}
+              </span>
+            </div>
             @if (task.description) {
             <span class="task-description">{{ task.description }}</span>
             }
@@ -94,7 +104,12 @@
           (dragend)="onDragEnd()"
         >
           <div class="task-content">
-            <span class="task-title">{{ task.title }}</span>
+            <div class="task-header">
+              <span class="task-title">{{ task.title }}</span>
+              <span class="priority-badge" [class]="'priority-' + task.priority">
+                {{ task.priority.toUpperCase() }}
+              </span>
+            </div>
             @if (task.description) {
             <span class="task-description">{{ task.description }}</span>
             }
@@ -136,6 +151,17 @@
           [value]="newTaskDescription()"
           (input)="newTaskDescription.set($any($event.target).value)"
         ></textarea>
+
+        <label class="modal-label">Priority</label>
+        <select
+          class="modal-select"
+          [value]="newTaskPriority()"
+          (change)="newTaskPriority.set($any($event.target).value)"
+        >
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
       </div>
 
       <div class="modal-actions">
@@ -177,6 +203,17 @@
           (input)="editingDescription.set($any($event.target).value)"
           (keyup.escape)="cancelEdit()"
         ></textarea>
+
+        <label class="modal-label">Priority</label>
+        <select
+          class="modal-select"
+          [value]="editingPriority()"
+          (change)="editingPriority.set($any($event.target).value)"
+        >
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
       </div>
 
       <div class="modal-actions">
