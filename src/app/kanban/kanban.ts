@@ -102,6 +102,7 @@ export class Kanban {
 
   newTaskTitle = signal('');
   newTaskDescription = signal('');
+  newTaskPriority = signal<TaskPriority>('medium');
   nextId = signal(this.getNextId());
   showPulse = signal(false);
 
@@ -109,12 +110,14 @@ export class Kanban {
   editingTaskId = signal<number | null>(null);
   editingTitle = signal('');
   editingDescription = signal('');
+  editingPriority = signal<TaskPriority>('medium');
 
   addTask() {
     const title = this.newTaskTitle().trim();
     if (!title) return;
 
     const description = this.newTaskDescription().trim();
+    const priority = this.newTaskPriority();
 
     this.tasks.update((tasks) => {
       const updated: Task[] = [
@@ -124,6 +127,7 @@ export class Kanban {
           title,
           description,
           status: 'todo',
+          priority,
         },
       ];
       this.saveTasks(updated);
@@ -133,6 +137,7 @@ export class Kanban {
     this.nextId.update((id) => id + 1);
     this.newTaskTitle.set('');
     this.newTaskDescription.set('');
+    this.newTaskPriority.set('medium');
 
     this.showPulse.set(true);
     setTimeout(() => this.showPulse.set(false), 600);
@@ -147,6 +152,7 @@ export class Kanban {
     this.editingTaskId.set(task.id);
     this.editingTitle.set(task.title);
     this.editingDescription.set(task.description);
+    this.editingPriority.set(task.priority);
     this.showEditTaskModal.set(true);
   }
 
@@ -155,6 +161,7 @@ export class Kanban {
     this.editingTaskId.set(null);
     this.editingTitle.set('');
     this.editingDescription.set('');
+    this.editingPriority.set('medium')
     this.showEditTaskModal.set(false);
   }
 
@@ -164,6 +171,7 @@ export class Kanban {
     if (!newTitle) return;
 
     const newDescription = this.editingDescription().trim();
+    const newPriority = this.editingPriority();
 
     this.tasks.update((tasks: Task[]) => {
       const updated: Task[] = tasks.map((t: Task) =>
