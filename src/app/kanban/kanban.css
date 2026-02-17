@@ -639,6 +639,14 @@
   box-shadow: 0 12px 40px rgba(196, 77, 255, 0.25);
 }
 
+/* Visual feedback for drop target (reordering within column) */
+.task.drop-target {
+  border-top: 3px solid rgba(196, 77, 255, 0.8);
+  margin-top: 8px;
+  box-shadow: 0 -4px 20px rgba(196, 77, 255, 0.3);
+  transform: translateY(2px);
+}
+
 /* Column glow when dragging over */
 .column.drag-over {
   outline: 2px dashed rgba(196, 77, 255, 0.5);

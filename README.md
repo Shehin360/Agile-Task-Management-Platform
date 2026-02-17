@@ -6,13 +6,18 @@ A modern, interactive Kanban board application built with **Angular 21** that he
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-## 📋 Features
+## ✨ Key Features
 
-- ✨ **Interactive Task Management** - Click tasks to move them through workflow stages
-- 🎨 **Smooth Animations** - Enter/leave animations powered by Angular Animations
-- 📱 **Responsive Design** - Clean, modern UI that works on all screen sizes
-- 🚀 **Standalone Components** - Built with Angular's modern standalone architecture
-- ⚡ **Server-Side Rendering (SSR)** - Fast initial page loads with Angular Universal
+- **🎨 Modern Glassmorphism UI** - Translucent cards, floating orbs, and glowing accents
+- **🔄 Drag & Drop Between Columns** - Intuitive interface for moving tasks across workflow stages
+- **📊 Drag to Reorder Within Columns** - Prioritize tasks by dragging them up or down in the same column
+- **🎯 Priority Levels** - Low, Medium, High priority badges with color coding
+- **📝 Rich Task Details** - Title, description, and priority for each task
+- **✏️ Edit & Delete** - Update or remove tasks with modal popups
+- **💾 LocalStorage Persistence** - Tasks automatically saved and restored
+- **⚡ Reactive Performance** - Powered by Angular Signals and computed properties
+- **📱 Fully Responsive** - Optimized for mobile, tablet, and desktop screens
+- **🎭 Smooth Animations** - Entry/exit animations and micro-interactions
 
 ## 🎯 Workflow Stages
 

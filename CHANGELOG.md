@@ -4,6 +4,239 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [v8.0] - 17 February 2026
+
+### 🔄 Drag to Reorder Within Columns
+
+**Files edited:** `kanban.ts`, `kanban.html`, `kanban.css`
+
+#### Summary
+
+Added the ability to reorder tasks within the same column by dragging and dropping. Tasks now maintain their position order, and you can prioritize tasks by dragging them above or below other tasks in the same column.
+
+#### What Changed:
+
+**Before:**
+
+- ✅ Drag tasks between columns (To Do → In Progress → Done)
+- ❌ Cannot reorder tasks within the same column
+- ❌ New tasks always appear at the end
+
+**After:**
+
+- ✅ Drag tasks between columns (To Do → In Progress → Done)
+- ✅ **NEW:** Drag tasks within the same column to reorder
+- ✅ **NEW:** Visual drop indicator shows where task will be placed
+- ✅ Task order is persisted in localStorage
+
+#### TypeScript Changes (`kanban.ts`):
+
+**1. Added `order` field to Task interface:**
+
+```typescript
+interface Task {
+  id: number;
+  title: string;
+  description: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  order: number; // NEW - For sorting within columns
+}
+```
+
+**2. Added drop target signal for reordering:**
+
+```typescript
+dropTargetTaskId = signal<number | null>(null); // Track hover target
+```
+
+**3. Updated computed task lists to sort by order:**
+
+```typescript
+todoTasks = computed(
+  () =>
+    this.tasks()
+      .filter((t) => t.status === 'todo')
+      .sort((a, b) => a.order - b.order) // Sort by order
+);
+// Same for inprogressTasks and doneTasks
+```
+
+**4. Enhanced `addTask()` to assign order:**
+
+```typescript
+addTask() {
+  // ...existing code...
+  this.tasks.update((tasks) => {
+    // Get max order for 'todo' column
+    const todoTasks = tasks.filter(t => t.status === 'todo');
+    const maxOrder = todoTasks.length > 0
+      ? Math.max(...todoTasks.map(t => t.order))
+      : 0;
+
+    const updated: Task[] = [
+      ...tasks,
+      {
+        id: this.nextId(),
+        title,
+        description,
+        status: 'todo',
+        priority,
+        order: maxOrder + 1, // Add to end
+      },
+    ];
+    // ...
+  });
+}
+```
+
+**5. Completely rewrote `onDrop()` to handle reordering:**
+
+```typescript
+onDrop(event: DragEvent, newStatus: TaskStatus) {
+  event.preventDefault();
+  const taskId = this.draggedTaskId();
+  const targetTaskId = this.dropTargetTaskId();
+  const draggedTask = this.tasks().find(t => t.id === taskId);
+
+  this.tasks.update((tasks: Task[]) => {
+    // If dropped on a specific task (reordering)
+    if (targetTaskId !== null) {
+      const targetTask = tasks.find(t => t.id === targetTaskId);
+      if (targetTask && targetTask.status === newStatus) {
+        // Reorder within same column
+        const columnTasks = tasks
+          .filter(t => t.status === newStatus && t.id !== taskId)
+          .sort((a, b) => a.order - b.order);
+
+        const targetIndex = columnTasks.findIndex(t => t.id === targetTaskId);
+
+        // Insert dragged task at target position
+        columnTasks.splice(targetIndex, 0, { ...draggedTask, status: newStatus });
+
+        // Reassign order values
+        columnTasks.forEach((task, index) => {
+          const taskInArray = tasks.find(t => t.id === task.id);
+          if (taskInArray) {
+            taskInArray.order = index + 1;
+            if (taskInArray.id === taskId) {
+              taskInArray.status = newStatus;
+            }
+          }
+        });
+
+        return [...tasks];
+      }
+    }
+
+    // Moving to different column
+    if (draggedTask.status !== newStatus) {
+      const newColumnTasks = tasks.filter(t => t.status === newStatus);
+      const maxOrder = newColumnTasks.length > 0
+        ? Math.max(...newColumnTasks.map(t => t.order))
+        : 0;
+
+      return tasks.map((t: Task) =>
+        t.id === taskId
+          ? { ...t, status: newStatus, order: maxOrder + 1 }
+          : t
+      );
+    }
+
+    return tasks;
+  });
+
+  this.draggedTaskId.set(null);
+  this.dragOverColumn.set(null);
+  this.dropTargetTaskId.set(null);
+}
+```
+
+**6. Added `onDragOverTask()` handler:**
+
+```typescript
+onDragOverTask(event: DragEvent, taskId: number) {
+  event.preventDefault();
+  event.stopPropagation();
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move';
+  }
+  this.dropTargetTaskId.set(taskId);
+}
+```
+
+**7. Updated `loadTasks()` migration logic:**
+
+```typescript
+private loadTasks(): Task[] {
+  // ...existing code...
+  return tasks.map((task, index) => ({
+    ...task,
+    description: task.description || '',
+    priority: task.priority || 'medium',
+    order: task.order ?? index + 1, // Assign order if missing
+  }));
+}
+```
+
+#### HTML Changes (`kanban.html`):
+
+Added drag events to all task cards in all 3 columns:
+
+```html
+<div
+  class="task"
+  draggable="true"
+  [class.dragging]="draggedTaskId() === task.id"
+  [class.drop-target]="dropTargetTaskId() === task.id"
+  (dragstart)="onDragStart($event, task.id)"
+  (dragend)="onDragEnd()"
+  (dragover)="onDragOverTask($event, task.id)"
+>
+  <!-- task content -->
+</div>
+```
+
+#### CSS Changes (`kanban.css`):
+
+Added visual feedback for drop target:
+
+```css
+/* Visual feedback for drop target (reordering within column) */
+.task.drop-target {
+  border-top: 3px solid rgba(196, 77, 255, 0.8);
+  margin-top: 8px;
+  box-shadow: 0 -4px 20px rgba(196, 77, 255, 0.3);
+  transform: translateY(2px);
+}
+```
+
+#### How It Works:
+
+1. **Drag a task** → Task becomes semi-transparent
+2. **Hover over another task** → A glowing line appears above the target task
+3. **Drop** → Task is inserted at that position
+4. **All tasks in the column are automatically renumbered** (order: 1, 2, 3, ...)
+
+#### User Experience:
+
+| Action                        | Result                                         |
+| ----------------------------- | ---------------------------------------------- |
+| Drag task within same column  | Task moves to new position, other tasks shift  |
+| Drag task to different column | Task moves to end of new column                |
+| Drag task over another task   | Shows insertion line (drop target indicator)   |
+| Release drag                  | Tasks reorder, order persisted to localStorage |
+
+#### Benefits:
+
+- ✅ Prioritize tasks by dragging to top of column
+- ✅ Group related tasks together
+- ✅ Visual feedback makes it clear where task will drop
+- ✅ Order persists across page reloads
+- ✅ Smooth animations for better UX
+
+---
+
 ## [v7.1] - 14 February 2026
 
 ### 🧹 Code Optimization & Cleanup

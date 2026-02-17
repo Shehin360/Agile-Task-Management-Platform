@@ -19,8 +19,10 @@
           @taskAnim
           draggable="true"
           [class.dragging]="draggedTaskId() === task.id"
+          [class.drop-target]="dropTargetTaskId() === task.id"
           (dragstart)="onDragStart($event, task.id)"
           (dragend)="onDragEnd()"
+          (dragover)="onDragOverTask($event, task.id)"
         >
           <div class="task-content">
             <div class="task-header">
@@ -61,8 +63,10 @@
           @taskAnim
           draggable="true"
           [class.dragging]="draggedTaskId() === task.id"
+          [class.drop-target]="dropTargetTaskId() === task.id"
           (dragstart)="onDragStart($event, task.id)"
           (dragend)="onDragEnd()"
+          (dragover)="onDragOverTask($event, task.id)"
         >
           <div class="task-content">
             <div class="task-header">
@@ -100,8 +104,10 @@
           @taskAnim
           draggable="true"
           [class.dragging]="draggedTaskId() === task.id"
+          [class.drop-target]="dropTargetTaskId() === task.id"
           (dragstart)="onDragStart($event, task.id)"
           (dragend)="onDragEnd()"
+          (dragover)="onDragOverTask($event, task.id)"
         >
           <div class="task-content">
             <div class="task-header">
