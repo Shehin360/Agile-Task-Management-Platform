@@ -122,6 +122,75 @@
   align-items: flex-start;
 }
 
+/* SORT BAR */
+.sort-bar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sort-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.sort-btn:active {
+  transform: translateY(0);
+}
+
+.sort-icon {
+  font-size: 0.85rem;
+}
+
+.sort-hint {
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.5px;
+}
+
+/* Active sort mode glow colors */
+.sort-active-manual {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.sort-active-dueDate {
+  border-color: rgba(96, 165, 250, 0.4);
+  background: rgba(96, 165, 250, 0.08);
+  box-shadow: 0 0 20px rgba(96, 165, 250, 0.1);
+  color: #93c5fd;
+}
+
+.sort-active-priority {
+  border-color: rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.08);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.1);
+  color: #fcd34d;
+}
+
 /* COLUMNS — GLASSMORPHISM  */
 .column {
   flex: 1;
@@ -201,6 +270,42 @@
   min-height: 80px;
   transition: background 0.3s ease;
   border-radius: 8px;
+}
+
+/* EMPTY STATE — SUBTLE HINT */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 20px;
+  flex: 1;
+  text-align: center;
+  user-select: none;
+  animation: fadeIn 0.4s ease;
+}
+
+.empty-icon {
+  font-size: 2rem;
+  opacity: 0.3;
+  filter: grayscale(0.5);
+}
+
+.empty-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.2);
+  letter-spacing: 1px;
+}
+
+.empty-hint {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.12);
+  font-style: italic;
+  letter-spacing: 0.3px;
+  max-width: 180px;
+  line-height: 1.5;
 }
 
 /* TASK CARDS — GLASS EFFECT  */
@@ -341,7 +446,8 @@
 }
 
 @keyframes overdueGlow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
   }
   50% {

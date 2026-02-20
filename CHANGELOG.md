@@ -4,6 +4,52 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [v10.0] - 20 February 2026
+
+### 🔀 Smart Sort — Sort Tasks by Due Date or Priority
+
+**Files edited:** `kanban.ts`, `kanban.html`, `kanban.css`
+
+#### Summary
+
+Added a sort toggle button that lets you cycle through three sorting modes across all columns: **Manual** (default drag order), **Due Date** (earliest deadline first), and **Priority** (high → medium → low). The button glows with a distinct color for each active mode.
+
+#### What Changed:
+
+**Before:**
+
+- ✅ Tasks sorted by manual drag order only
+- ❌ No way to auto-sort by urgency or importance
+
+**After:**
+
+- ✅ **NEW:** Sort toggle button above the board
+- ✅ **NEW:** Three sort modes — Manual ↕️, Due Date 📅, Priority 🎯
+- ✅ **NEW:** Click to cycle: Manual → Due Date → Priority → Manual...
+- ✅ **NEW:** Active mode shown with color-coded glow (blue for date, amber for priority)
+- ✅ **NEW:** Smart tiebreakers — priority mode sub-sorts by due date, due date mode falls back to manual order
+
+#### TypeScript Changes (`kanban.ts`):
+
+- Added `sortMode` signal with type `'manual' | 'dueDate' | 'priority'`
+- Added `cycleSortMode()` to cycle through the three modes
+- Added `sortLabel` computed signal for display text
+- Added `priorityWeight()` helper for numeric priority comparison
+- Added `sortTasks()` method with smart tiebreaker logic
+- Refactored all three computed task lists to use `sortTasks()` instead of inline `.sort()`
+
+#### HTML Changes (`kanban.html`):
+
+- Added sort bar with toggle button between title and board
+- Button displays current mode icon + label and a "Click to change sort" hint
+
+#### CSS Changes (`kanban.css`):
+
+- Added `.sort-bar`, `.sort-btn`, `.sort-icon`, `.sort-hint` styles
+- Added `.sort-active-manual`, `.sort-active-dueDate`, `.sort-active-priority` glow variants
+
+---
+
 ## [v9.0] - 17 February 2026
 
 ### 📅 Due Dates for Tasks
@@ -91,9 +137,12 @@ formatDueDate(dueDate: string | null): string {
 
 ```html
 <label class="modal-label">Due Date</label>
-<input class="modal-input modal-date" type="date"
+<input
+  class="modal-input modal-date"
+  type="date"
   [value]="newTaskDueDate() || ''"
-  (input)="newTaskDueDate.set($any($event.target).value || null)" />
+  (input)="newTaskDueDate.set($any($event.target).value || null)"
+/>
 ```
 
 **3. Added date picker to Edit Task modal (same pattern with `editingDueDate`).**

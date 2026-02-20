@@ -40,22 +40,73 @@ export class Kanban {
 
   tasks = signal<Task[]>(this.loadTasks());
 
-  // Computed task lists — efficient, only recalculate when tasks signal changes
-  todoTasks = computed(() =>
-    this.tasks()
-      .filter((t) => t.status === 'todo')
-      .sort((a, b) => a.order - b.order)
-  );
+  // Sort mode: 'manual' (drag order), 'dueDate' (earliest first), 'priority' (high first)
+  sortMode = signal<'manual' | 'dueDate' | 'priority'>('manual');
+
+  // Cycle through sort modes
+  cycleSortMode() {
+    const modes: ('manual' | 'dueDate' | 'priority')[] = ['manual', 'dueDate', 'priority'];
+    const currentIndex = modes.indexOf(this.sortMode());
+    this.sortMode.set(modes[(currentIndex + 1) % modes.length]);
+  }
+
+  // Sort label for display
+  sortLabel = computed(() => {
+    switch (this.sortMode()) {
+      case 'manual':
+        return '↕️ Manual';
+      case 'dueDate':
+        return '📅 Due Date';
+      case 'priority':
+        return '🎯 Priority';
+    }
+  });
+
+  // Priority weight for sorting (higher priority = lower number = sorted first)
+  private priorityWeight(p: TaskPriority): number {
+    switch (p) {
+      case 'high':
+        return 1;
+      case 'medium':
+        return 2;
+      case 'low':
+        return 3;
+    }
+  }
+
+  // Shared sort function based on current mode
+  private sortTasks(tasks: Task[]): Task[] {
+    const mode = this.sortMode();
+    if (mode === 'manual') {
+      return tasks.sort((a, b) => a.order - b.order);
+    }
+    if (mode === 'dueDate') {
+      return tasks.sort((a, b) => {
+        // Tasks with due dates come first, then sort by date ascending
+        if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+        if (a.dueDate && !b.dueDate) return -1;
+        if (!a.dueDate && b.dueDate) return 1;
+        return a.order - b.order; // Fallback to manual order
+      });
+    }
+    // priority mode
+    return tasks.sort((a, b) => {
+      const diff = this.priorityWeight(a.priority) - this.priorityWeight(b.priority);
+      if (diff !== 0) return diff;
+      // Same priority? Sort by due date (earliest first), then manual order
+      if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+      if (a.dueDate && !b.dueDate) return -1;
+      if (!a.dueDate && b.dueDate) return 1;
+      return a.order - b.order;
+    });
+  }
+
+  // Computed task lists — efficient, only recalculate when tasks signal or sortMode changes
+  todoTasks = computed(() => this.sortTasks(this.tasks().filter((t) => t.status === 'todo')));
   inprogressTasks = computed(() =>
-    this.tasks()
-      .filter((t) => t.status === 'inprogress')
-      .sort((a, b) => a.order - b.order)
+    this.sortTasks(this.tasks().filter((t) => t.status === 'inprogress'))
   );
-  doneTasks = computed(() =>
-    this.tasks()
-      .filter((t) => t.status === 'done')
-      .sort((a, b) => a.order - b.order)
-  );
+  doneTasks = computed(() => this.sortTasks(this.tasks().filter((t) => t.status === 'done')));
 
   // Drag state
   draggedTaskId = signal<number | null>(null);
@@ -252,7 +303,13 @@ export class Kanban {
     this.tasks.update((tasks: Task[]) => {
       const updated: Task[] = tasks.map((t: Task) =>
         t.id === taskId
-          ? { ...t, title: newTitle, description: newDescription, priority: newPriority, dueDate: newDueDate }
+          ? {
+              ...t,
+              title: newTitle,
+              description: newDescription,
+              priority: newPriority,
+              dueDate: newDueDate,
+            }
           : t
       );
       this.saveTasks(updated);
