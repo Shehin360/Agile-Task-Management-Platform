@@ -40,6 +40,20 @@ export class Kanban {
 
   tasks = signal<Task[]>(this.loadTasks());
 
+  // Search
+  searchQuery = signal('');
+
+  // Check if a task matches the search query
+  taskMatchesSearch(task: Task): boolean {
+    const query = this.searchQuery().toLowerCase().trim();
+    if (!query) return true;
+    return (
+      task.title.toLowerCase().includes(query) ||
+      task.description.toLowerCase().includes(query) ||
+      task.priority.toLowerCase().includes(query)
+    );
+  }
+
   // Sort mode: 'manual' (drag order), 'dueDate' (earliest first), 'priority' (high first)
   sortMode = signal<'manual' | 'dueDate' | 'priority'>('manual');
 
@@ -101,12 +115,46 @@ export class Kanban {
     });
   }
 
-  // Computed task lists — efficient, only recalculate when tasks signal or sortMode changes
-  todoTasks = computed(() => this.sortTasks(this.tasks().filter((t) => t.status === 'todo')));
-  inprogressTasks = computed(() =>
-    this.sortTasks(this.tasks().filter((t) => t.status === 'inprogress'))
-  );
-  doneTasks = computed(() => this.sortTasks(this.tasks().filter((t) => t.status === 'done')));
+  // Computed task lists — filter by search, then sort
+  todoTasks = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    let filtered = this.tasks().filter((t) => t.status === 'todo');
+    if (query) {
+      filtered = filtered.filter(
+        (t) =>
+          t.title.toLowerCase().includes(query) ||
+          t.description.toLowerCase().includes(query) ||
+          t.priority.toLowerCase().includes(query)
+      );
+    }
+    return this.sortTasks(filtered);
+  });
+  inprogressTasks = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    let filtered = this.tasks().filter((t) => t.status === 'inprogress');
+    if (query) {
+      filtered = filtered.filter(
+        (t) =>
+          t.title.toLowerCase().includes(query) ||
+          t.description.toLowerCase().includes(query) ||
+          t.priority.toLowerCase().includes(query)
+      );
+    }
+    return this.sortTasks(filtered);
+  });
+  doneTasks = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    let filtered = this.tasks().filter((t) => t.status === 'done');
+    if (query) {
+      filtered = filtered.filter(
+        (t) =>
+          t.title.toLowerCase().includes(query) ||
+          t.description.toLowerCase().includes(query) ||
+          t.priority.toLowerCase().includes(query)
+      );
+    }
+    return this.sortTasks(filtered);
+  });
 
   // Drag state
   draggedTaskId = signal<number | null>(null);

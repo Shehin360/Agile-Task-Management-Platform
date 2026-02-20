@@ -1,8 +1,21 @@
 <div class="page">
   <h1 class="title">Sprintly</h1>
 
-  <!-- SORT TOGGLE -->
-  <div class="sort-bar">
+  <!-- TOOLBAR: SEARCH + SORT -->
+  <div class="toolbar">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search tasks..."
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)"
+      />
+      @if (searchQuery()) {
+      <button class="search-clear" (click)="searchQuery.set('')">✕</button>
+      }
+    </div>
     <button class="sort-btn" [class]="'sort-active-' + sortMode()" (click)="cycleSortMode()">
       <span class="sort-icon">{{ sortLabel() }}</span>
       <span class="sort-hint">Click to change sort</span>
