@@ -11,8 +11,9 @@ A modern, interactive Kanban board application built with **Angular 21** that he
 - **🎨 Modern Glassmorphism UI** - Translucent cards, floating orbs, and glowing accents
 - **🔄 Drag & Drop Between Columns** - Intuitive interface for moving tasks across workflow stages
 - **📊 Drag to Reorder Within Columns** - Prioritize tasks by dragging them up or down in the same column
+- **📅 Due Dates** - Set optional deadlines with color-coded badges (overdue, today, upcoming)
 - **🎯 Priority Levels** - Low, Medium, High priority badges with color coding
-- **📝 Rich Task Details** - Title, description, and priority for each task
+- **📝 Rich Task Details** - Title, description, priority, and due date for each task
 - **✏️ Edit & Delete** - Update or remove tasks with modal popups
 - **💾 LocalStorage Persistence** - Tasks automatically saved and restored
 - **⚡ Reactive Performance** - Powered by Angular Signals and computed properties

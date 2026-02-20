@@ -92,5 +92,5 @@ Thumbs.db
 .idea/
 
 
-./CHANGELOG.md
-./FEATURE_REORDER.md
+/CHANGELOG.md
+/FEATURE_REORDER.md

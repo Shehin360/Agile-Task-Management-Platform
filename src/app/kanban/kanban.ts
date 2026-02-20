@@ -12,7 +12,8 @@ interface Task {
   description: string;
   status: TaskStatus;
   priority: TaskPriority;
-  order: number;  
+  order: number;
+  dueDate: string | null; // ISO date string (YYYY-MM-DD) or null
 }
 
 @Component({
@@ -173,6 +174,7 @@ export class Kanban {
   newTaskTitle = signal('');
   newTaskDescription = signal('');
   newTaskPriority = signal<TaskPriority>('medium');
+  newTaskDueDate = signal<string | null>(null);
   nextId = signal(this.getNextId());
 
   // Editing state
@@ -180,6 +182,7 @@ export class Kanban {
   editingTitle = signal('');
   editingDescription = signal('');
   editingPriority = signal<TaskPriority>('medium');
+  editingDueDate = signal<string | null>(null);
 
   addTask() {
     const title = this.newTaskTitle().trim();
@@ -187,6 +190,7 @@ export class Kanban {
 
     const description = this.newTaskDescription().trim();
     const priority = this.newTaskPriority();
+    const dueDate = this.newTaskDueDate();
 
     this.tasks.update((tasks) => {
       // Get max order for 'todo' column
@@ -201,7 +205,8 @@ export class Kanban {
           description,
           status: 'todo',
           priority,
-          order: maxOrder + 1, // Add to end of todo column
+          order: maxOrder + 1,
+          dueDate,
         },
       ];
       this.saveTasks(updated);
@@ -212,6 +217,7 @@ export class Kanban {
     this.newTaskTitle.set('');
     this.newTaskDescription.set('');
     this.newTaskPriority.set('medium');
+    this.newTaskDueDate.set(null);
   }
 
   // Start editing a task
@@ -220,6 +226,7 @@ export class Kanban {
     this.editingTitle.set(task.title || '');
     this.editingDescription.set(task.description || '');
     this.editingPriority.set(task.priority || 'medium');
+    this.editingDueDate.set(task.dueDate || null);
     this.showEditTaskModal.set(true);
   }
 
@@ -229,6 +236,7 @@ export class Kanban {
     this.editingTitle.set('');
     this.editingDescription.set('');
     this.editingPriority.set('medium');
+    this.editingDueDate.set(null);
     this.showEditTaskModal.set(false);
   }
 
@@ -239,11 +247,12 @@ export class Kanban {
 
     const newDescription = (this.editingDescription() || '').trim();
     const newPriority = this.editingPriority() || 'medium';
+    const newDueDate = this.editingDueDate();
 
     this.tasks.update((tasks: Task[]) => {
       const updated: Task[] = tasks.map((t: Task) =>
         t.id === taskId
-          ? { ...t, title: newTitle, description: newDescription, priority: newPriority }
+          ? { ...t, title: newTitle, description: newDescription, priority: newPriority, dueDate: newDueDate }
           : t
       );
       this.saveTasks(updated);
@@ -260,6 +269,35 @@ export class Kanban {
       this.saveTasks(updated);
       return updated;
     });
+  }
+
+  // Due date helpers
+  getDueDateStatus(dueDate: string | null): 'overdue' | 'today' | 'upcoming' | 'none' {
+    if (!dueDate) return 'none';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(dueDate + 'T00:00:00');
+    const diffTime = due.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return 'overdue';
+    if (diffDays === 0) return 'today';
+    return 'upcoming';
+  }
+
+  formatDueDate(dueDate: string | null): string {
+    if (!dueDate) return '';
+    const due = new Date(dueDate + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffTime = due.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return `${Math.abs(diffDays)}d overdue`;
+    if (diffDays === 0) return 'Due today';
+    if (diffDays === 1) return 'Due tomorrow';
+    if (diffDays <= 7) return `${diffDays}d left`;
+    return due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
   private loadTasks(): Task[] {

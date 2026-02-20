@@ -1,5 +1,5 @@
 <div class="page">
-  <h1 class="title">AGILE TASK BOARD</h1>
+  <h1 class="title">Sprintly</h1>
 
   <div class="board">
     <!-- TO DO COLUMN -->
@@ -33,6 +33,11 @@
             </div>
             @if (task.description) {
             <span class="task-description">{{ task.description }}</span>
+            }
+            @if (task.dueDate) {
+            <span class="due-date-badge" [class]="'due-' + getDueDateStatus(task.dueDate)">
+              📅 {{ formatDueDate(task.dueDate) }}
+            </span>
             }
           </div>
           <div class="task-actions">
@@ -78,6 +83,11 @@
             @if (task.description) {
             <span class="task-description">{{ task.description }}</span>
             }
+            @if (task.dueDate) {
+            <span class="due-date-badge" [class]="'due-' + getDueDateStatus(task.dueDate)">
+              📅 {{ formatDueDate(task.dueDate) }}
+            </span>
+            }
           </div>
           <div class="task-actions">
             <button class="task-btn edit-btn" (click)="startEdit(task)">✏️</button>
@@ -118,6 +128,11 @@
             </div>
             @if (task.description) {
             <span class="task-description">{{ task.description }}</span>
+            }
+            @if (task.dueDate) {
+            <span class="due-date-badge" [class]="'due-' + getDueDateStatus(task.dueDate)">
+              📅 {{ formatDueDate(task.dueDate) }}
+            </span>
             }
           </div>
           <div class="task-actions">
@@ -168,6 +183,14 @@
           <option value="medium">Medium</option>
           <option value="high">High</option>
         </select>
+
+        <label class="modal-label">Due Date</label>
+        <input
+          class="modal-input modal-date"
+          type="date"
+          [value]="newTaskDueDate() || ''"
+          (input)="newTaskDueDate.set($any($event.target).value || null)"
+        />
       </div>
 
       <div class="modal-actions">
@@ -220,6 +243,14 @@
           <option value="medium">Medium</option>
           <option value="high">High</option>
         </select>
+
+        <label class="modal-label">Due Date</label>
+        <input
+          class="modal-input modal-date"
+          type="date"
+          [value]="editingDueDate() || ''"
+          (input)="editingDueDate.set($any($event.target).value || null)"
+        />
       </div>
 
       <div class="modal-actions">

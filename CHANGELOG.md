@@ -4,6 +4,114 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [v9.0] - 17 February 2026
+
+### 📅 Due Dates for Tasks
+
+**Files edited:** `kanban.ts`, `kanban.html`, `kanban.css`
+
+#### Summary
+
+Added due date support for tasks with a date picker in the Add/Edit modals and color-coded due date badges on task cards. Tasks now display visual indicators showing whether they are overdue (red pulse), due today (amber), or upcoming (blue).
+
+#### What Changed:
+
+**Before:**
+
+- ✅ Task cards show title, description, and priority
+- ❌ No way to set or track deadlines
+- ❌ No visual urgency feedback
+
+**After:**
+
+- ✅ Task cards show title, description, priority, **and due date**
+- ✅ **NEW:** Date picker in Add Task modal
+- ✅ **NEW:** Date picker in Edit Task modal
+- ✅ **NEW:** Color-coded due date badges:
+  - 🔴 **Overdue** — Red pulsing glow (e.g., "2d overdue")
+  - 🟡 **Due Today** — Amber badge ("Due today")
+  - 🔵 **Upcoming** — Blue badge ("Due tomorrow", "3d left", or "Jan 25")
+- ✅ Due dates are persisted in localStorage
+- ✅ Due date is optional — tasks without a due date show no badge
+
+#### TypeScript Changes (`kanban.ts`):
+
+**1. Added `dueDate` field to Task interface:**
+
+```typescript
+interface Task {
+  id: number;
+  title: string;
+  description: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  order: number;
+  dueDate: string | null; // ISO date string (YYYY-MM-DD) or null
+}
+```
+
+**2. Added signals for due date in Add/Edit forms:**
+
+```typescript
+newTaskDueDate = signal<string | null>(null);
+editingDueDate = signal<string | null>(null);
+```
+
+**3. Added `getDueDateStatus()` helper — determines badge color:**
+
+```typescript
+getDueDateStatus(dueDate: string | null): 'overdue' | 'today' | 'upcoming' | 'none' {
+  // Compares due date to today and returns status
+}
+```
+
+**4. Added `formatDueDate()` helper — formats human-readable label:**
+
+```typescript
+formatDueDate(dueDate: string | null): string {
+  // Returns "2d overdue", "Due today", "Due tomorrow", "3d left", or "Jan 25"
+}
+```
+
+**5. Updated `addTask()`, `startEdit()`, `cancelEdit()`, `saveEdit()` to handle `dueDate`.**
+
+#### HTML Changes (`kanban.html`):
+
+**1. Added due date badge to all three column task cards:**
+
+```html
+@if (task.dueDate) {
+<span class="due-date-badge" [class]="'due-' + getDueDateStatus(task.dueDate)">
+  📅 {{ formatDueDate(task.dueDate) }}
+</span>
+}
+```
+
+**2. Added date picker to Add Task modal:**
+
+```html
+<label class="modal-label">Due Date</label>
+<input class="modal-input modal-date" type="date"
+  [value]="newTaskDueDate() || ''"
+  (input)="newTaskDueDate.set($any($event.target).value || null)" />
+```
+
+**3. Added date picker to Edit Task modal (same pattern with `editingDueDate`).**
+
+#### CSS Changes (`kanban.css`):
+
+**1. Base due date badge styling** (pill shape matching priority badges)
+
+**2. `.due-overdue`** — Red background, pulsing glow animation
+
+**3. `.due-today`** — Amber/yellow background with subtle glow
+
+**4. `.due-upcoming`** — Cool blue background
+
+**5. `.modal-date`** — Dark color scheme for native date picker, styled picker indicator
+
+---
+
 ## [v8.0] - 17 February 2026
 
 ### 🔄 Drag to Reorder Within Columns
