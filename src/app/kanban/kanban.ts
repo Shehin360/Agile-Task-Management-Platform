@@ -3,17 +3,67 @@ import { isPlatformBrowser } from '@angular/common';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 const STORAGE_KEY = 'kanban_tasks';
-type TaskStatus = 'todo' | 'inprogress' | 'done';
+const COLUMNS_KEY = 'kanban_columns';
 type TaskPriority = 'low' | 'medium' | 'high';
+
+// Column gradient presets for dynamic columns
+const COLUMN_COLORS = [
+  {
+    gradient: 'linear-gradient(135deg, #e94560, #c44dff)',
+    glow: 'rgba(233, 69, 96, 0.3)',
+    accent: '#e94560',
+  },
+  {
+    gradient: 'linear-gradient(135deg, #00b4d8, #7c3aed)',
+    glow: 'rgba(0, 180, 216, 0.3)',
+    accent: '#00b4d8',
+  },
+  {
+    gradient: 'linear-gradient(135deg, #10b981, #06b6d4)',
+    glow: 'rgba(16, 185, 129, 0.3)',
+    accent: '#10b981',
+  },
+  {
+    gradient: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+    glow: 'rgba(245, 158, 11, 0.3)',
+    accent: '#f59e0b',
+  },
+  {
+    gradient: 'linear-gradient(135deg, #8b5cf6, #ec4899)',
+    glow: 'rgba(139, 92, 246, 0.3)',
+    accent: '#8b5cf6',
+  },
+  {
+    gradient: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
+    glow: 'rgba(6, 182, 212, 0.3)',
+    accent: '#06b6d4',
+  },
+  {
+    gradient: 'linear-gradient(135deg, #84cc16, #22c55e)',
+    glow: 'rgba(132, 204, 22, 0.3)',
+    accent: '#84cc16',
+  },
+  {
+    gradient: 'linear-gradient(135deg, #f43f5e, #fb923c)',
+    glow: 'rgba(244, 63, 94, 0.3)',
+    accent: '#f43f5e',
+  },
+];
+
+interface Column {
+  id: string;
+  name: string;
+  colorIndex: number; // Index into COLUMN_COLORS
+}
 
 interface Task {
   id: number;
   title: string;
   description: string;
-  status: TaskStatus;
+  status: string; // Now dynamic — matches column.id
   priority: TaskPriority;
   order: number;
-  dueDate: string | null; // ISO date string (YYYY-MM-DD) or null
+  dueDate: string | null;
 }
 
 @Component({
@@ -38,12 +88,18 @@ export class Kanban {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
 
+  // Dynamic columns
+  columns = signal<Column[]>(this.loadColumns());
   tasks = signal<Task[]>(this.loadTasks());
+
+  // Column colors for template access
+  getColumnColor(colorIndex: number) {
+    return COLUMN_COLORS[colorIndex % COLUMN_COLORS.length];
+  }
 
   // Search
   searchQuery = signal('');
 
-  // Check if a task matches the search query
   taskMatchesSearch(task: Task): boolean {
     const query = this.searchQuery().toLowerCase().trim();
     if (!query) return true;
@@ -54,17 +110,15 @@ export class Kanban {
     );
   }
 
-  // Sort mode: 'manual' (drag order), 'dueDate' (earliest first), 'priority' (high first)
+  // Sort mode
   sortMode = signal<'manual' | 'dueDate' | 'priority'>('manual');
 
-  // Cycle through sort modes
   cycleSortMode() {
     const modes: ('manual' | 'dueDate' | 'priority')[] = ['manual', 'dueDate', 'priority'];
     const currentIndex = modes.indexOf(this.sortMode());
     this.sortMode.set(modes[(currentIndex + 1) % modes.length]);
   }
 
-  // Sort label for display
   sortLabel = computed(() => {
     switch (this.sortMode()) {
       case 'manual':
@@ -76,7 +130,6 @@ export class Kanban {
     }
   });
 
-  // Priority weight for sorting (higher priority = lower number = sorted first)
   private priorityWeight(p: TaskPriority): number {
     switch (p) {
       case 'high':
@@ -88,7 +141,6 @@ export class Kanban {
     }
   }
 
-  // Shared sort function based on current mode
   private sortTasks(tasks: Task[]): Task[] {
     const mode = this.sortMode();
     if (mode === 'manual') {
@@ -96,18 +148,15 @@ export class Kanban {
     }
     if (mode === 'dueDate') {
       return tasks.sort((a, b) => {
-        // Tasks with due dates come first, then sort by date ascending
         if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
         if (a.dueDate && !b.dueDate) return -1;
         if (!a.dueDate && b.dueDate) return 1;
-        return a.order - b.order; // Fallback to manual order
+        return a.order - b.order;
       });
     }
-    // priority mode
     return tasks.sort((a, b) => {
       const diff = this.priorityWeight(a.priority) - this.priorityWeight(b.priority);
       if (diff !== 0) return diff;
-      // Same priority? Sort by due date (earliest first), then manual order
       if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
       if (a.dueDate && !b.dueDate) return -1;
       if (!a.dueDate && b.dueDate) return 1;
@@ -115,10 +164,10 @@ export class Kanban {
     });
   }
 
-  // Computed task lists — filter by search, then sort
-  todoTasks = computed(() => {
+  // Dynamic: get tasks for any column
+  getColumnTasks(columnId: string): Task[] {
     const query = this.searchQuery().toLowerCase().trim();
-    let filtered = this.tasks().filter((t) => t.status === 'todo');
+    let filtered = this.tasks().filter((t) => t.status === columnId);
     if (query) {
       filtered = filtered.filter(
         (t) =>
@@ -127,39 +176,96 @@ export class Kanban {
           t.priority.toLowerCase().includes(query)
       );
     }
-    return this.sortTasks(filtered);
-  });
-  inprogressTasks = computed(() => {
-    const query = this.searchQuery().toLowerCase().trim();
-    let filtered = this.tasks().filter((t) => t.status === 'inprogress');
-    if (query) {
-      filtered = filtered.filter(
-        (t) =>
-          t.title.toLowerCase().includes(query) ||
-          t.description.toLowerCase().includes(query) ||
-          t.priority.toLowerCase().includes(query)
-      );
-    }
-    return this.sortTasks(filtered);
-  });
-  doneTasks = computed(() => {
-    const query = this.searchQuery().toLowerCase().trim();
-    let filtered = this.tasks().filter((t) => t.status === 'done');
-    if (query) {
-      filtered = filtered.filter(
-        (t) =>
-          t.title.toLowerCase().includes(query) ||
-          t.description.toLowerCase().includes(query) ||
-          t.priority.toLowerCase().includes(query)
-      );
-    }
-    return this.sortTasks(filtered);
-  });
+    return this.sortTasks([...filtered]);
+  }
 
-  // Drag state
+  // ──────── COLUMN MANAGEMENT ────────
+
+  showAddColumnModal = signal(false);
+  newColumnName = signal('');
+  showDeleteColumnConfirm = signal<string | null>(null); // column id to confirm delete
+  editingColumnId = signal<string | null>(null);
+  editingColumnName = signal('');
+
+  addColumn() {
+    const name = this.newColumnName().trim();
+    if (!name) return;
+
+    const id =
+      name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '') +
+      '-' +
+      Date.now();
+    const colorIndex = this.columns().length % COLUMN_COLORS.length;
+
+    this.columns.update((cols) => {
+      const updated = [...cols, { id, name, colorIndex }];
+      this.saveColumns(updated);
+      return updated;
+    });
+
+    this.newColumnName.set('');
+    this.showAddColumnModal.set(false);
+  }
+
+  deleteColumn(columnId: string) {
+    // Move tasks from deleted column to the first column, or delete them if no columns left
+    const cols = this.columns();
+    const remaining = cols.filter((c) => c.id !== columnId);
+    const fallbackColumn = remaining.length > 0 ? remaining[0].id : null;
+
+    this.tasks.update((tasks) => {
+      let updated: Task[];
+      if (fallbackColumn) {
+        updated = tasks.map((t) => (t.status === columnId ? { ...t, status: fallbackColumn } : t));
+      } else {
+        updated = tasks.filter((t) => t.status !== columnId);
+      }
+      this.saveTasks(updated);
+      return updated;
+    });
+
+    this.columns.update((cols) => {
+      const updated = cols.filter((c) => c.id !== columnId);
+      this.saveColumns(updated);
+      return updated;
+    });
+
+    this.showDeleteColumnConfirm.set(null);
+  }
+
+  startEditColumn(column: Column) {
+    this.editingColumnId.set(column.id);
+    this.editingColumnName.set(column.name);
+  }
+
+  saveEditColumn() {
+    const id = this.editingColumnId();
+    const name = this.editingColumnName().trim();
+    if (!id || !name) return;
+
+    this.columns.update((cols) => {
+      const updated = cols.map((c) => (c.id === id ? { ...c, name } : c));
+      this.saveColumns(updated);
+      return updated;
+    });
+
+    this.editingColumnId.set(null);
+    this.editingColumnName.set('');
+  }
+
+  cancelEditColumn() {
+    this.editingColumnId.set(null);
+    this.editingColumnName.set('');
+  }
+
+  // ──────── DRAG STATE ────────
+
   draggedTaskId = signal<number | null>(null);
-  dragOverColumn = signal<TaskStatus | null>(null);
-  dropTargetTaskId = signal<number | null>(null); // For reordering within column
+  dragOverColumn = signal<string | null>(null);
+  dropTargetTaskId = signal<number | null>(null);
 
   onDragStart(event: DragEvent, taskId: number) {
     this.draggedTaskId.set(taskId);
@@ -169,14 +275,12 @@ export class Kanban {
     }
   }
 
-  // Drag end
   onDragEnd() {
     this.draggedTaskId.set(null);
     this.dragOverColumn.set(null);
   }
 
-  // Drag over
-  onDragOver(event: DragEvent, column: TaskStatus) {
+  onDragOver(event: DragEvent, column: string) {
     event.preventDefault();
     if (event.dataTransfer) {
       event.dataTransfer.dropEffect = 'move';
@@ -188,8 +292,7 @@ export class Kanban {
     this.dragOverColumn.set(null);
   }
 
-  // Drop handler
-  onDrop(event: DragEvent, newStatus: TaskStatus) {
+  onDrop(event: DragEvent, newStatus: string) {
     event.preventDefault();
     const taskId = this.draggedTaskId();
     if (taskId == null) return;
@@ -201,21 +304,16 @@ export class Kanban {
     this.tasks.update((tasks: Task[]) => {
       const oldStatus = draggedTask.status;
 
-      // If dropped on a specific task (for reordering)
       if (targetTaskId !== null) {
         const targetTask = tasks.find((t) => t.id === targetTaskId);
         if (targetTask && targetTask.status === newStatus) {
-          // Reordering within same column
           const columnTasks = tasks
             .filter((t) => t.status === newStatus && t.id !== taskId)
             .sort((a, b) => a.order - b.order);
 
           const targetIndex = columnTasks.findIndex((t) => t.id === targetTaskId);
-
-          // Insert dragged task at target position
           columnTasks.splice(targetIndex, 0, { ...draggedTask, status: newStatus });
 
-          // Reassign order values
           columnTasks.forEach((task, index) => {
             const taskInArray = tasks.find((t) => t.id === task.id);
             if (taskInArray) {
@@ -231,9 +329,7 @@ export class Kanban {
         }
       }
 
-      // Moving to different column or empty column
       if (oldStatus !== newStatus) {
-        // Get tasks in new column
         const newColumnTasks = tasks.filter((t) => t.status === newStatus);
         const maxOrder =
           newColumnTasks.length > 0 ? Math.max(...newColumnTasks.map((t) => t.order)) : 0;
@@ -245,7 +341,6 @@ export class Kanban {
         this.saveTasks(updated);
         return updated;
       } else {
-        // Same column, no reorder (dropped on empty space)
         return tasks;
       }
     });
@@ -255,7 +350,6 @@ export class Kanban {
     this.dropTargetTaskId.set(null);
   }
 
-  // New: Handle drag over specific task (for reordering)
   onDragOverTask(event: DragEvent, taskId: number) {
     event.preventDefault();
     event.stopPropagation();
@@ -265,23 +359,28 @@ export class Kanban {
     this.dropTargetTaskId.set(taskId);
   }
 
-  // Modal state
+  // ──────── TASK MODALS ────────
+
   showAddTaskModal = signal(false);
   showEditTaskModal = signal(false);
+  addTaskColumnId = signal<string>(''); // which column to add a task to
 
-  // New task form state
   newTaskTitle = signal('');
   newTaskDescription = signal('');
   newTaskPriority = signal<TaskPriority>('medium');
   newTaskDueDate = signal<string | null>(null);
   nextId = signal(this.getNextId());
 
-  // Editing state
   editingTaskId = signal<number | null>(null);
   editingTitle = signal('');
   editingDescription = signal('');
   editingPriority = signal<TaskPriority>('medium');
   editingDueDate = signal<string | null>(null);
+
+  openAddTaskModal(columnId: string) {
+    this.addTaskColumnId.set(columnId);
+    this.showAddTaskModal.set(true);
+  }
 
   addTask() {
     const title = this.newTaskTitle().trim();
@@ -290,11 +389,11 @@ export class Kanban {
     const description = this.newTaskDescription().trim();
     const priority = this.newTaskPriority();
     const dueDate = this.newTaskDueDate();
+    const columnId = this.addTaskColumnId();
 
     this.tasks.update((tasks) => {
-      // Get max order for 'todo' column
-      const todoTasks = tasks.filter((t) => t.status === 'todo');
-      const maxOrder = todoTasks.length > 0 ? Math.max(...todoTasks.map((t) => t.order)) : 0;
+      const columnTasks = tasks.filter((t) => t.status === columnId);
+      const maxOrder = columnTasks.length > 0 ? Math.max(...columnTasks.map((t) => t.order)) : 0;
 
       const updated: Task[] = [
         ...tasks,
@@ -302,7 +401,7 @@ export class Kanban {
           id: this.nextId(),
           title,
           description,
-          status: 'todo',
+          status: columnId,
           priority,
           order: maxOrder + 1,
           dueDate,
@@ -319,7 +418,6 @@ export class Kanban {
     this.newTaskDueDate.set(null);
   }
 
-  // Start editing a task
   startEdit(task: Task) {
     this.editingTaskId.set(task.id);
     this.editingTitle.set(task.title || '');
@@ -329,7 +427,6 @@ export class Kanban {
     this.showEditTaskModal.set(true);
   }
 
-  // Cancel editing
   cancelEdit() {
     this.editingTaskId.set(null);
     this.editingTitle.set('');
@@ -339,7 +436,6 @@ export class Kanban {
     this.showEditTaskModal.set(false);
   }
 
-  // Save edited task
   saveEdit(taskId: number) {
     const newTitle = this.editingTitle().trim();
     if (!newTitle) return;
@@ -367,7 +463,6 @@ export class Kanban {
     this.cancelEdit();
   }
 
-  // Delete a task
   deleteTask(taskId: number) {
     this.tasks.update((tasks: Task[]) => {
       const updated: Task[] = tasks.filter((t: Task) => t.id !== taskId);
@@ -376,7 +471,8 @@ export class Kanban {
     });
   }
 
-  // Due date helpers
+  // ──────── DUE DATE HELPERS ────────
+
   getDueDateStatus(dueDate: string | null): 'overdue' | 'today' | 'upcoming' | 'none' {
     if (!dueDate) return 'none';
     const today = new Date();
@@ -384,7 +480,6 @@ export class Kanban {
     const due = new Date(dueDate + 'T00:00:00');
     const diffTime = due.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
     if (diffDays < 0) return 'overdue';
     if (diffDays === 0) return 'today';
     return 'upcoming';
@@ -397,7 +492,6 @@ export class Kanban {
     today.setHours(0, 0, 0, 0);
     const diffTime = due.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
     if (diffDays < 0) return `${Math.abs(diffDays)}d overdue`;
     if (diffDays === 0) return 'Due today';
     if (diffDays === 1) return 'Due tomorrow';
@@ -405,17 +499,32 @@ export class Kanban {
     return due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
+  // ──────── PERSISTENCE ────────
+
+  private loadColumns(): Column[] {
+    const stored = this.isBrowser ? localStorage.getItem(COLUMNS_KEY) : null;
+    if (stored) return JSON.parse(stored) as Column[];
+    // Default columns
+    return [
+      { id: 'todo', name: 'To Do', colorIndex: 0 },
+      { id: 'inprogress', name: 'In Progress', colorIndex: 1 },
+      { id: 'done', name: 'Done', colorIndex: 2 },
+    ];
+  }
+
+  private saveColumns(columns: Column[]) {
+    if (this.isBrowser) localStorage.setItem(COLUMNS_KEY, JSON.stringify(columns));
+  }
+
   private loadTasks(): Task[] {
     const stored = this.isBrowser ? localStorage.getItem(STORAGE_KEY) : null;
     if (!stored) return [];
-
     const tasks = JSON.parse(stored) as Task[];
-    // Migrate old tasks to ensure all fields exist with defaults
     return tasks.map((task, index) => ({
       ...task,
       description: task.description || '',
       priority: task.priority || 'medium',
-      order: task.order ?? index + 1, // Assign order if missing
+      order: task.order ?? index + 1,
     }));
   }
 
@@ -426,7 +535,6 @@ export class Kanban {
   private getNextId(): number {
     const stored = this.isBrowser ? localStorage.getItem(STORAGE_KEY) : null;
     if (!stored) return 1;
-
     const tasks = JSON.parse(stored) as Task[];
     return tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
   }

@@ -9,23 +9,28 @@ A modern, interactive Kanban board application built with **Angular 21** that he
 ## ✨ Key Features
 
 - **🎨 Modern Glassmorphism UI** - Translucent cards, floating orbs, and glowing accents
+- **🏗️ Dynamic Columns** - Add, rename, or remove workflow stages to match your process
 - **🔄 Drag & Drop Between Columns** - Intuitive interface for moving tasks across workflow stages
 - **📊 Drag to Reorder Within Columns** - Prioritize tasks by dragging them up or down in the same column
-- **� Smart Sort** - Toggle between Manual, Due Date, and Priority sorting across all columns
-- **�📅 Due Dates** - Set optional deadlines with color-coded badges (overdue, today, upcoming)
+- **🔀 Smart Sort** - Toggle between Manual, Due Date, and Priority sorting across all columns
+- **📅 Due Dates** - Set optional deadlines with color-coded badges (overdue, today, upcoming)
 - **🎯 Priority Levels** - Low, Medium, High priority badges with color coding
 - **📝 Rich Task Details** - Title, description, priority, and due date for each task
 - **✏️ Edit & Delete** - Update or remove tasks with modal popups
-- **💾 LocalStorage Persistence** - Tasks automatically saved and restored
+- **💾 LocalStorage Persistence** - Tasks and columns automatically saved and restored
 - **⚡ Reactive Performance** - Powered by Angular Signals and computed properties
 - **📱 Fully Responsive** - Optimized for mobile, tablet, and desktop screens
 - **🎭 Smooth Animations** - Entry/exit animations and micro-interactions
 
 ## 🎯 Workflow Stages
 
+Default columns provided out of the box:
+
 1. **To Do** - Tasks waiting to be started
 2. **In Progress** - Tasks currently being worked on
 3. **Done** - Completed tasks
+
+You can **customize these** — add new columns like "In Review", "QA", "Blocked", etc., rename any column, or remove columns you don't need. When a column is deleted, its tasks are automatically moved to the first remaining column.
 
 ## 🛠️ Tech Stack
 

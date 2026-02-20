@@ -4,6 +4,74 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [v11.0] - 20 February 2026
+
+### 🏗️ Dynamic Columns — Add, Rename & Remove Workflow Stages
+
+**Files edited:** `kanban.ts`, `kanban.html`, `kanban.css`
+
+#### Summary
+
+The board is no longer limited to three hardcoded columns (To Do, In Progress, Done). You can now **add custom columns**, **rename** existing ones, and **delete** columns you no longer need. Each column gets its own unique color from a rotating palette, and all data is persisted to localStorage.
+
+#### What Changed:
+
+**Before:**
+
+- ✅ Three fixed columns: To Do, In Progress, Done
+- ❌ No way to customize workflow stages
+- ❌ Column colors were hardcoded via CSS `nth-child` selectors
+
+**After:**
+
+- ✅ **NEW:** Dynamic column system — add unlimited custom columns (e.g. "In Review", "QA", "Blocked")
+- ✅ **NEW:** "Add Column" card at the end of the board with modal for naming
+- ✅ **NEW:** Inline column rename — click the ✏️ on any column header to edit in place
+- ✅ **NEW:** Column deletion with confirmation modal — tasks are moved to the first remaining column
+- ✅ **NEW:** Task count badge on each column header
+- ✅ **NEW:** 8-color rotating gradient palette for column headers and task accents
+- ✅ **NEW:** Columns persisted to `localStorage` under `kanban_columns` key
+- ✅ **NEW:** Each column's "+ Add Task" button adds to that specific column
+
+#### TypeScript Changes (`kanban.ts`):
+
+- Added `Column` interface with `id`, `name`, and `colorIndex`
+- Added `COLUMN_COLORS` palette with 8 gradient/glow/accent presets
+- Changed `TaskStatus` from a union type to `string` (dynamic column IDs)
+- Added `columns` signal with `loadColumns()` / `saveColumns()` persistence
+- Replaced hardcoded `todoTasks`, `inprogressTasks`, `doneTasks` computed signals with a single `getColumnTasks(columnId)` method
+- Added `addColumn()`, `deleteColumn()`, `startEditColumn()`, `saveEditColumn()`, `cancelEditColumn()` methods
+- Added `showAddColumnModal`, `showDeleteColumnConfirm`, `editingColumnId`, `editingColumnName` signals
+- Added `addTaskColumnId` signal and `openAddTaskModal(columnId)` to support per-column task addition
+- Updated `addTask()` to use `addTaskColumnId()` instead of hardcoded `'todo'`
+- Updated all drag/drop handlers to use `string` instead of `TaskStatus` union
+
+#### HTML Changes (`kanban.html`):
+
+- Replaced three hardcoded column blocks with a single `@for (column of columns())` loop
+- Column header now uses inline `[style.background]` and `[style.box-shadow]` for dynamic colors
+- Added inline-edit mode in column headers (input + save/cancel buttons)
+- Added column action buttons (✏️ rename, 🗑️ delete) that appear on header hover
+- Added task count badge in column header
+- Added "Add Column" card at end of board
+- Added "Add Column" modal and "Delete Column" confirmation modal
+- Each task card now uses `[style.--col-accent]` CSS custom property for its left border glow
+- Each "+ Add Task" button uses `[style.--btn-accent]` for hover color
+
+#### CSS Changes (`kanban.css`):
+
+- Removed all `nth-child(1/2/3)` selectors for column headers, task borders, and drag-over states
+- Column header now uses `display: flex` layout with `.column-header-content`, `.column-header-actions`
+- Added `.column-task-count` badge styles
+- Added `.col-action-btn`, `.col-edit-btn`, `.col-delete-btn` for header action buttons
+- Added `.column-header-edit`, `.column-name-input` for inline rename
+- Task `::before` left border now uses `var(--col-accent)` CSS custom property
+- Add-task button hover uses `var(--btn-accent)` CSS custom property
+- Added `.add-column-card` with dashed border, hover glow, and icon/text styles
+- Added `.modal-sm`, `.modal-header-danger`, `.confirm-text`, `.modal-btn.danger` for column modals
+
+---
+
 ## [v10.0] - 20 February 2026
 
 ### 🔀 Smart Sort — Sort Tasks by Due Date or Priority
