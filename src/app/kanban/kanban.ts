@@ -230,6 +230,7 @@ export class Kanban {
   showAddColumnModal = signal(false);
   newColumnName = signal('');
   showDeleteColumnConfirm = signal<string | null>(null); // column id to confirm delete
+  showDeleteTaskConfirm = signal<number | null>(null); // task id to confirm delete
   editingColumnId = signal<string | null>(null);
   editingColumnName = signal('');
 
@@ -522,6 +523,22 @@ export class Kanban {
 
     this.showToast(`Task "${newTitle}" updated`, 'info');
     this.cancelEdit();
+  }
+
+  // ──────── TASK DELETION ────────
+
+  getDeleteTaskTitle(): string {
+    const id = this.showDeleteTaskConfirm();
+    if (id == null) return '';
+    const task = this.tasks().find((t) => t.id === id);
+    return task?.title ?? 'this task';
+  }
+
+  confirmDeleteTask() {
+    const taskId = this.showDeleteTaskConfirm();
+    if (taskId == null) return;
+    this.deleteTask(taskId);
+    this.showDeleteTaskConfirm.set(null);
   }
 
   deleteTask(taskId: number) {

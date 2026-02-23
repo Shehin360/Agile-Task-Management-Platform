@@ -107,7 +107,9 @@
           </div>
           <div class="task-actions">
             <button class="task-btn edit-btn" (click)="startEdit(task)">✏️</button>
-            <button class="task-btn delete-btn" (click)="deleteTask(task.id)">🗑️</button>
+            <button class="task-btn delete-btn" (click)="showDeleteTaskConfirm.set(task.id)">
+              🗑️
+            </button>
           </div>
         </div>
         } @empty {
@@ -156,6 +158,28 @@
         <button class="modal-btn danger" (click)="deleteColumn(showDeleteColumnConfirm()!)">
           Delete
         </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- DELETE TASK CONFIRMATION -->
+  @if (showDeleteTaskConfirm()) {
+  <div class="modal-backdrop" (click)="showDeleteTaskConfirm.set(null)">
+    <div class="modal modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header modal-header-danger">
+        <h2>Delete Task</h2>
+        <button class="modal-close" (click)="showDeleteTaskConfirm.set(null)">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-text">
+          Are you sure you want to delete <strong>"{{ getDeleteTaskTitle() }}"</strong>? This action
+          cannot be undone.
+        </p>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" (click)="showDeleteTaskConfirm.set(null)">Cancel</button>
+        <button class="modal-btn danger" (click)="confirmDeleteTask()">Delete</button>
       </div>
     </div>
   </div>
