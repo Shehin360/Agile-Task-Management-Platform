@@ -4,6 +4,61 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [v12.0] - 23 February 2026
+
+### 🔔 Toast Notifications — Visual Feedback for All User Actions
+
+**Files edited:** `kanban.ts`, `kanban.html`, `kanban.css`
+
+#### Summary
+
+Every user action on the board now triggers a beautiful animated toast notification that slides in from the right, displays a color-coded message with an icon, and auto-dismisses after 3.5 seconds with a progress bar. Users can also click to dismiss immediately.
+
+#### What Changed:
+
+**Before:**
+
+- ❌ No feedback when tasks or columns were created, edited, deleted, or moved
+- ❌ Users had to visually scan the board to confirm their action worked
+
+**After:**
+
+- ✅ **NEW:** Toast notification system with 4 types: `success` (✅), `error` (❌), `info` (ℹ️), `warning` (⚠️)
+- ✅ **NEW:** Toasts appear for: task created, task updated, task deleted, column added, column renamed, column deleted, task moved (drag & drop)
+- ✅ **NEW:** Animated slide-in/slide-out with Angular `@toastAnim` trigger
+- ✅ **NEW:** Auto-dismiss after 3.5 seconds with animated progress bar
+- ✅ **NEW:** Click to dismiss early, close button on each toast
+- ✅ **NEW:** Glassmorphism styling matching the board's design language
+- ✅ **NEW:** Color-coded left accent bar per toast type (green/red/blue/amber)
+- ✅ **NEW:** Responsive — full-width on mobile, fixed-width on desktop
+
+#### TypeScript Changes (`kanban.ts`):
+
+- Added `ToastType` type (`'success' | 'error' | 'info' | 'warning'`)
+- Added `ToastMessage` interface with `id`, `text`, `type`, and `icon`
+- Added `toasts` signal to track active toast messages
+- Added `showToast(text, type)` method with auto-dismiss via `setTimeout`
+- Added `dismissToast(id)` to remove a toast by ID
+- Added `@toastAnim` animation trigger for slide-in/slide-out
+- Integrated `showToast()` calls into: `addTask()`, `saveEdit()`, `deleteTask()`, `addColumn()`, `deleteColumn()`, `saveEditColumn()`, `onDrop()` (cross-column moves)
+
+#### HTML Changes (`kanban.html`):
+
+- Added `toast-container` with `@for` loop rendering active toasts
+- Each toast shows icon, message text, and a close button
+- Uses `@toastAnim` animation trigger for enter/leave transitions
+
+#### CSS Changes (`kanban.css`):
+
+- Added `.toast-container` — fixed bottom-right positioning with `z-index: 2000`
+- Added `.toast` base styles — glassmorphism card with blur, border, shadow
+- Added `.toast-success`, `.toast-error`, `.toast-info`, `.toast-warning` — type-specific accent colors
+- Added `.toast-icon`, `.toast-text`, `.toast-close` — layout and interaction styles
+- Added `::after` pseudo-element with `toastProgress` keyframe for countdown bar
+- Added responsive rules for mobile (full-width toasts)
+
+---
+
 ## [v11.0] - 20 February 2026
 
 ### 🏗️ Dynamic Columns — Add, Rename & Remove Workflow Stages

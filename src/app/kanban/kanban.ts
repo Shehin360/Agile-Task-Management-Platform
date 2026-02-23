@@ -5,6 +5,14 @@ import { trigger, transition, style, animate } from '@angular/animations';
 const STORAGE_KEY = 'kanban_tasks';
 const COLUMNS_KEY = 'kanban_columns';
 type TaskPriority = 'low' | 'medium' | 'high';
+type ToastType = 'success' | 'error' | 'info' | 'warning';
+
+interface ToastMessage {
+  id: number;
+  text: string;
+  type: ToastType;
+  icon: string;
+}
 
 // Column gradient presets for dynamic columns
 const COLUMN_COLORS = [
@@ -82,6 +90,21 @@ interface Task {
         animate('150ms ease-in', style({ opacity: 0, transform: 'translateY(-10px)' })),
       ]),
     ]),
+    trigger('toastAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(100%)' }),
+        animate(
+          '350ms cubic-bezier(0.4, 0, 0.2, 1)',
+          style({ opacity: 1, transform: 'translateX(0)' })
+        ),
+      ]),
+      transition(':leave', [
+        animate(
+          '250ms cubic-bezier(0.4, 0, 0.2, 1)',
+          style({ opacity: 0, transform: 'translateX(100%)' })
+        ),
+      ]),
+    ]),
   ],
 })
 export class Kanban {
@@ -91,6 +114,29 @@ export class Kanban {
   // Dynamic columns
   columns = signal<Column[]>(this.loadColumns());
   tasks = signal<Task[]>(this.loadTasks());
+
+  // ──────── TOAST NOTIFICATIONS ────────
+  toasts = signal<ToastMessage[]>([]);
+  private toastCounter = 0;
+
+  private toastIcons: Record<ToastType, string> = {
+    success: '✅',
+    error: '❌',
+    info: 'ℹ️',
+    warning: '⚠️',
+  };
+
+  showToast(text: string, type: ToastType = 'success') {
+    const id = ++this.toastCounter;
+    const icon = this.toastIcons[type];
+    this.toasts.update((t) => [...t, { id, text, type, icon }]);
+
+    setTimeout(() => this.dismissToast(id), 3500);
+  }
+
+  dismissToast(id: number) {
+    this.toasts.update((t) => t.filter((toast) => toast.id !== id));
+  }
 
   // Column colors for template access
   getColumnColor(colorIndex: number) {
@@ -208,9 +254,14 @@ export class Kanban {
 
     this.newColumnName.set('');
     this.showAddColumnModal.set(false);
+    this.showToast(`Column "${name}" added`, 'success');
   }
 
   deleteColumn(columnId: string) {
+    // Capture the column name before deleting for the toast
+    const deletedColumn = this.columns().find((c) => c.id === columnId);
+    const columnName = deletedColumn?.name ?? 'Column';
+
     // Move tasks from deleted column to the first column, or delete them if no columns left
     const cols = this.columns();
     const remaining = cols.filter((c) => c.id !== columnId);
@@ -234,6 +285,7 @@ export class Kanban {
     });
 
     this.showDeleteColumnConfirm.set(null);
+    this.showToast(`Column "${columnName}" deleted`, 'error');
   }
 
   startEditColumn(column: Column) {
@@ -254,6 +306,7 @@ export class Kanban {
 
     this.editingColumnId.set(null);
     this.editingColumnName.set('');
+    this.showToast(`Column renamed to "${name}"`, 'info');
   }
 
   cancelEditColumn() {
@@ -301,9 +354,9 @@ export class Kanban {
     const draggedTask = this.tasks().find((t) => t.id === taskId);
     if (!draggedTask) return;
 
-    this.tasks.update((tasks: Task[]) => {
-      const oldStatus = draggedTask.status;
+    const oldStatus = draggedTask.status;
 
+    this.tasks.update((tasks: Task[]) => {
       if (targetTaskId !== null) {
         const targetTask = tasks.find((t) => t.id === targetTaskId);
         if (targetTask && targetTask.status === newStatus) {
@@ -344,6 +397,12 @@ export class Kanban {
         return tasks;
       }
     });
+
+    // Show toast only when moved to a different column
+    if (oldStatus !== newStatus) {
+      const targetCol = this.columns().find((c) => c.id === newStatus);
+      this.showToast(`Task moved to "${targetCol?.name ?? newStatus}"`, 'info');
+    }
 
     this.draggedTaskId.set(null);
     this.dragOverColumn.set(null);
@@ -416,6 +475,7 @@ export class Kanban {
     this.newTaskDescription.set('');
     this.newTaskPriority.set('medium');
     this.newTaskDueDate.set(null);
+    this.showToast(`Task "${title}" created`, 'success');
   }
 
   startEdit(task: Task) {
@@ -460,15 +520,21 @@ export class Kanban {
       return updated;
     });
 
+    this.showToast(`Task "${newTitle}" updated`, 'info');
     this.cancelEdit();
   }
 
   deleteTask(taskId: number) {
+    const task = this.tasks().find((t) => t.id === taskId);
+    const taskTitle = task?.title ?? 'Task';
+
     this.tasks.update((tasks: Task[]) => {
       const updated: Task[] = tasks.filter((t: Task) => t.id !== taskId);
       this.saveTasks(updated);
       return updated;
     });
+
+    this.showToast(`Task "${taskTitle}" deleted`, 'error');
   }
 
   // ──────── DUE DATE HELPERS ────────

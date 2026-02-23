@@ -303,4 +303,17 @@
     </div>
   </div>
   }
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div class="toast-container">
+    @for (toast of toasts(); track toast.id) {
+    <div class="toast" [class]="'toast-' + toast.type" @toastAnim (click)="dismissToast(toast.id)">
+      <span class="toast-icon">{{ toast.icon }}</span>
+      <span class="toast-text">{{ toast.text }}</span>
+      <button class="toast-close" (click)="dismissToast(toast.id); $event.stopPropagation()">
+        ✕
+      </button>
+    </div>
+    }
+  </div>
 </div>
