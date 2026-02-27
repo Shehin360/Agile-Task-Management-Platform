@@ -27,7 +27,7 @@
       <!-- Username -->
       <div class="input-group">
         <label class="input-label" for="username">Username</label>
-        <div class="input-wrapper">
+        <div class="input-wrapper" [class.input-invalid]="usernameError()">
           <span class="input-icon">👤</span>
           <input
             class="login-input"
@@ -35,17 +35,26 @@
             type="text"
             placeholder="Enter your username"
             [value]="username()"
-            (input)="username.set($any($event.target).value)"
+            (input)="onUsernameInput($any($event.target).value)"
+            (blur)="onUsernameBlur()"
             (keyup.enter)="onSubmit()"
             autocomplete="username"
           />
+          @if (usernameError()) {
+          <span class="input-status">✕</span>
+          } @else if (usernameTouched() && !usernameError()) {
+          <span class="input-status input-valid-icon">✓</span>
+          }
         </div>
+        @if (usernameError()) {
+        <span class="field-error">{{ usernameError() }}</span>
+        }
       </div>
 
       <!-- Password -->
       <div class="input-group">
         <label class="input-label" for="password">Password</label>
-        <div class="input-wrapper">
+        <div class="input-wrapper" [class.input-invalid]="passwordError()">
           <span class="input-icon">🔒</span>
           <input
             class="login-input"
@@ -53,7 +62,8 @@
             [type]="showPassword() ? 'text' : 'password'"
             placeholder="Enter your password"
             [value]="password()"
-            (input)="password.set($any($event.target).value)"
+            (input)="onPasswordInput($any($event.target).value)"
+            (blur)="onPasswordBlur()"
             (keyup.enter)="onSubmit()"
             autocomplete="current-password"
           />
@@ -61,6 +71,9 @@
             {{ showPassword() ? '🙈' : '👁️' }}
           </button>
         </div>
+        @if (passwordError()) {
+        <span class="field-error">{{ passwordError() }}</span>
+        }
       </div>
 
       <!-- Submit -->

@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { trigger, transition, style, animate } from '@angular/animations';
@@ -41,6 +41,51 @@ export class Login {
   shakeState = signal('');
   showPassword = signal(false);
 
+  // ──────── FIELD VALIDATION ────────
+  usernameTouched = signal(false);
+  passwordTouched = signal(false);
+
+  usernameError = computed(() => {
+    if (!this.usernameTouched()) return null;
+    const val = this.username().trim();
+    if (!val) return 'Username is required';
+    if (val.length < 3) return 'Username must be at least 3 characters';
+    if (/[^a-zA-Z0-9_]/.test(val)) return 'Only letters, numbers & underscores allowed';
+    return null;
+  });
+
+  passwordError = computed(() => {
+    if (!this.passwordTouched()) return null;
+    const val = this.password();
+    if (!val) return 'Password is required';
+    if (val.length < 4) return 'Password must be at least 4 characters';
+    return null;
+  });
+
+  isFormValid = computed(() => {
+    const u = this.username().trim();
+    const p = this.password();
+    return u.length >= 3 && !/[^a-zA-Z0-9_]/.test(u) && p.length >= 4;
+  });
+
+  onUsernameInput(value: string) {
+    this.username.set(value);
+    if (this.error()) this.error.set(null);
+  }
+
+  onPasswordInput(value: string) {
+    this.password.set(value);
+    if (this.error()) this.error.set(null);
+  }
+
+  onUsernameBlur() {
+    this.usernameTouched.set(true);
+  }
+
+  onPasswordBlur() {
+    this.passwordTouched.set(true);
+  }
+
   constructor() {
     if (this.authService.isLoggedIn()) {
       this.router.navigate(['/board']);
@@ -55,14 +100,17 @@ export class Login {
     this.username.set(user);
     this.password.set(pass);
     this.error.set(null);
+    this.usernameTouched.set(false);
+    this.passwordTouched.set(false);
   }
 
   onSubmit() {
-    const username = this.username().trim();
-    const password = this.password();
+    // Mark both fields as touched to show any field-level errors
+    this.usernameTouched.set(true);
+    this.passwordTouched.set(true);
 
-    if (!username || !password) {
-      this.error.set('Please enter both username and password');
+    if (!this.isFormValid()) {
+      this.error.set(null);
       this.shakeState.set('error');
       setTimeout(() => this.shakeState.set(''), 500);
       return;
@@ -73,7 +121,7 @@ export class Login {
 
     // Small delay for UX feel
     setTimeout(() => {
-      const result = this.authService.login(username, password);
+      const result = this.authService.login(this.username().trim(), this.password());
 
       if (result.success) {
         this.router.navigate(['/board']);

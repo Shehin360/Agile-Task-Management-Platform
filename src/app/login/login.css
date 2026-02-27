@@ -250,6 +250,39 @@
   box-shadow: 0 0 20px rgba(196, 77, 255, 0.15);
 }
 
+/* FIELD VALIDATION */
+.input-wrapper.input-invalid .login-input {
+  border-color: rgba(239, 68, 68, 0.6);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.input-wrapper.input-invalid .login-input:focus {
+  border-color: rgba(239, 68, 68, 0.7);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+}
+
+.input-status {
+  position: absolute;
+  right: 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #f87171;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.input-status.input-valid-icon {
+  color: #34d399;
+}
+
+.field-error {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #f87171;
+  padding-left: 2px;
+  animation: fadeIn 0.3s ease;
+}
+
 .password-toggle {
   position: absolute;
   right: 12px;
