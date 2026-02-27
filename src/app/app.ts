@@ -1,14 +1,19 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Kanban } from './kanban/kanban';
 
 @Component({
   selector: 'app-root',
-  standalone:true,
-  imports: [Kanban],
-  template: '<app-kanban />',
-  // styleUrl: './app.css'
+  standalone: true,
+  imports: [RouterOutlet],
+  template: '<router-outlet />',
+  styles: [
+    `
+      :host {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+    `,
+  ],
 })
-export class App {
-protected readonly title = signal('Agile Project');  
-}
+export class App {}

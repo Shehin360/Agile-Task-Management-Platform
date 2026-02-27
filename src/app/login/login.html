@@ -1,0 +1,91 @@
+<div class="login-page">
+  <!-- Floating orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="login-container" @fadeIn>
+    <!-- Brand -->
+    <div class="login-brand">
+      <h1 class="login-logo">Sprintly</h1>
+      <p class="login-tagline">Agile Task Management</p>
+    </div>
+
+    <!-- Card -->
+    <div class="login-card" [@shake]="shakeState()">
+      <h2 class="card-heading">Welcome Back</h2>
+      <p class="card-subheading">Sign in to your workspace</p>
+
+      <!-- Error -->
+      @if (error()) {
+      <div class="login-error">
+        <span class="error-icon">⚠️</span>
+        <span>{{ error() }}</span>
+      </div>
+      }
+
+      <!-- Username -->
+      <div class="input-group">
+        <label class="input-label" for="username">Username</label>
+        <div class="input-wrapper">
+          <span class="input-icon">👤</span>
+          <input
+            class="login-input"
+            id="username"
+            type="text"
+            placeholder="Enter your username"
+            [value]="username()"
+            (input)="username.set($any($event.target).value)"
+            (keyup.enter)="onSubmit()"
+            autocomplete="username"
+          />
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="input-group">
+        <label class="input-label" for="password">Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔒</span>
+          <input
+            class="login-input"
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            placeholder="Enter your password"
+            [value]="password()"
+            (input)="password.set($any($event.target).value)"
+            (keyup.enter)="onSubmit()"
+            autocomplete="current-password"
+          />
+          <button class="password-toggle" type="button" (click)="togglePassword()">
+            {{ showPassword() ? '🙈' : '👁️' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button class="login-btn" (click)="onSubmit()" [disabled]="isLoading()">
+        @if (isLoading()) {
+        <span class="spinner"></span>
+        <span>Signing in...</span>
+        } @else {
+        <span>Sign In</span>
+        <span class="btn-arrow">→</span>
+        }
+      </button>
+
+      <!-- Demo credentials hint -->
+      <div class="demo-section">
+        <p class="demo-title">Demo Credentials</p>
+        <div class="demo-list">
+          <button class="demo-item" (click)="fillCredentials('demo', 'demo')">
+            🎯 demo / demo
+          </button>
+          <button class="demo-item" (click)="fillCredentials('admin', 'admin123')">
+            👑 admin / admin123
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,6 +1,8 @@
 import { Component, signal, computed, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { AuthService } from '../auth/auth.service';
 
 const STORAGE_KEY = 'kanban_tasks';
 const COLUMNS_KEY = 'kanban_columns';
@@ -110,6 +112,15 @@ interface Task {
 export class Kanban {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  currentUser = this.authService.currentUser;
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 
   // Dynamic columns
   columns = signal<Column[]>(this.loadColumns());

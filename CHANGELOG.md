@@ -4,6 +4,51 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [v14.0] - 25 February 2026
+
+### 🔐 Login Page & Authentication — Route Protection
+
+**Files created:** `auth/auth.service.ts`, `auth/auth.guard.ts`, `login/login.ts`, `login/login.html`, `login/login.css`
+**Files edited:** `app.ts`, `app.routes.ts`, `app.routes.server.ts`, `kanban/kanban.ts`, `kanban/kanban.html`, `kanban/kanban.css`
+
+#### Summary
+
+Added a full login page with hardcoded credentials, an auth guard to protect the board route, and a user bar on the Kanban board showing the current user with a logout button. The login page uses the same glassmorphism design language as the board.
+
+#### What Changed:
+
+- ✅ **NEW:** `AuthService` — manages login/logout with hardcoded credentials, persists user session to localStorage
+- ✅ **NEW:** `authGuard` — Angular functional route guard that redirects unauthenticated users to `/login`
+- ✅ **NEW:** Login page — glassmorphism card with username/password inputs, show/hide password toggle, loading spinner, shake animation on error
+- ✅ **NEW:** Demo credential hints — clickable buttons that auto-fill `demo/demo` or `admin/admin123`
+- ✅ **NEW:** User bar on Kanban board — shows logged-in user's display name and a logout button
+- ✅ **NEW:** Lazy-loaded routes — `/login` and `/board` are loaded on demand for better performance
+- ✅ **NEW:** SSR compatibility — login and board routes use `RenderMode.Client`
+
+#### Hardcoded Credentials:
+
+| Username | Password  | Display Name |
+| -------- | --------- | ------------ |
+| admin    | admin123  | Admin        |
+| shehin   | shehin123 | Shehin       |
+| demo     | demo      | Demo User    |
+
+#### File Details:
+
+- `auth/auth.service.ts` — `login()`, `logout()`, `currentUser` signal, `isLoggedIn` signal, localStorage persistence
+- `auth/auth.guard.ts` — `CanActivateFn` that checks `isLoggedIn()` and redirects to `/login`
+- `login/login.ts` — Login component with signals, form validation, loading state, shake animation
+- `login/login.html` — Glassmorphism login card with floating orbs, input fields, demo hints
+- `login/login.css` — Full login page styling matching the board's design
+- `app.ts` — Replaced inline `<app-kanban />` with `<router-outlet />`
+- `app.routes.ts` — Added `/login`, `/board` (guarded), and redirect routes
+- `app.routes.server.ts` — Set `/login` and `/board` to `RenderMode.Client`
+- `kanban/kanban.ts` — Injected `AuthService` and `Router`, added `logout()` and `currentUser`
+- `kanban/kanban.html` — Replaced standalone title with user bar (title + user name + logout)
+- `kanban/kanban.css` — Added `.user-bar`, `.user-info`, `.user-avatar`, `.user-name`, `.logout-btn` styles
+
+---
+
 ## [v12.0] - 23 February 2026
 
 ### 🔔 Toast Notifications — Visual Feedback for All User Actions

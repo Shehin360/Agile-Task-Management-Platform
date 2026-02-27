@@ -1,5 +1,13 @@
 <div class="page">
-  <h1 class="title">Sprintly</h1>
+  <!-- USER BAR -->
+  <div class="user-bar">
+    <h1 class="title">Sprintly</h1>
+    <div class="user-info">
+      <span class="user-avatar">👤</span>
+      <span class="user-name">{{ currentUser()?.displayName }}</span>
+      <button class="logout-btn" (click)="logout()">Logout →</button>
+    </div>
+  </div>
 
   <!-- TOOLBAR: SEARCH + SORT -->
   <div class="toolbar">
