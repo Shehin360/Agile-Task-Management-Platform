@@ -117,9 +117,20 @@ export class Kanban {
 
   currentUser = this.authService.currentUser;
 
+  showLogoutConfirm = signal(false);
+
   logout() {
+    this.showLogoutConfirm.set(true);
+  }
+
+  confirmLogout() {
+    this.showLogoutConfirm.set(false);
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  cancelLogout() {
+    this.showLogoutConfirm.set(false);
   }
 
   // Dynamic columns

@@ -348,4 +348,19 @@
     </div>
     }
   </div>
+
+  <!-- LOGOUT CONFIRMATION MODAL -->
+  @if (showLogoutConfirm()) {
+  <div class="modal-overlay" (click)="cancelLogout()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-icon">👋</div>
+      <h3 class="modal-title">Leaving so soon?</h3>
+      <p class="modal-message">Are you sure you want to log out of your workspace?</p>
+      <div class="modal-actions">
+        <button class="modal-btn modal-cancel-btn" (click)="cancelLogout()">Cancel</button>
+        <button class="modal-btn modal-logout-btn" (click)="confirmLogout()">Logout</button>
+      </div>
+    </div>
+  </div>
+  }
 </div>

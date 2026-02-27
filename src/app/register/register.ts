@@ -4,11 +4,11 @@ import { AuthService } from '../auth/auth.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-register',
   standalone: true,
   imports: [RouterLink],
-  templateUrl: './login.html',
-  styleUrls: ['./login.css'],
+  templateUrl: './register.html',
+  styleUrls: ['./register.css'],
   animations: [
     trigger('fadeIn', [
       transition(':enter', [
@@ -30,27 +30,44 @@ import { trigger, transition, style, animate } from '@angular/animations';
     ]),
   ],
 })
-export class Login {
+export class Register {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  displayName = signal('');
   username = signal('');
   password = signal('');
+  confirmPassword = signal('');
   error = signal<string | null>(null);
   isLoading = signal(false);
   shakeState = signal('');
   showPassword = signal(false);
+  showConfirmPassword = signal(false);
 
-  // ──────── FIELD VALIDATION ────────
+  // ──────── TOUCHED STATE ────────
+  displayNameTouched = signal(false);
   usernameTouched = signal(false);
   passwordTouched = signal(false);
+  confirmPasswordTouched = signal(false);
+
+  // ──────── FIELD VALIDATION ────────
+  displayNameError = computed(() => {
+    if (!this.displayNameTouched()) return null;
+    const val = this.displayName().trim();
+    if (!val) return 'Display name is required';
+    if (val.length < 2) return 'Display name must be at least 2 characters';
+    return null;
+  });
 
   usernameError = computed(() => {
     if (!this.usernameTouched()) return null;
     const val = this.username().trim();
     if (!val) return 'Username is required';
     if (val.length < 3) return 'Username must be at least 3 characters';
-    if (/[^a-zA-Z0-9_]/.test(val)) return 'Only letters, numbers & underscores allowed';
+    if (/[^a-zA-Z0-9_]/.test(val))
+      return 'Only letters, numbers & underscores allowed';
+    if (this.authService.isUsernameTaken(val))
+      return 'This username is already taken';
     return null;
   });
 
@@ -62,11 +79,34 @@ export class Login {
     return null;
   });
 
+  confirmPasswordError = computed(() => {
+    if (!this.confirmPasswordTouched()) return null;
+    const val = this.confirmPassword();
+    if (!val) return 'Please confirm your password';
+    if (val !== this.password()) return 'Passwords do not match';
+    return null;
+  });
+
   isFormValid = computed(() => {
+    const d = this.displayName().trim();
     const u = this.username().trim();
     const p = this.password();
-    return u.length >= 3 && !/[^a-zA-Z0-9_]/.test(u) && p.length >= 4;
+    const cp = this.confirmPassword();
+    return (
+      d.length >= 2 &&
+      u.length >= 3 &&
+      !/[^a-zA-Z0-9_]/.test(u) &&
+      !this.authService.isUsernameTaken(u) &&
+      p.length >= 4 &&
+      p === cp
+    );
   });
+
+  // ──────── INPUT HANDLERS ────────
+  onDisplayNameInput(value: string) {
+    this.displayName.set(value);
+    if (this.error()) this.error.set(null);
+  }
 
   onUsernameInput(value: string) {
     this.username.set(value);
@@ -78,12 +118,22 @@ export class Login {
     if (this.error()) this.error.set(null);
   }
 
+  onConfirmPasswordInput(value: string) {
+    this.confirmPassword.set(value);
+    if (this.error()) this.error.set(null);
+  }
+
+  onDisplayNameBlur() {
+    this.displayNameTouched.set(true);
+  }
   onUsernameBlur() {
     this.usernameTouched.set(true);
   }
-
   onPasswordBlur() {
     this.passwordTouched.set(true);
+  }
+  onConfirmPasswordBlur() {
+    this.confirmPasswordTouched.set(true);
   }
 
   constructor() {
@@ -96,18 +146,15 @@ export class Login {
     this.showPassword.update((v) => !v);
   }
 
-  fillCredentials(user: string, pass: string) {
-    this.username.set(user);
-    this.password.set(pass);
-    this.error.set(null);
-    this.usernameTouched.set(false);
-    this.passwordTouched.set(false);
+  toggleConfirmPassword() {
+    this.showConfirmPassword.update((v) => !v);
   }
 
   onSubmit() {
-    // Mark both fields as touched to show any field-level errors
+    this.displayNameTouched.set(true);
     this.usernameTouched.set(true);
     this.passwordTouched.set(true);
+    this.confirmPasswordTouched.set(true);
 
     if (!this.isFormValid()) {
       this.error.set(null);
@@ -119,14 +166,17 @@ export class Login {
     this.isLoading.set(true);
     this.error.set(null);
 
-    // Small delay for UX feel
     setTimeout(() => {
-      const result = this.authService.login(this.username().trim(), this.password());
+      const result = this.authService.register(
+        this.username().trim(),
+        this.password(),
+        this.displayName().trim()
+      );
 
       if (result.success) {
         this.router.navigate(['/board']);
       } else {
-        this.error.set(result.error ?? 'Login failed');
+        this.error.set(result.error ?? 'Registration failed');
         this.shakeState.set('error');
         setTimeout(() => this.shakeState.set(''), 500);
       }

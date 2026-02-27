@@ -13,8 +13,8 @@
 
     <!-- Card -->
     <div class="login-card" [@shake]="shakeState()">
-      <h2 class="card-heading">Welcome Back</h2>
-      <p class="card-subheading">Sign in to your workspace</p>
+      <h2 class="card-heading">Create Account</h2>
+      <p class="card-subheading">Join your team's workspace</p>
 
       <!-- Error -->
       @if (error()) {
@@ -23,6 +23,33 @@
         <span>{{ error() }}</span>
       </div>
       }
+
+      <!-- Display Name -->
+      <div class="input-group">
+        <label class="input-label" for="displayName">Display Name</label>
+        <div class="input-wrapper" [class.input-invalid]="displayNameError()">
+          <span class="input-icon">😊</span>
+          <input
+            class="login-input"
+            id="displayName"
+            type="text"
+            placeholder="How should we call you?"
+            [value]="displayName()"
+            (input)="onDisplayNameInput($any($event.target).value)"
+            (blur)="onDisplayNameBlur()"
+            (keyup.enter)="onSubmit()"
+            autocomplete="name"
+          />
+          @if (displayNameError()) {
+          <span class="input-status">✕</span>
+          } @else if (displayNameTouched() && !displayNameError()) {
+          <span class="input-status input-valid-icon">✓</span>
+          }
+        </div>
+        @if (displayNameError()) {
+        <span class="field-error">{{ displayNameError() }}</span>
+        }
+      </div>
 
       <!-- Username -->
       <div class="input-group">
@@ -33,7 +60,7 @@
             class="login-input"
             id="username"
             type="text"
-            placeholder="Enter your username"
+            placeholder="Choose a username"
             [value]="username()"
             (input)="onUsernameInput($any($event.target).value)"
             (blur)="onUsernameBlur()"
@@ -60,12 +87,12 @@
             class="login-input"
             id="password"
             [type]="showPassword() ? 'text' : 'password'"
-            placeholder="Enter your password"
+            placeholder="Create a password"
             [value]="password()"
             (input)="onPasswordInput($any($event.target).value)"
             (blur)="onPasswordBlur()"
             (keyup.enter)="onSubmit()"
-            autocomplete="current-password"
+            autocomplete="new-password"
           />
           <button class="password-toggle" type="button" (click)="togglePassword()">
             {{ showPassword() ? '🙈' : '👁️' }}
@@ -76,31 +103,46 @@
         }
       </div>
 
+      <!-- Confirm Password -->
+      <div class="input-group">
+        <label class="input-label" for="confirmPassword">Confirm Password</label>
+        <div class="input-wrapper" [class.input-invalid]="confirmPasswordError()">
+          <span class="input-icon">🔐</span>
+          <input
+            class="login-input"
+            id="confirmPassword"
+            [type]="showConfirmPassword() ? 'text' : 'password'"
+            placeholder="Re-enter your password"
+            [value]="confirmPassword()"
+            (input)="onConfirmPasswordInput($any($event.target).value)"
+            (blur)="onConfirmPasswordBlur()"
+            (keyup.enter)="onSubmit()"
+            autocomplete="new-password"
+          />
+          <button class="password-toggle" type="button" (click)="toggleConfirmPassword()">
+            {{ showConfirmPassword() ? '🙈' : '👁️' }}
+          </button>
+        </div>
+        @if (confirmPasswordError()) {
+        <span class="field-error">{{ confirmPasswordError() }}</span>
+        }
+      </div>
+
       <!-- Submit -->
-      <button class="login-btn" (click)="onSubmit()" [disabled]="isLoading()">
+      <button class="login-btn register-btn" (click)="onSubmit()" [disabled]="isLoading()">
         @if (isLoading()) {
         <span class="spinner"></span>
-        <span>Signing in...</span>
+        <span>Creating account...</span>
         } @else {
-        <span>Sign In</span>
+        <span>Create Account</span>
         <span class="btn-arrow">→</span>
         }
       </button>
 
-      <!-- Demo credentials hint -->
-      <div class="demo-section">
-        <p class="demo-title">Demo Credentials</p>
-        <div class="demo-list">
-          <button class="demo-item" (click)="fillCredentials('demo', 'demo1234')">
-            🎯 demo / demo1234
-          </button>
-        </div>
-      </div>
-
-      <!-- Link to register -->
+      <!-- Link to login -->
       <div class="switch-section">
-        <span class="switch-text">Don't have an account?</span>
-        <a class="switch-link" routerLink="/register">Create one</a>
+        <span class="switch-text">Already have an account?</span>
+        <a class="switch-link" routerLink="/login">Sign In</a>
       </div>
     </div>
   </div>

@@ -7,6 +7,10 @@ export const routes: Routes = [
     loadComponent: () => import('./login/login').then((m) => m.Login),
   },
   {
+    path: 'register',
+    loadComponent: () => import('./register/register').then((m) => m.Register),
+  },
+  {
     path: 'board',
     loadComponent: () => import('./kanban/kanban').then((m) => m.Kanban),
     canActivate: [authGuard],
