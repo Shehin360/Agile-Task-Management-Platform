@@ -64,10 +64,8 @@ export class Register {
     const val = this.username().trim();
     if (!val) return 'Username is required';
     if (val.length < 3) return 'Username must be at least 3 characters';
-    if (/[^a-zA-Z0-9_]/.test(val))
-      return 'Only letters, numbers & underscores allowed';
-    if (this.authService.isUsernameTaken(val))
-      return 'This username is already taken';
+    if (/[^a-zA-Z0-9_]/.test(val)) return 'Only letters, numbers & underscores allowed';
+    if (this.authService.isUsernameTaken(val)) return 'This username is already taken';
     return null;
   });
 

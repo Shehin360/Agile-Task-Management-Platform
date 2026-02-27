@@ -1,36 +1,36 @@
-<div class="login-page">
+<div class="auth-page">
   <!-- Floating orbs -->
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
+  <div class="auth-orb auth-orb-1"></div>
+  <div class="auth-orb auth-orb-2"></div>
+  <div class="auth-orb auth-orb-3"></div>
 
-  <div class="login-container" @fadeIn>
+  <div class="auth-container" @fadeIn>
     <!-- Brand -->
-    <div class="login-brand">
-      <h1 class="login-logo">Sprintly</h1>
-      <p class="login-tagline">Agile Task Management</p>
+    <div class="auth-brand">
+      <h1 class="auth-logo">Sprintly</h1>
+      <p class="auth-tagline">Agile Task Management</p>
     </div>
 
     <!-- Card -->
-    <div class="login-card" [@shake]="shakeState()">
-      <h2 class="card-heading">Create Account</h2>
-      <p class="card-subheading">Join your team's workspace</p>
+    <div class="auth-card register-card" [@shake]="shakeState()">
+      <h2 class="auth-heading">Create Account</h2>
+      <p class="auth-subheading">Join your team's workspace</p>
 
       <!-- Error -->
       @if (error()) {
-      <div class="login-error">
-        <span class="error-icon">⚠️</span>
+      <div class="auth-error">
+        <span class="auth-error-icon">⚠️</span>
         <span>{{ error() }}</span>
       </div>
       }
 
       <!-- Display Name -->
-      <div class="input-group">
-        <label class="input-label" for="displayName">Display Name</label>
-        <div class="input-wrapper" [class.input-invalid]="displayNameError()">
-          <span class="input-icon">😊</span>
+      <div class="auth-input-group">
+        <label class="auth-input-label" for="displayName">Display Name</label>
+        <div class="auth-input-wrapper" [class.input-invalid]="displayNameError()">
+          <span class="auth-input-icon">😊</span>
           <input
-            class="login-input"
+            class="auth-input"
             id="displayName"
             type="text"
             placeholder="How should we call you?"
@@ -41,23 +41,23 @@
             autocomplete="name"
           />
           @if (displayNameError()) {
-          <span class="input-status">✕</span>
+          <span class="auth-input-status">✕</span>
           } @else if (displayNameTouched() && !displayNameError()) {
-          <span class="input-status input-valid-icon">✓</span>
+          <span class="auth-input-status valid">✓</span>
           }
         </div>
         @if (displayNameError()) {
-        <span class="field-error">{{ displayNameError() }}</span>
+        <span class="auth-field-error">{{ displayNameError() }}</span>
         }
       </div>
 
       <!-- Username -->
-      <div class="input-group">
-        <label class="input-label" for="username">Username</label>
-        <div class="input-wrapper" [class.input-invalid]="usernameError()">
-          <span class="input-icon">👤</span>
+      <div class="auth-input-group">
+        <label class="auth-input-label" for="username">Username</label>
+        <div class="auth-input-wrapper" [class.input-invalid]="usernameError()">
+          <span class="auth-input-icon">👤</span>
           <input
-            class="login-input"
+            class="auth-input"
             id="username"
             type="text"
             placeholder="Choose a username"
@@ -68,23 +68,23 @@
             autocomplete="username"
           />
           @if (usernameError()) {
-          <span class="input-status">✕</span>
+          <span class="auth-input-status">✕</span>
           } @else if (usernameTouched() && !usernameError()) {
-          <span class="input-status input-valid-icon">✓</span>
+          <span class="auth-input-status valid">✓</span>
           }
         </div>
         @if (usernameError()) {
-        <span class="field-error">{{ usernameError() }}</span>
+        <span class="auth-field-error">{{ usernameError() }}</span>
         }
       </div>
 
       <!-- Password -->
-      <div class="input-group">
-        <label class="input-label" for="password">Password</label>
-        <div class="input-wrapper" [class.input-invalid]="passwordError()">
-          <span class="input-icon">🔒</span>
+      <div class="auth-input-group">
+        <label class="auth-input-label" for="password">Password</label>
+        <div class="auth-input-wrapper" [class.input-invalid]="passwordError()">
+          <span class="auth-input-icon">🔒</span>
           <input
-            class="login-input"
+            class="auth-input"
             id="password"
             [type]="showPassword() ? 'text' : 'password'"
             placeholder="Create a password"
@@ -94,22 +94,22 @@
             (keyup.enter)="onSubmit()"
             autocomplete="new-password"
           />
-          <button class="password-toggle" type="button" (click)="togglePassword()">
+          <button class="auth-password-toggle" type="button" (click)="togglePassword()">
             {{ showPassword() ? '🙈' : '👁️' }}
           </button>
         </div>
         @if (passwordError()) {
-        <span class="field-error">{{ passwordError() }}</span>
+        <span class="auth-field-error">{{ passwordError() }}</span>
         }
       </div>
 
       <!-- Confirm Password -->
-      <div class="input-group">
-        <label class="input-label" for="confirmPassword">Confirm Password</label>
-        <div class="input-wrapper" [class.input-invalid]="confirmPasswordError()">
-          <span class="input-icon">🔐</span>
+      <div class="auth-input-group">
+        <label class="auth-input-label" for="confirmPassword">Confirm Password</label>
+        <div class="auth-input-wrapper" [class.input-invalid]="confirmPasswordError()">
+          <span class="auth-input-icon">🔐</span>
           <input
-            class="login-input"
+            class="auth-input"
             id="confirmPassword"
             [type]="showConfirmPassword() ? 'text' : 'password'"
             placeholder="Re-enter your password"
@@ -119,30 +119,30 @@
             (keyup.enter)="onSubmit()"
             autocomplete="new-password"
           />
-          <button class="password-toggle" type="button" (click)="toggleConfirmPassword()">
+          <button class="auth-password-toggle" type="button" (click)="toggleConfirmPassword()">
             {{ showConfirmPassword() ? '🙈' : '👁️' }}
           </button>
         </div>
         @if (confirmPasswordError()) {
-        <span class="field-error">{{ confirmPasswordError() }}</span>
+        <span class="auth-field-error">{{ confirmPasswordError() }}</span>
         }
       </div>
 
       <!-- Submit -->
-      <button class="login-btn register-btn" (click)="onSubmit()" [disabled]="isLoading()">
+      <button class="auth-btn register-btn" (click)="onSubmit()" [disabled]="isLoading()">
         @if (isLoading()) {
-        <span class="spinner"></span>
+        <span class="auth-spinner"></span>
         <span>Creating account...</span>
         } @else {
         <span>Create Account</span>
-        <span class="btn-arrow">→</span>
+        <span class="auth-btn-arrow">→</span>
         }
       </button>
 
       <!-- Link to login -->
-      <div class="switch-section">
-        <span class="switch-text">Already have an account?</span>
-        <a class="switch-link" routerLink="/login">Sign In</a>
+      <div class="auth-switch">
+        <span class="auth-switch-text">Already have an account?</span>
+        <a class="auth-switch-link" routerLink="/login">Sign In</a>
       </div>
     </div>
   </div>

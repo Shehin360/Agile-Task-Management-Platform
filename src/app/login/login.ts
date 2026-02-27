@@ -96,14 +96,6 @@ export class Login {
     this.showPassword.update((v) => !v);
   }
 
-  fillCredentials(user: string, pass: string) {
-    this.username.set(user);
-    this.password.set(pass);
-    this.error.set(null);
-    this.usernameTouched.set(false);
-    this.passwordTouched.set(false);
-  }
-
   onSubmit() {
     // Mark both fields as touched to show any field-level errors
     this.usernameTouched.set(true);

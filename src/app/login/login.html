@@ -1,36 +1,36 @@
-<div class="login-page">
+<div class="auth-page">
   <!-- Floating orbs -->
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
+  <div class="auth-orb auth-orb-1"></div>
+  <div class="auth-orb auth-orb-2"></div>
+  <div class="auth-orb auth-orb-3"></div>
 
-  <div class="login-container" @fadeIn>
+  <div class="auth-container" @fadeIn>
     <!-- Brand -->
-    <div class="login-brand">
-      <h1 class="login-logo">Sprintly</h1>
-      <p class="login-tagline">Agile Task Management</p>
+    <div class="auth-brand">
+      <h1 class="auth-logo">Sprintly</h1>
+      <p class="auth-tagline">Agile Task Management</p>
     </div>
 
     <!-- Card -->
-    <div class="login-card" [@shake]="shakeState()">
-      <h2 class="card-heading">Welcome Back</h2>
-      <p class="card-subheading">Sign in to your workspace</p>
+    <div class="auth-card" [@shake]="shakeState()">
+      <h2 class="auth-heading">Welcome Back</h2>
+      <p class="auth-subheading">Sign in to your workspace</p>
 
       <!-- Error -->
       @if (error()) {
-      <div class="login-error">
-        <span class="error-icon">⚠️</span>
+      <div class="auth-error">
+        <span class="auth-error-icon">⚠️</span>
         <span>{{ error() }}</span>
       </div>
       }
 
       <!-- Username -->
-      <div class="input-group">
-        <label class="input-label" for="username">Username</label>
-        <div class="input-wrapper" [class.input-invalid]="usernameError()">
-          <span class="input-icon">👤</span>
+      <div class="auth-input-group">
+        <label class="auth-input-label" for="username">Username</label>
+        <div class="auth-input-wrapper" [class.input-invalid]="usernameError()">
+          <span class="auth-input-icon">👤</span>
           <input
-            class="login-input"
+            class="auth-input"
             id="username"
             type="text"
             placeholder="Enter your username"
@@ -41,23 +41,23 @@
             autocomplete="username"
           />
           @if (usernameError()) {
-          <span class="input-status">✕</span>
+          <span class="auth-input-status">✕</span>
           } @else if (usernameTouched() && !usernameError()) {
-          <span class="input-status input-valid-icon">✓</span>
+          <span class="auth-input-status valid">✓</span>
           }
         </div>
         @if (usernameError()) {
-        <span class="field-error">{{ usernameError() }}</span>
+        <span class="auth-field-error">{{ usernameError() }}</span>
         }
       </div>
 
       <!-- Password -->
-      <div class="input-group">
-        <label class="input-label" for="password">Password</label>
-        <div class="input-wrapper" [class.input-invalid]="passwordError()">
-          <span class="input-icon">🔒</span>
+      <div class="auth-input-group">
+        <label class="auth-input-label" for="password">Password</label>
+        <div class="auth-input-wrapper" [class.input-invalid]="passwordError()">
+          <span class="auth-input-icon">🔒</span>
           <input
-            class="login-input"
+            class="auth-input"
             id="password"
             [type]="showPassword() ? 'text' : 'password'"
             placeholder="Enter your password"
@@ -67,40 +67,30 @@
             (keyup.enter)="onSubmit()"
             autocomplete="current-password"
           />
-          <button class="password-toggle" type="button" (click)="togglePassword()">
+          <button class="auth-password-toggle" type="button" (click)="togglePassword()">
             {{ showPassword() ? '🙈' : '👁️' }}
           </button>
         </div>
         @if (passwordError()) {
-        <span class="field-error">{{ passwordError() }}</span>
+        <span class="auth-field-error">{{ passwordError() }}</span>
         }
       </div>
 
       <!-- Submit -->
-      <button class="login-btn" (click)="onSubmit()" [disabled]="isLoading()">
+      <button class="auth-btn" (click)="onSubmit()" [disabled]="isLoading()">
         @if (isLoading()) {
-        <span class="spinner"></span>
+        <span class="auth-spinner"></span>
         <span>Signing in...</span>
         } @else {
         <span>Sign In</span>
-        <span class="btn-arrow">→</span>
+        <span class="auth-btn-arrow">→</span>
         }
       </button>
 
-      <!-- Demo credentials hint -->
-      <div class="demo-section">
-        <p class="demo-title">Demo Credentials</p>
-        <div class="demo-list">
-          <button class="demo-item" (click)="fillCredentials('demo', 'demo1234')">
-            🎯 demo / demo1234
-          </button>
-        </div>
-      </div>
-
       <!-- Link to register -->
-      <div class="switch-section">
-        <span class="switch-text">Don't have an account?</span>
-        <a class="switch-link" routerLink="/register">Create one</a>
+      <div class="auth-switch">
+        <span class="auth-switch-text">Don't have an account?</span>
+        <a class="auth-switch-link" routerLink="/register">Create one</a>
       </div>
     </div>
   </div>
