@@ -1,9 +1,11 @@
-# Agile Kanban Board 📋
+# Sprintly — Agile Task Management Platform 📋
 
-A modern, interactive Kanban board application built with **Angular 21** that helps you manage tasks across different workflow stages.
+A modern, full-stack Agile Task Management Platform with an **Angular 21** frontend (Kanban board) and a **FastAPI** backend API. Helps teams manage tasks across different workflow stages with drag-and-drop, user authentication, and a professional UI.
 
 ![Angular](https://img.shields.io/badge/Angular-21.1.2-red)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.135.0-009688)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
+![Python](https://img.shields.io/badge/Python-3.13-yellow)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## ✨ Key Features
@@ -34,12 +36,19 @@ You can **customize these** — add new columns like "In Review", "QA", "Blocked
 
 ## 🛠️ Tech Stack
 
+### Frontend
 - **Framework**: Angular 21.1.2
 - **Language**: TypeScript 5.7.2
 - **Build Tool**: Angular CLI with Vite
-- **Styling**: CSS3 with Flexbox
+- **Styling**: CSS3 with Flexbox & Glassmorphism
 - **Animations**: @angular/animations
 - **SSR**: Angular Universal
+
+### Backend
+- **Framework**: FastAPI 0.135.0
+- **Language**: Python 3.13
+- **Server**: Uvicorn
+- **Validation**: Pydantic
 
 ## 📦 Prerequisites
 
@@ -103,27 +112,84 @@ npm run build
 npm run serve:ssr:agile_project
 ```
 
+## 🐍 Backend Setup (FastAPI)
+
+The FastAPI backend is included in the `backend/` folder of this repo. Since it is a **separate Python application**, you need to set it up and run it independently from the Angular frontend.
+
+### Step 1: Copy the backend folder to a separate location
+
+```bash
+cp -r backend/ ../agile_project_FastAPI/
+cd ../agile_project_FastAPI/
+```
+
+### Step 2: Create a Python virtual environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate        # macOS / Linux
+# venv\Scripts\activate         # Windows
+```
+
+### Step 3: Install Python dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Step 4: Run the FastAPI server
+
+```bash
+uvicorn FastAPI:app --reload --port 8000
+```
+
+The API will be available at `http://localhost:8000`. The Angular frontend is configured to make API calls to this address.
+
+### API Endpoints
+
+| Method   | Endpoint        | Description          |
+| -------- | --------------- | -------------------- |
+| `POST`   | `/create_task`  | Create a new task    |
+| `PUT`    | `/update_task`  | Update an existing task |
+| `DELETE` | `/delete_task`  | Delete a task        |
+
+> 💡 **Why is the backend inside the Angular project?**
+>
+> Ideally, the frontend and backend should be in separate repositories or at the root level of a monorepo. Due to the project setup constraints, the backend code is stored inside the Angular project's `backend/` folder for version control purposes. It does **not** interfere with the Angular build — Angular only processes `src/` and `public/`. To run the backend, simply copy it out to a separate folder and follow the steps above.
+
 ## 📁 Project Structure
 
 ```
 agile_project/
-├── src/
+├── src/                         # Angular frontend source
 │   ├── app/
 │   │   ├── kanban/              # Kanban board component
 │   │   │   ├── kanban.ts        # Component logic
 │   │   │   ├── kanban.html      # Template
 │   │   │   └── kanban.css       # Styles
+│   │   ├── login/               # Login page component
+│   │   ├── register/            # Register page component
+│   │   ├── auth/                # Auth guard & service
 │   │   ├── app.ts               # Root component
 │   │   ├── app.routes.ts        # Application routes
 │   │   └── app.config.ts        # App configuration
 │   ├── index.html               # Main HTML file
 │   ├── main.ts                  # Application entry point
 │   └── styles.css               # Global styles
-├── public/                      # Static assets
+├── backend/                     # FastAPI backend (see note below)
+│   ├── FastAPI.py               # API server with CRUD endpoints
+│   └── requirements.txt         # Python dependencies
+├── public/                      # Static assets (logo, favicon)
 ├── angular.json                 # Angular configuration
-├── package.json                 # Dependencies
-└── tsconfig.json               # TypeScript configuration
+├── package.json                 # Node.js dependencies
+└── tsconfig.json                # TypeScript configuration
 ```
+
+> ⚠️ **Important Note about the Backend folder:**
+>
+> The `backend/` folder contains the **FastAPI backend server** and is included in this repo for convenience so that all project code lives in one place. However, **the backend must be run separately from a different directory** — it is not part of the Angular build process and Angular completely ignores it.
+>
+> **To run the backend, copy the `backend/` folder to a separate location** outside this Angular project, create a Python virtual environment there, install dependencies, and run it independently. See the [Backend Setup](#-backend-setup-fastapi) section below for full instructions.
 
 ## 🎮 How to Use
 

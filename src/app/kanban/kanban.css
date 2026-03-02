@@ -85,6 +85,27 @@
 }
 
 /* TITLE */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 10px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(196, 77, 255, 0.3));
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.brand-logo:hover {
+  transform: scale(1.08) rotate(-3deg);
+  filter: drop-shadow(0 4px 16px rgba(196, 77, 255, 0.5));
+}
+
 .title {
   position: relative;
   z-index: 1;
@@ -1284,32 +1305,230 @@
 }
 @media (max-width: 1024px) {
   .page {
-    padding: 24px 20px;
+    padding: 16px 14px;
     height: auto;
     min-height: 100vh;
     overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .board {
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
     min-height: auto;
+    overflow-x: hidden;
+    overflow-y: visible;
+    flex: none;
   }
 
   .column {
     width: 100%;
+    min-width: unset;
     height: auto;
-    max-height: 500px;
+    max-height: none;
+    flex: none;
+  }
+
+  /* On mobile, keep columns compact — body scrolls internally only when many tasks */
+  .column-body {
+    max-height: 280px;
+    overflow-y: auto;
+    flex: none;
+  }
+
+  .column:hover {
+    transform: none;
+    box-shadow: none;
   }
 
   .title {
-    font-size: clamp(1.2rem, 4vw, 1.6rem);
+    font-size: clamp(1rem, 4vw, 1.4rem);
     letter-spacing: 2px;
   }
 
-  .user-bar {
+  .brand-logo {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
+
+  .brand {
+    gap: 10px;
+  }
+
+  .navbar {
     flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    margin-bottom: 14px;
+  }
+
+  .navbar-left {
+    gap: 10px;
+  }
+
+  .navbar-right {
+    gap: 10px;
+  }
+
+  .toolbar {
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-box {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .sort-btn {
+    padding: 8px 16px;
+    font-size: 0.78rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .add-column-card {
+    min-width: unset;
+    width: 100%;
+    max-width: 100%;
+    min-height: 70px;
+  }
+
+  /* Reduce empty state size on mobile */
+  .empty-state {
+    padding: 24px 16px;
+  }
+
+  .empty-icon {
+    font-size: 1.5rem;
+  }
+
+  .empty-text {
+    font-size: 0.78rem;
+  }
+
+  .empty-hint {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 12px 10px;
+  }
+
+  .navbar {
+    padding: 8px 12px;
+    border-radius: 12px;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .navbar-left {
+    gap: 8px;
+  }
+
+  .navbar-divider {
+    height: 20px;
+  }
+
+  .navbar-stat-count {
+    font-size: 0.95rem;
+  }
+
+  .navbar-stat-label {
+    font-size: 0.65rem;
+  }
+
+  .navbar-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.65rem;
+  }
+
+  .navbar-username {
+    font-size: 0.78rem;
+  }
+
+  .logout-btn {
+    padding: 6px 14px;
+    font-size: 0.72rem;
+  }
+
+  .board {
     gap: 12px;
+  }
+
+  .column {
+    border-radius: 16px;
+  }
+
+  .column::before {
+    border-radius: 16px;
+  }
+
+  .column-body {
+    max-height: 240px;
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .column-header {
+    padding: 10px 12px;
+    font-size: 0.68rem;
+    letter-spacing: 2px;
+  }
+
+  .column-add-btn {
+    margin: 6px 12px 12px;
+    padding: 10px;
+    font-size: 0.78rem;
+    letter-spacing: 1.5px;
+    border-radius: 10px;
+  }
+
+  .task {
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+
+  .task-title {
+    font-size: 0.84rem;
+  }
+
+  .task-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+
+  .modal {
+    width: 94vw;
+    max-width: 400px;
+    border-radius: 20px;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .modal-actions {
+    padding: 0 20px 20px;
+  }
+
+  .toast-container {
+    top: 12px;
+    right: 10px;
+    left: 10px;
+  }
+
+  .toast {
+    min-width: unset;
+    max-width: 100%;
   }
 }
 
@@ -1424,63 +1643,241 @@
 
 @media (max-width: 480px) {
   .page {
-    padding: 16px 12px;
+    padding: 10px 8px;
   }
 
   .title {
-    font-size: 1rem;
+    font-size: 0.9rem;
     letter-spacing: 1.5px;
   }
 
-  .user-info {
+  .brand-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+  }
+
+  .brand {
     gap: 8px;
   }
 
-  .user-name {
+  .navbar {
+    padding: 8px 10px;
+    border-radius: 10px;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .navbar-left {
+    gap: 6px;
+  }
+
+  .navbar-divider {
+    display: none;
+  }
+
+  .navbar-stat-label {
+    display: none;
+  }
+
+  .navbar-right {
+    gap: 6px;
+  }
+
+  .navbar-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.58rem;
+    border-width: 1.5px;
+  }
+
+  .navbar-username {
+    display: none;
+  }
+
+  .logout-text {
     display: none;
   }
 
   .logout-btn {
-    padding: 6px 14px;
-    font-size: 0.72rem;
+    padding: 6px 10px;
+    font-size: 0.7rem;
+    border-radius: 8px;
   }
 
-  .modal {
-    width: 94vw;
-    max-width: 400px;
-    border-radius: 20px;
+  .toolbar {
+    margin-bottom: 10px;
+    gap: 6px;
   }
 
-  .modal-body {
-    padding: 20px;
+  .sort-hint {
+    display: none;
   }
 
-  .modal-actions {
-    padding: 0 20px 20px;
+  .board {
+    gap: 10px;
   }
 
-  .task-btn {
-    min-width: 40px;
-    min-height: 40px;
+  .column {
+    border-radius: 12px;
   }
 
-  .task {
-    padding: 12px 14px;
+  .column::before {
+    border-radius: 12px;
+  }
+
+  .column-body {
+    max-height: 200px;
+    padding: 8px;
+    gap: 6px;
   }
 
   .column-header {
-    padding: 14px;
+    padding: 8px 10px;
+    font-size: 0.62rem;
+    letter-spacing: 1.5px;
+  }
+
+  .column-add-btn {
+    margin: 4px 8px 8px;
+    padding: 10px;
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+    border-radius: 8px;
+  }
+
+  .task {
+    padding: 8px 10px;
+    border-radius: 8px;
+    gap: 6px;
+  }
+
+  .task-content {
+    padding-left: 6px;
+    gap: 4px;
+  }
+
+  .task-title {
+    font-size: 0.8rem;
+  }
+
+  .task-description {
     font-size: 0.7rem;
   }
 
+  .task-creator-name {
+    display: none;
+  }
+
+  .task-creator-avatar {
+    width: 18px;
+    height: 18px;
+    font-size: 0.48rem;
+  }
+
+  .priority-badge {
+    font-size: 0.5rem;
+    padding: 2px 6px;
+  }
+
+  .due-date-badge {
+    font-size: 0.58rem;
+    padding: 2px 7px;
+  }
+
+  .task-actions {
+    opacity: 1;
+  }
+
+  .task-btn {
+    min-width: 32px;
+    min-height: 32px;
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+    border-radius: 8px;
+  }
+
+  .empty-state {
+    padding: 20px 12px;
+  }
+
+  .empty-icon {
+    font-size: 1.3rem;
+  }
+
+  .empty-text {
+    font-size: 0.72rem;
+  }
+
+  .empty-hint {
+    font-size: 0.6rem;
+    max-width: 150px;
+  }
+
+  .add-column-card {
+    min-height: 60px;
+    border-radius: 12px;
+  }
+
+  .add-column-icon {
+    font-size: 1.4rem;
+  }
+
+  .add-column-text {
+    font-size: 0.65rem;
+    letter-spacing: 1.5px;
+  }
+
+  .modal {
+    width: 96vw;
+    max-width: 380px;
+    border-radius: 16px;
+  }
+
+  .modal-sm {
+    width: 94vw;
+  }
+
+  .modal-header {
+    padding: 14px 18px;
+  }
+
+  .modal-header h2 {
+    font-size: 1rem;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-actions {
+    padding: 0 16px 16px;
+    gap: 8px;
+  }
+
+  .modal-btn {
+    padding: 10px 16px;
+    font-size: 0.82rem;
+  }
+
+  .modal-card {
+    padding: 24px 20px 20px;
+    border-radius: 18px;
+  }
+
   .toast-container {
-    top: 16px;
-    right: 12px;
-    left: 12px;
+    top: 10px;
+    right: 8px;
+    left: 8px;
   }
 
   .toast {
     min-width: unset;
     max-width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    gap: 8px;
   }
 }

@@ -94,3 +94,13 @@ Thumbs.db
 
 /CHANGELOG.md
 /FEATURE_REORDER.md
+
+# Python / FastAPI backend
+__pycache__/
+*.py[cod]
+*$py.class
+backend/venv/
+backend/fapi/
+backend/.venv/
+backend/*.egg-info/
+*.pyc

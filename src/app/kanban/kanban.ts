@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { AuthService } from '../auth/auth.service';
+import { HttpClient } from '@angular/common/http';
 
 const STORAGE_KEY = 'kanban_tasks';
 const COLUMNS_KEY = 'kanban_columns';
@@ -114,6 +115,7 @@ export class Kanban {
   private isBrowser = isPlatformBrowser(this.platformId);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private http = inject(HttpClient);
 
   currentUser = this.authService.currentUser;
 
@@ -473,6 +475,22 @@ export class Kanban {
     const dueDate = this.newTaskDueDate();
     const columnId = this.addTaskColumnId();
 
+    this.http
+      .post('http://localhost:8000/create_task', {
+        task: title,
+        task_description: description,
+        priority: priority,
+        task_date: dueDate ?? '',
+      })
+      .subscribe({
+        next: (response) => {
+          console.log('API response:', response);
+        },
+        error: (err: any) => {
+          console.log('API Error:', err);
+        },
+      });
+
     this.tasks.update((tasks) => {
       const columnTasks = tasks.filter((t) => t.status === columnId);
       const maxOrder = columnTasks.length > 0 ? Math.max(...columnTasks.map((t) => t.order)) : 0;
@@ -527,6 +545,23 @@ export class Kanban {
     const newPriority = this.editingPriority() || 'medium';
     const newDueDate = this.editingDueDate();
 
+    this.http
+      .put('http://localhost:8000/update_task', {
+        task_id: taskId,
+        task: newTitle,
+        task_description: newDescription,
+        priority: newPriority,
+        task_date: newDueDate ?? '',
+      })
+      .subscribe({
+        next: (response) => {
+          console.log('API response:', response);
+        },
+        error: (err: any) => {
+          console.log('API Error:', err);
+        },
+      });
+
     this.tasks.update((tasks: Task[]) => {
       const updated: Task[] = tasks.map((t: Task) =>
         t.id === taskId
@@ -566,6 +601,22 @@ export class Kanban {
   deleteTask(taskId: number) {
     const task = this.tasks().find((t) => t.id === taskId);
     const taskTitle = task?.title ?? 'Task';
+
+    this.http
+      .delete('http://localhost:8000/delete_task', {
+        body: {
+          task_id: taskId,
+          task: taskTitle,
+        },
+      })
+      .subscribe({
+        next: (response) => {
+          console.log('API response:', response);
+        },
+        error: (err: any) => {
+          console.log('API Error:', err);
+        },
+      });
 
     this.tasks.update((tasks: Task[]) => {
       const updated: Task[] = tasks.filter((t: Task) => t.id !== taskId);
