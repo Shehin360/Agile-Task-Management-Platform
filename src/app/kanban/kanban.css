@@ -327,6 +327,25 @@
   min-height: 0;
   overflow-x: auto;
   overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+.board::-webkit-scrollbar {
+  height: 6px;
+}
+
+.board::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.board::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+}
+
+.board::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 /* TOOLBAR — SEARCH + SORT */
@@ -468,8 +487,8 @@
 
 /* COLUMNS — GLASSMORPHISM  */
 .column {
-  flex: 1 1 0;
-  min-width: 260px;
+  flex: 0 0 auto;
+  width: clamp(280px, 30vw, 400px);
   background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -1207,7 +1226,6 @@
 /* ADD COLUMN CARD */
 .add-column-card {
   min-width: 220px;
-  max-width: 280px;
   min-height: 120px;
   display: flex;
   flex-direction: column;
