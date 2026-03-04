@@ -55,3 +55,36 @@ def delete_task(task: DeleteTask):
         "status": "success",
         "message": f"Task {task.task} with Task ID {task.task_id} deleted successfully."
     }
+
+# newly added Login,Logout and Register mock api's
+
+
+class LoginRequest(BaseModel):
+    username:str
+    password:str
+
+@app.post("/login")
+def login(data: LoginRequest):
+    return {
+        "status": "success",
+        "message": f"User '{data.username}' logged in successfully."
+    }
+
+class Registerrequest(BaseModel):
+    username:str
+    display_name: str
+
+@app.post("/register")
+def register(data: Registerrequest):
+    return{ 
+        "status": "success",
+        "message": f"User '{data.username}' with display name '{data.display_name}' registered successfully."
+    }
+
+class LogoutRequest(BaseModel):
+    username:str
+
+@app.post("/logout")
+def Logout(data: LogoutRequest):
+    responce = {"message" : f"User '{data.username}' logged out successfully."}
+    return responce

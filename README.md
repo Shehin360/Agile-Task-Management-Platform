@@ -37,6 +37,7 @@ You can **customize these** — add new columns like "In Review", "QA", "Blocked
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Framework**: Angular 21.1.2
 - **Language**: TypeScript 5.7.2
 - **Build Tool**: Angular CLI with Vite
@@ -45,6 +46,7 @@ You can **customize these** — add new columns like "In Review", "QA", "Blocked
 - **SSR**: Angular Universal
 
 ### Backend
+
 - **Framework**: FastAPI 0.135.0
 - **Language**: Python 3.13
 - **Server**: Uvicorn
@@ -147,11 +149,11 @@ The API will be available at `http://localhost:8000`. The Angular frontend is co
 
 ### API Endpoints
 
-| Method   | Endpoint        | Description          |
-| -------- | --------------- | -------------------- |
-| `POST`   | `/create_task`  | Create a new task    |
-| `PUT`    | `/update_task`  | Update an existing task |
-| `DELETE` | `/delete_task`  | Delete a task        |
+| Method   | Endpoint       | Description             |
+| -------- | -------------- | ----------------------- |
+| `POST`   | `/create_task` | Create a new task       |
+| `PUT`    | `/update_task` | Update an existing task |
+| `DELETE` | `/delete_task` | Delete a task           |
 
 > 💡 **Why is the backend inside the Angular project?**
 >

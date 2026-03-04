@@ -1,8 +1,11 @@
 import { Injectable, signal, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+
 
 const AUTH_KEY = 'kanban_user';
 const USERS_KEY = 'kanban_registered_users';
+const API = 'http://localhost:8000';
 
 export interface User {
   username: string;
@@ -19,6 +22,7 @@ interface StoredUser {
 export class AuthService {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private http = inject(HttpClient)
 
   currentUser = signal<User | null>(this.loadSession());
   isLoggedIn = signal<boolean>(this.loadSession() !== null);
@@ -62,6 +66,12 @@ export class AuthService {
     this.isLoggedIn.set(true);
     if (this.isBrowser) localStorage.setItem(AUTH_KEY, JSON.stringify(user));
 
+    this.http.post(`${API}/register`, {username, display_name:displayName})
+    .subscribe({
+      next: (res) => console.log('register API:', res),
+      error: (err) => console.log('Register API Error:', err)
+    });
+
     return { success: true };
   }
 
@@ -82,11 +92,26 @@ export class AuthService {
     this.isLoggedIn.set(true);
     if (this.isBrowser) localStorage.setItem(AUTH_KEY, JSON.stringify(user));
 
-    return { success: true };
+
+  this.http.post(`${API}/login`, {username:match?.username, password: ''})
+    .subscribe({
+      next: (res) => console.log('Login API:', res),
+      error: (err) => console.log('Login API Error', err),
+    });
+        return { success: true };
   }
 
   // ──────── LOGOUT ────────
   logout() {
+    const user = this.currentUser();
+    if(user){
+      this.http.post(`${API}/logout`, {username: user.username, password: ''})
+      .subscribe({
+        next: (res) => console.log('Logout API:', res),
+        error: (err) => console.log('Logout API Error:', err),
+      });
+    }
+
     this.currentUser.set(null);
     this.isLoggedIn.set(false);
     if (this.isBrowser) localStorage.removeItem(AUTH_KEY);
