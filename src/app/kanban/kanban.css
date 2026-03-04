@@ -125,7 +125,7 @@
 /* USER BAR */
 .user-bar {
   position: relative;
-  z-index: 1;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -139,16 +139,164 @@
   gap: 12px;
 }
 
-.user-avatar {
-  font-size: 1.1rem;
-  width: 36px;
-  height: 36px;
+/* ── User Menu Wrapper (dropdown container) ── */
+.user-menu-wrapper {
+  position: relative;
+  z-index: 101;
+}
+
+.user-avatar-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  color: inherit;
+}
+
+.user-avatar-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.navbar-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(196, 77, 255, 0.15);
-  border: 1px solid rgba(196, 77, 255, 0.25);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  letter-spacing: 0.5px;
+}
+
+.user-menu-caret {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+  transition: transform 0.2s ease;
+  margin-left: 2px;
+}
+
+.user-menu-caret.open {
+  transform: rotate(180deg);
+}
+
+/* ── Dropdown Menu ── */
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 260px;
+  background: rgba(22, 22, 35, 0.97);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  z-index: 1000;
+  overflow: hidden;
+  padding: 6px;
+}
+
+.dropdown-user-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px;
+}
+
+.dropdown-avatar {
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dropdown-display-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-username {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 4px 8px;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
+.dropdown-item-icon {
+  font-size: 1rem;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.dropdown-item-danger {
+  color: #f87171;
+}
+
+.dropdown-item-danger:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+}
+
+/* Invisible backdrop to close dropdown */
+.user-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
 }
 
 .user-name {
@@ -156,28 +304,6 @@
   font-weight: 600;
   color: rgba(255, 255, 255, 0.65);
   letter-spacing: 0.5px;
-}
-
-.logout-btn {
-  padding: 8px 20px;
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  border-radius: 12px;
-  color: #fca5a5;
-  font-size: 0.78rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  letter-spacing: 1px;
-}
-
-.logout-btn:hover {
-  background: rgba(239, 68, 68, 0.22);
-  border-color: rgba(239, 68, 68, 0.45);
-  color: #fecaca;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15);
 }
 
 @keyframes gradientShift {
@@ -1454,9 +1580,9 @@
     font-size: 0.78rem;
   }
 
-  .logout-btn {
-    padding: 6px 14px;
-    font-size: 0.72rem;
+  .user-avatar-btn {
+    padding: 4px 8px;
+    gap: 8px;
   }
 
   .board {
@@ -1695,14 +1821,28 @@
     display: none;
   }
 
-  .logout-text {
+  .user-name {
     display: none;
   }
 
-  .logout-btn {
-    padding: 6px 10px;
+  .user-menu-caret {
+    display: none;
+  }
+
+  .user-avatar-btn {
+    padding: 4px 6px;
+    border-radius: 10px;
+  }
+
+  .navbar-avatar {
+    width: 30px;
+    height: 30px;
     font-size: 0.7rem;
-    border-radius: 8px;
+  }
+
+  .user-dropdown {
+    width: 230px;
+    right: -4px;
   }
 
   .toolbar {
@@ -1880,4 +2020,92 @@
     font-size: 0.78rem;
     gap: 8px;
   }
+}
+
+/* ── Profile Edit Modal ── */
+.profile-modal {
+  max-width: 440px;
+  width: 92vw;
+}
+
+.profile-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 20px 16px;
+}
+
+.profile-modal-header .modal-close {
+  margin-left: auto;
+  align-self: flex-start;
+}
+
+.profile-modal-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.profile-header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-header-info h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.profile-username {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 2px;
+}
+
+.profile-optional {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.profile-field-hint {
+  display: block;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 4px;
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+}
+
+/* ── Profile Alert Messages ── */
+.profile-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  margin-bottom: 14px;
+}
+
+.profile-alert-error {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.profile-alert-success {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
 }

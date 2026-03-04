@@ -2,7 +2,6 @@ import { Injectable, signal, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 
-
 const AUTH_KEY = 'kanban_user';
 const USERS_KEY = 'kanban_registered_users';
 const API = 'http://localhost:8000';
@@ -22,7 +21,7 @@ interface StoredUser {
 export class AuthService {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
-  private http = inject(HttpClient)
+  private http = inject(HttpClient);
 
   currentUser = signal<User | null>(this.loadSession());
   isLoggedIn = signal<boolean>(this.loadSession() !== null);
@@ -66,10 +65,9 @@ export class AuthService {
     this.isLoggedIn.set(true);
     if (this.isBrowser) localStorage.setItem(AUTH_KEY, JSON.stringify(user));
 
-    this.http.post(`${API}/register`, {username, display_name:displayName})
-    .subscribe({
+    this.http.post(`${API}/register`, { username, display_name: displayName }).subscribe({
       next: (res) => console.log('register API:', res),
-      error: (err) => console.log('Register API Error:', err)
+      error: (err) => console.log('Register API Error:', err),
     });
 
     return { success: true };
@@ -92,21 +90,18 @@ export class AuthService {
     this.isLoggedIn.set(true);
     if (this.isBrowser) localStorage.setItem(AUTH_KEY, JSON.stringify(user));
 
-
-  this.http.post(`${API}/login`, {username:match?.username, password: ''})
-    .subscribe({
+    this.http.post(`${API}/login`, { username: match?.username, password: '' }).subscribe({
       next: (res) => console.log('Login API:', res),
       error: (err) => console.log('Login API Error', err),
     });
-        return { success: true };
+    return { success: true };
   }
 
   // ──────── LOGOUT ────────
   logout() {
     const user = this.currentUser();
-    if(user){
-      this.http.post(`${API}/logout`, {username: user.username, password: ''})
-      .subscribe({
+    if (user) {
+      this.http.post(`${API}/logout`, { username: user.username, password: '' }).subscribe({
         next: (res) => console.log('Logout API:', res),
         error: (err) => console.log('Logout API Error:', err),
       });
@@ -115,6 +110,55 @@ export class AuthService {
     this.currentUser.set(null);
     this.isLoggedIn.set(false);
     if (this.isBrowser) localStorage.removeItem(AUTH_KEY);
+  }
+
+  // Updating user Profile
+
+  updateProfile(
+    newDisplayName: string,
+    newPassword?: string,
+    newUsername?: string
+  ): { success: boolean; error?: string } {
+    const current = this.currentUser();
+    if (!current) return { success: false, error: 'Not logged in' };
+
+    const users = this.getRegisteredUsers();
+    const idx = users.findIndex((u) => u.username.toLowerCase() === current.username.toLowerCase());
+
+    if (idx === -1) return { success: false, error: 'User not found' };
+
+    // Validate new username uniqueness (if changed)
+    if (newUsername && newUsername.toLowerCase() !== current.username.toLowerCase()) {
+      const taken = users.some(
+        (u, i) => i !== idx && u.username.toLowerCase() === newUsername.toLowerCase()
+      );
+      if (taken) return { success: false, error: 'Username is already taken.' };
+    }
+
+    const finalUsername = newUsername?.trim() || current.username;
+    users[idx].username = finalUsername;
+    users[idx].displayName = newDisplayName;
+    if (newPassword && newPassword.trim().length > 0) {
+      users[idx].password = newPassword;
+    }
+    this.saveRegisteredUsers(users);
+
+    const updated: User = { username: finalUsername, displayName: newDisplayName };
+    this.currentUser.set(updated);
+    if (this.isBrowser) localStorage.setItem(AUTH_KEY, JSON.stringify(updated));
+
+    this.http
+      .put(`${API}/update_profile`, {
+        username: current.username,
+        new_username: finalUsername !== current.username ? finalUsername : null,
+        new_display_name: newDisplayName,
+      })
+      .subscribe({
+        next: (res) => console.log('Update Profile', res),
+        error: (err) => console.log('Updated Profile API Error', err),
+      });
+
+    return { success: true };
   }
 
   // ──────── HELPERS ────────

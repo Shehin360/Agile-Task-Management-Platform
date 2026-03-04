@@ -108,6 +108,18 @@ interface Task {
         ),
       ]),
     ]),
+    trigger('scaleIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.92) translateY(-10px)' }),
+        animate(
+          '220ms cubic-bezier(0.4, 0, 0.2, 1)',
+          style({ opacity: 1, transform: 'scale(1) translateY(0)' })
+        ),
+      ]),
+      transition(':leave', [
+        animate('160ms ease-in', style({ opacity: 0, transform: 'scale(0.92) translateY(-10px)' })),
+      ]),
+    ]),
   ],
 })
 export class Kanban {
@@ -119,9 +131,19 @@ export class Kanban {
 
   currentUser = this.authService.currentUser;
 
+  showUserMenu = signal(false);
   showLogoutConfirm = signal(false);
 
+  toggleUserMenu() {
+    this.showUserMenu.update((v) => !v);
+  }
+
+  closeUserMenu() {
+    this.showUserMenu.set(false);
+  }
+
   logout() {
+    this.closeUserMenu();
     this.showLogoutConfirm.set(true);
   }
 
@@ -165,6 +187,32 @@ export class Kanban {
   // Column colors for template access
   getColumnColor(colorIndex: number) {
     return COLUMN_COLORS[colorIndex % COLUMN_COLORS.length];
+  }
+
+  // Avatar helpers
+  getInitials(name: string): string {
+    return name
+      .trim()
+      .split(/\s+/)
+      .map((w) => w[0]?.toUpperCase() ?? '')
+      .slice(0, 2)
+      .join('');
+  }
+
+  getAvatarColor(username: string): string {
+    const colors = [
+      '#6366f1',
+      '#8b5cf6',
+      '#ec4899',
+      '#f59e0b',
+      '#10b981',
+      '#3b82f6',
+      '#ef4444',
+      '#14b8a6',
+    ];
+    let hash = 0;
+    for (let i = 0; i < username.length; i++) hash = username.charCodeAt(i) + ((hash << 5) - hash);
+    return colors[Math.abs(hash) % colors.length];
   }
 
   // Search
@@ -694,4 +742,80 @@ export class Kanban {
     const tasks = JSON.parse(stored) as Task[];
     return tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
   }
+
+  // ...existing code...
+
+  // ── Profile Modal ──
+  showProfileModal = signal(false);
+  profileUsername = signal('');
+  profileDisplayName = signal('');
+  profilePassword = signal('');
+  profileConfirmPassword = signal('');
+  profileError = signal('');
+  profileSuccess = signal('');
+
+  openProfileModal() {
+    this.closeUserMenu();
+    const user = this.authService.currentUser();
+    this.profileUsername.set(user?.username ?? '');
+    this.profileDisplayName.set(user?.displayName ?? '');
+    this.profilePassword.set('');
+    this.profileConfirmPassword.set('');
+    this.profileError.set('');
+    this.profileSuccess.set('');
+    this.showProfileModal.set(true);
+  }
+
+  closeProfileModal() {
+    this.showProfileModal.set(false);
+  }
+
+  saveProfile() {
+    const username = this.profileUsername().trim();
+    const displayName = this.profileDisplayName().trim();
+    const password = this.profilePassword().trim();
+    const confirmPassword = this.profileConfirmPassword().trim();
+
+    if (!username) {
+      this.profileError.set('Username cannot be empty.');
+      return;
+    }
+
+    if (username.length < 3) {
+      this.profileError.set('Username must be at least 3 characters.');
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      this.profileError.set('Username can only contain letters, numbers, and underscores.');
+      return;
+    }
+
+    if (!displayName) {
+      this.profileError.set('Display name cannot be empty.');
+      return;
+    }
+
+    if (password && password.length < 6) {
+      this.profileError.set('Password must be at least 6 characters.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      this.profileError.set('Passwords do not match.');
+      return;
+    }
+
+    const result = this.authService.updateProfile(displayName, password || undefined, username);
+
+    if (result.success) {
+      this.profileSuccess.set('Profile updated successfully!');
+      this.profileError.set('');
+      setTimeout(() => this.closeProfileModal(), 1500);
+    } else {
+      this.profileError.set(result.error ?? 'Something went wrong.');
+    }
+  }
+
+  // ...existing code...
 }

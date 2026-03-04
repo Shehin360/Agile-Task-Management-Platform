@@ -81,6 +81,23 @@ def register(data: Registerrequest):
         "message": f"User '{data.username}' with display name '{data.display_name}' registered successfully."
     }
 
+class UpdateProfileRequest(BaseModel):
+    username: str
+    new_username: str | None = None
+    new_display_name: str | None = None
+
+@app.put("/update_profile")
+def update_profile(data: UpdateProfileRequest):
+    changes = []
+    if data.new_username:
+        changes.append(f"username → '{data.new_username}'")
+    if data.new_display_name:
+        changes.append(f"display name → '{data.new_display_name}'")
+    return {
+        "status": "success",
+        "message": f"Profile for '{data.username}' updated: {', '.join(changes) if changes else 'no changes'}."
+    }
+
 class LogoutRequest(BaseModel):
     username:str
 

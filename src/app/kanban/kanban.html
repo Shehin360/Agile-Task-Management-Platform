@@ -5,10 +5,57 @@
       <img src="sprintly-logo.png" alt="Sprintly" class="brand-logo" />
       <h1 class="title">Sprintly</h1>
     </div>
-    <div class="user-info">
-      <span class="user-avatar">👤</span>
-      <span class="user-name">{{ currentUser()?.displayName }}</span>
-      <button class="logout-btn" (click)="logout()">Logout →</button>
+
+    <!-- Avatar + Dropdown -->
+    <div class="user-menu-wrapper">
+      <button class="user-avatar-btn" (click)="toggleUserMenu()" title="Account">
+        <div
+          class="navbar-avatar"
+          [style.background]="getAvatarColor(currentUser()?.username ?? '')"
+        >
+          {{ getInitials(currentUser()?.displayName ?? currentUser()?.username ?? '') }}
+        </div>
+        <span class="user-name">{{ currentUser()?.displayName }}</span>
+        <span class="user-menu-caret" [class.open]="showUserMenu()">▾</span>
+      </button>
+
+      @if (showUserMenu()) {
+      <div class="user-dropdown" @scaleIn>
+        <!-- User Info Header -->
+        <div class="dropdown-user-header">
+          <div
+            class="dropdown-avatar"
+            [style.background]="getAvatarColor(currentUser()?.username ?? '')"
+          >
+            {{ getInitials(currentUser()?.displayName ?? currentUser()?.username ?? '') }}
+          </div>
+          <div class="dropdown-user-details">
+            <span class="dropdown-display-name">{{ currentUser()?.displayName }}</span>
+            <span class="dropdown-username">@{{ currentUser()?.username }}</span>
+          </div>
+        </div>
+
+        <div class="dropdown-divider"></div>
+
+        <!-- Menu Items -->
+        <button class="dropdown-item" (click)="openProfileModal()">
+          <span class="dropdown-item-icon">✏️</span>
+          <span>Edit Profile</span>
+        </button>
+
+        <div class="dropdown-divider"></div>
+
+        <button class="dropdown-item dropdown-item-danger" (click)="logout()">
+          <span class="dropdown-item-icon">🚪</span>
+          <span>Sign Out</span>
+        </button>
+      </div>
+      }
+
+      <!-- Invisible backdrop to close menu when clicking outside -->
+      @if (showUserMenu()) {
+      <div class="user-menu-backdrop" (click)="closeUserMenu()"></div>
+      }
     </div>
   </div>
 
@@ -362,6 +409,88 @@
       <div class="modal-actions">
         <button class="modal-btn modal-cancel-btn" (click)="cancelLogout()">Cancel</button>
         <button class="modal-btn modal-logout-btn" (click)="confirmLogout()">Logout</button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- PROFILE EDIT MODAL -->
+  @if (showProfileModal()) {
+  <div class="modal-backdrop" (click)="closeProfileModal()">
+    <div class="modal modal-sm profile-modal" (click)="$event.stopPropagation()" @scaleIn>
+      <!-- Header -->
+      <div class="modal-header profile-modal-header">
+        <div
+          class="profile-modal-avatar"
+          [style.background]="getAvatarColor(currentUser()?.username ?? '')"
+        >
+          {{ getInitials(currentUser()?.displayName ?? currentUser()?.username ?? '') }}
+        </div>
+        <div class="profile-header-info">
+          <h2>Edit Profile</h2>
+          <p class="profile-username">@{{ currentUser()?.username }}</p>
+        </div>
+        <button class="modal-close" (click)="closeProfileModal()">✕</button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+        @if (profileError()) {
+        <div class="profile-alert profile-alert-error">
+          <span>⚠️</span><span>{{ profileError() }}</span>
+        </div>
+        } @if (profileSuccess()) {
+        <div class="profile-alert profile-alert-success">
+          <span>✅</span><span>{{ profileSuccess() }}</span>
+        </div>
+        }
+
+        <label class="modal-label">Username</label>
+        <input
+          class="modal-input"
+          type="text"
+          placeholder="Your username"
+          [value]="profileUsername()"
+          (input)="profileUsername.set($any($event.target).value)"
+        />
+        <span class="profile-field-hint"
+          >Letters, numbers, and underscores only. Min 3 characters.</span
+        >
+
+        <label class="modal-label">Display Name</label>
+        <input
+          class="modal-input"
+          type="text"
+          placeholder="Your display name"
+          [value]="profileDisplayName()"
+          (input)="profileDisplayName.set($any($event.target).value)"
+        />
+
+        <label class="modal-label"
+          >New Password <span class="profile-optional">(optional)</span></label
+        >
+        <input
+          class="modal-input"
+          type="password"
+          placeholder="Leave blank to keep current"
+          [value]="profilePassword()"
+          (input)="profilePassword.set($any($event.target).value)"
+        />
+
+        <label class="modal-label">Confirm Password</label>
+        <input
+          class="modal-input"
+          type="password"
+          placeholder="Repeat new password"
+          [value]="profileConfirmPassword()"
+          (input)="profileConfirmPassword.set($any($event.target).value)"
+        />
+      </div>
+
+      <!-- Actions -->
+      <div class="modal-actions">
+        <button class="modal-btn cancel" (click)="closeProfileModal()">Cancel</button>
+        <button class="modal-btn add" (click)="saveProfile()">Save Changes</button>
       </div>
     </div>
   </div>
