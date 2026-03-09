@@ -1,201 +1,312 @@
 <div class="page">
-  <!-- USER BAR -->
-  <div class="user-bar">
-    <div class="brand">
-      <img src="sprintly-logo.png" alt="Sprintly" class="brand-logo" />
-      <h1 class="title">Sprintly</h1>
+  <!-- ── UNIFIED NAVBAR ── -->
+  <nav class="navbar">
+    <div class="navbar-left">
+      <div class="brand">
+        <img src="sprintly-logo.png" alt="Sprintly" class="brand-logo" />
+        <h1 class="title">Sprintly</h1>
+      </div>
+      <!-- <div class="navbar-divider"></div> -->
     </div>
 
-    <!-- Avatar + Dropdown -->
-    <div class="user-menu-wrapper">
-      <button class="user-avatar-btn" (click)="toggleUserMenu()" title="Account">
-        <div
-          class="navbar-avatar"
-          [style.background]="getAvatarColor(currentUser()?.username ?? '')"
-        >
-          {{ getInitials(currentUser()?.displayName ?? currentUser()?.username ?? '') }}
-        </div>
-        <span class="user-name">{{ currentUser()?.displayName }}</span>
-        <span class="user-menu-caret" [class.open]="showUserMenu()">▾</span>
+    <div class="navbar-center">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input
+          class="search-input"
+          type="text"
+          placeholder="Search tasks..."
+          [value]="searchQuery()"
+          (input)="searchQuery.set($any($event.target).value)"
+        />
+        @if (searchQuery()) {
+        <button class="search-clear" (click)="searchQuery.set('')">✕</button>
+        }
+      </div>
+      <button
+        class="sort-btn"
+        [class]="'sort-btn sort-active-' + sortMode()"
+        (click)="cycleSortMode()"
+      >
+        <span class="sort-icon">{{ sortLabel() }}</span>
+        <span class="sort-hint">Click to change sort</span>
       </button>
+    </div>
 
-      @if (showUserMenu()) {
-      <div class="user-dropdown" @scaleIn>
-        <!-- User Info Header -->
-        <div class="dropdown-user-header">
+    <div class="navbar-right">
+      <!-- Avatar + Dropdown -->
+      <div class="user-menu-wrapper">
+        <button class="user-avatar-btn" (click)="toggleUserMenu()" title="Account">
           <div
-            class="dropdown-avatar"
+            class="navbar-avatar"
             [style.background]="getAvatarColor(currentUser()?.username ?? '')"
           >
             {{ getInitials(currentUser()?.displayName ?? currentUser()?.username ?? '') }}
           </div>
-          <div class="dropdown-user-details">
-            <span class="dropdown-display-name">{{ currentUser()?.displayName }}</span>
-            <span class="dropdown-username">@{{ currentUser()?.username }}</span>
+          <span class="user-name">{{ currentUser()?.displayName }}</span>
+          <span class="user-menu-caret" [class.open]="showUserMenu()">▾</span>
+        </button>
+
+        @if (showUserMenu()) {
+        <div class="user-dropdown" @scaleIn>
+          <!-- User Info Header -->
+          <div class="dropdown-user-header">
+            <div
+              class="dropdown-avatar"
+              [style.background]="getAvatarColor(currentUser()?.username ?? '')"
+            >
+              {{ getInitials(currentUser()?.displayName ?? currentUser()?.username ?? '') }}
+            </div>
+            <div class="dropdown-user-details">
+              <span class="dropdown-display-name">{{ currentUser()?.displayName }}</span>
+              <span class="dropdown-username">@{{ currentUser()?.username }}</span>
+            </div>
+          </div>
+
+          <div class="dropdown-divider"></div>
+
+          <!-- Menu Items -->
+          <button class="dropdown-item" (click)="openProfileModal()">
+            <span class="dropdown-item-icon">✏️</span>
+            <span>Edit Profile</span>
+          </button>
+
+          <div class="dropdown-divider"></div>
+
+          <button class="dropdown-item dropdown-item-danger" (click)="logout()">
+            <span class="dropdown-item-icon">🚪</span>
+            <span>Sign Out</span>
+          </button>
+        </div>
+        }
+
+        <!-- Invisible backdrop to close menu when clicking outside -->
+        @if (showUserMenu()) {
+        <div class="user-menu-backdrop" (click)="closeUserMenu()"></div>
+        }
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── MAIN CONTENT AREA ── -->
+  <div class="main-content">
+    <!-- ── TASK PROGRESS DASHBOARD ── -->
+    <div class="progress-dashboard">
+      <div class="progress-top-row">
+        <!-- Circular Progress Ring -->
+        <div class="progress-ring-wrapper">
+          <svg class="progress-ring" viewBox="0 0 120 120">
+            <circle class="progress-ring-bg" cx="60" cy="60" r="52" />
+            <circle
+              class="progress-ring-fill"
+              cx="60"
+              cy="60"
+              r="52"
+              [style.stroke-dasharray]="2 * 3.14159 * 52"
+              [style.stroke-dashoffset]="2 * 3.14159 * 52 * (1 - completionPercent() / 100)"
+            />
+          </svg>
+          <div class="progress-ring-text">
+            <span class="progress-ring-percent">{{ completionPercent() }}%</span>
           </div>
         </div>
 
-        <div class="dropdown-divider"></div>
+        <!-- Progress Info -->
+        <div class="progress-info">
+          <h2 class="progress-title">Task Progress</h2>
+          <span class="progress-summary">
+            {{ completedTasks() }} / {{ totalTasks() }} tasks completed
+          </span>
 
-        <!-- Menu Items -->
-        <button class="dropdown-item" (click)="openProfileModal()">
-          <span class="dropdown-item-icon">✏️</span>
-          <span>Edit Profile</span>
-        </button>
+          <!-- Segmented Progress Bar -->
+          <div class="progress-bar-track">
+            @for (seg of progressSegments(); track seg.columnId) {
+            <div
+              class="progress-bar-segment"
+              [style.width.%]="seg.percent"
+              [style.background]="getColumnColor(seg.colorIndex).gradient"
+              [title]="seg.columnName + ': ' + seg.count + ' (' + seg.percent + '%)'"
+            ></div>
+            } @if (totalTasks() === 0) {
+            <div class="progress-bar-empty"></div>
+            }
+          </div>
 
-        <div class="dropdown-divider"></div>
-
-        <button class="dropdown-item dropdown-item-danger" (click)="logout()">
-          <span class="dropdown-item-icon">🚪</span>
-          <span>Sign Out</span>
-        </button>
+          <!-- Legend dots -->
+          <div class="progress-legend">
+            @for (stat of columnStats(); track stat.columnId) {
+            <div class="legend-item">
+              <span
+                class="legend-dot"
+                [style.background]="getColumnColor(stat.colorIndex).accent"
+              ></span>
+              <span class="legend-label">{{ stat.columnName }}</span>
+            </div>
+            }
+          </div>
+        </div>
       </div>
-      }
 
-      <!-- Invisible backdrop to close menu when clicking outside -->
-      @if (showUserMenu()) {
-      <div class="user-menu-backdrop" (click)="closeUserMenu()"></div>
-      }
-    </div>
-  </div>
-
-  <!-- TOOLBAR: SEARCH + SORT -->
-  <div class="toolbar">
-    <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input
-        class="search-input"
-        type="text"
-        placeholder="Search tasks..."
-        [value]="searchQuery()"
-        (input)="searchQuery.set($any($event.target).value)"
-      />
-      @if (searchQuery()) {
-      <button class="search-clear" (click)="searchQuery.set('')">✕</button>
-      }
-    </div>
-    <button class="sort-btn" [class]="'sort-active-' + sortMode()" (click)="cycleSortMode()">
-      <span class="sort-icon">{{ sortLabel() }}</span>
-      <span class="sort-hint">Click to change sort</span>
-    </button>
-  </div>
-
-  <div class="board">
-    <!-- DYNAMIC COLUMNS -->
-    @for (column of columns(); track column.id) {
-    <div
-      class="column"
-      [class.drag-over]="dragOverColumn() === column.id"
-      (dragover)="onDragOver($event, column.id)"
-      (dragleave)="onDragLeave()"
-      (drop)="onDrop($event, column.id)"
-    >
-      <!-- Column Header with dynamic color -->
-      <div
-        class="column-header"
-        [style.background]="getColumnColor(column.colorIndex).gradient"
-        [style.box-shadow]="'0 4px 20px ' + getColumnColor(column.colorIndex).glow"
-      >
-        @if (editingColumnId() === column.id) {
-        <div class="column-header-edit">
-          <input
-            class="column-name-input"
-            type="text"
-            [value]="editingColumnName()"
-            (input)="editingColumnName.set($any($event.target).value)"
-            (keyup.enter)="saveEditColumn()"
-            (keyup.escape)="cancelEditColumn()"
-          />
-          <button class="col-action-btn col-save-btn" (click)="saveEditColumn()">✓</button>
-          <button class="col-action-btn col-cancel-btn" (click)="cancelEditColumn()">✕</button>
+      <!-- Stat Cards -->
+      <div class="progress-stats">
+        <!-- Total Card -->
+        <div class="stat-card stat-card-total">
+          <div
+            class="stat-card-accent"
+            style="
+              background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.4),
+                rgba(255, 255, 255, 0.15)
+              );
+            "
+          ></div>
+          <span class="stat-card-count">{{ totalTasks() }}</span>
+          <span class="stat-card-label">Total Tasks</span>
         </div>
-        } @else {
-        <div class="column-header-content">
-          <span class="column-header-title">{{ column.name }}</span>
-          <span class="column-task-count">{{ getColumnTasks(column.id).length }}</span>
-        </div>
-        <div class="column-header-actions">
-          <button
-            class="col-action-btn col-edit-btn"
-            (click)="startEditColumn(column)"
-            title="Rename column"
-          >
-            ✏️
-          </button>
-          @if (columns().length > 1) {
-          <button
-            class="col-action-btn col-delete-btn"
-            (click)="showDeleteColumnConfirm.set(column.id)"
-            title="Delete column"
-          >
-            🗑️
-          </button>
+        <!-- Per-Column Cards -->
+        @for (stat of columnStats(); track stat.columnId) {
+        <div class="stat-card" [class.stat-card-highlight]="stat.count > 0">
+          <div
+            class="stat-card-accent"
+            [style.background]="getColumnColor(stat.colorIndex).gradient"
+          ></div>
+          <span class="stat-card-count">{{ stat.count }}</span>
+          <span class="stat-card-label">{{ stat.columnName }}</span>
+          @if (totalTasks() > 0) {
+          <span class="stat-card-percent" [style.color]="getColumnColor(stat.colorIndex).accent">
+            {{ stat.percent }}%
+          </span>
           }
         </div>
         }
       </div>
+    </div>
 
-      <div class="column-body">
-        @for (task of getColumnTasks(column.id); track task.id) {
+    <!-- ── SECTION DIVIDER ── -->
+    <div class="section-divider">
+      <span class="section-divider-label">Board</span>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div class="board">
+      <!-- DYNAMIC COLUMNS -->
+      @for (column of columns(); track column.id) {
+      <div
+        class="column"
+        [class.drag-over]="dragOverColumn() === column.id"
+        (dragover)="onDragOver($event, column.id)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event, column.id)"
+      >
+        <!-- Column Header with dynamic color -->
         <div
-          class="task"
-          @taskAnim
-          draggable="true"
-          [class.dragging]="draggedTaskId() === task.id"
-          [class.drop-target]="dropTargetTaskId() === task.id"
-          (dragstart)="onDragStart($event, task.id)"
-          (dragend)="onDragEnd()"
-          (dragover)="onDragOverTask($event, task.id)"
-          [style.--col-accent]="getColumnColor(column.colorIndex).accent"
+          class="column-header"
+          [style.background]="getColumnColor(column.colorIndex).gradient"
+          [style.box-shadow]="'0 4px 20px ' + getColumnColor(column.colorIndex).glow"
         >
-          <div class="task-content">
-            <div class="task-header">
-              <span class="task-title">{{ task.title }}</span>
-              <span class="priority-badge" [class]="'priority-' + task.priority">
-                {{ task.priority.toUpperCase() }}
-              </span>
-            </div>
-            @if (task.description) {
-            <span class="task-description">{{ task.description }}</span>
-            } @if (task.dueDate) {
-            <span class="due-date-badge" [class]="'due-' + getDueDateStatus(task.dueDate)">
-              📅 {{ formatDueDate(task.dueDate) }}
-            </span>
-            }
+          @if (editingColumnId() === column.id) {
+          <div class="column-header-edit">
+            <input
+              class="column-name-input"
+              type="text"
+              [value]="editingColumnName()"
+              (input)="editingColumnName.set($any($event.target).value)"
+              (keyup.enter)="saveEditColumn()"
+              (keyup.escape)="cancelEditColumn()"
+            />
+            <button class="col-action-btn col-save-btn" (click)="saveEditColumn()">✓</button>
+            <button class="col-action-btn col-cancel-btn" (click)="cancelEditColumn()">✕</button>
           </div>
-          <div class="task-actions">
-            <button class="task-btn edit-btn" (click)="startEdit(task)">✏️</button>
-            <button class="task-btn delete-btn" (click)="showDeleteTaskConfirm.set(task.id)">
+          } @else {
+          <div class="column-header-content">
+            <span class="column-header-title">{{ column.name }}</span>
+            <span class="column-task-count">{{ getColumnTasks(column.id).length }}</span>
+          </div>
+          <div class="column-header-actions">
+            <button
+              class="col-action-btn col-edit-btn"
+              (click)="startEditColumn(column)"
+              title="Rename column"
+            >
+              ✏️
+            </button>
+            @if (columns().length > 1) {
+            <button
+              class="col-action-btn col-delete-btn"
+              (click)="showDeleteColumnConfirm.set(column.id)"
+              title="Delete column"
+            >
               🗑️
             </button>
+            }
           </div>
+          }
         </div>
-        } @empty {
-        <div class="empty-state">
-          <span class="empty-icon">📋</span>
-          <span class="empty-text">No tasks yet</span>
-          <span class="empty-hint">Click "+ Add Task" below to get started</span>
+
+        <div class="column-body">
+          @for (task of getColumnTasks(column.id); track task.id) {
+          <div
+            class="task"
+            @taskAnim
+            draggable="true"
+            [class.dragging]="draggedTaskId() === task.id"
+            [class.drop-target]="dropTargetTaskId() === task.id"
+            (dragstart)="onDragStart($event, task.id)"
+            (dragend)="onDragEnd()"
+            (dragover)="onDragOverTask($event, task.id)"
+            [style.--col-accent]="getColumnColor(column.colorIndex).accent"
+          >
+            <div class="task-content">
+              <div class="task-header">
+                <span class="task-title">{{ task.title }}</span>
+                <span class="priority-badge" [class]="'priority-' + task.priority">
+                  {{ task.priority.toUpperCase() }}
+                </span>
+              </div>
+              @if (task.description) {
+              <span class="task-description">{{ task.description }}</span>
+              } @if (task.dueDate) {
+              <span class="due-date-badge" [class]="'due-' + getDueDateStatus(task.dueDate)">
+                📅 {{ formatDueDate(task.dueDate) }}
+              </span>
+              }
+            </div>
+            <div class="task-actions">
+              <button class="task-btn edit-btn" (click)="startEdit(task)">✏️</button>
+              <button class="task-btn delete-btn" (click)="showDeleteTaskConfirm.set(task.id)">
+                🗑️
+              </button>
+            </div>
+          </div>
+          } @empty {
+          <div class="empty-state">
+            <span class="empty-icon">📋</span>
+            <span class="empty-text">No tasks yet</span>
+            <span class="empty-hint">Click "+ Add Task" below to get started</span>
+          </div>
+          }
         </div>
-        }
+
+        <!-- Add task button per column -->
+        <button
+          class="column-add-btn"
+          [style.--btn-accent]="getColumnColor(column.colorIndex).accent"
+          (click)="openAddTaskModal(column.id)"
+        >
+          + Add Task
+        </button>
       </div>
+      }
 
-      <!-- Add task button per column -->
-      <button
-        class="column-add-btn"
-        [style.--btn-accent]="getColumnColor(column.colorIndex).accent"
-        (click)="openAddTaskModal(column.id)"
-      >
-        + Add Task
-      </button>
-    </div>
-    }
-
-    <!-- ADD COLUMN CARD -->
-    <div class="add-column-card" (click)="showAddColumnModal.set(true)">
-      <span class="add-column-icon">＋</span>
-      <span class="add-column-text">Add Column</span>
+      <!-- ADD COLUMN CARD -->
+      <div class="add-column-card" (click)="showAddColumnModal.set(true)">
+        <span class="add-column-icon">＋</span>
+        <span class="add-column-text">Add Column</span>
+      </div>
     </div>
   </div>
+  <!-- end .main-content -->
 
   <!-- DELETE COLUMN CONFIRMATION -->
   @if (showDeleteColumnConfirm()) {

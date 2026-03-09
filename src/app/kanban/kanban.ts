@@ -248,6 +248,71 @@ export class Kanban {
     }
   });
 
+  // ──────── TASK PROGRESS DASHBOARD ────────
+
+  /** Total number of tasks (all columns) */
+  totalTasks = computed(() => this.tasks().length);
+
+  /** Per-column stats: { columnId, columnName, count, colorIndex, percent, colPercent } */
+  columnStats = computed(() => {
+    const allTasks = this.tasks();
+    const total = allTasks.length;
+    const cols = this.columns();
+    return cols.map((col, index) => {
+      const count = allTasks.filter((t) => t.status === col.id).length;
+      return {
+        columnId: col.id,
+        columnName: col.name,
+        count,
+        colorIndex: col.colorIndex,
+        // Percentage of total tasks in this column
+        percent: total > 0 ? Math.round((count / total) * 100) : 0,
+        // Per-column completion % (how much of total progress this column represents)
+        colPercent: total > 0 ? Math.round((count / total) * 100) : 0,
+        isLast: index === cols.length - 1,
+      };
+    });
+  });
+
+  /**
+   * Overall completion: weighted progress through columns.
+   * Column 1 = 0% weight, last column = 100% weight.
+   * A task in the middle columns counts as partial progress.
+   */
+  completionPercent = computed(() => {
+    const total = this.totalTasks();
+    const cols = this.columns();
+    if (total === 0 || cols.length <= 1) return 0;
+
+    const allTasks = this.tasks();
+    let weightedSum = 0;
+    const maxWeight = cols.length - 1;
+
+    for (const task of allTasks) {
+      const colIndex = cols.findIndex((c) => c.id === task.status);
+      if (colIndex >= 0) {
+        weightedSum += colIndex / maxWeight;
+      }
+    }
+
+    return Math.round((weightedSum / total) * 100);
+  });
+
+  /** Tasks in the last column (fully done) */
+  completedTasks = computed(() => {
+    const cols = this.columns();
+    if (cols.length === 0) return 0;
+    const lastColId = cols[cols.length - 1].id;
+    return this.tasks().filter((t) => t.status === lastColId).length;
+  });
+
+  /** Progress bar segments — one per column, width proportional to task count */
+  progressSegments = computed(() => {
+    const total = this.totalTasks();
+    if (total === 0) return [];
+    return this.columnStats().filter((s) => s.count > 0);
+  });
+
   private priorityWeight(p: TaskPriority): number {
     switch (p) {
       case 'high':
@@ -743,8 +808,6 @@ export class Kanban {
     return tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
   }
 
-  // ...existing code...
-
   // ── Profile Modal ──
   showProfileModal = signal(false);
   profileUsername = signal('');
@@ -816,6 +879,4 @@ export class Kanban {
       this.profileError.set(result.error ?? 'Something went wrong.');
     }
   }
-
-  // ...existing code...
 }

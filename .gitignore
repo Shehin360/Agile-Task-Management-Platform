@@ -104,3 +104,6 @@ backend/fapi/
 backend/.venv/
 backend/*.egg-info/
 *.pyc
+
+Claude.MD
+/tasks
