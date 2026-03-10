@@ -879,4 +879,10 @@ export class Kanban {
       this.profileError.set(result.error ?? 'Something went wrong.');
     }
   }
+
+  // ──────── ANALYTICS NAVIGATION ────────
+  navigateToAnalytics() {
+    this.closeUserMenu();
+    this.router.navigate(['/analytics']);
+  }
 }

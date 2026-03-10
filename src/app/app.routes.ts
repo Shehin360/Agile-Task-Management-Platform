@@ -16,6 +16,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'analytics',
+    loadComponent: () => import('./analytics/analytics').then((m) => m.Analytics),
+    canActivate: [authGuard],
+  },
+  {
     path: '',
     redirectTo: 'board',
     pathMatch: 'full',
