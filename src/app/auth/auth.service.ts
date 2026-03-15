@@ -97,6 +97,41 @@ export class AuthService {
     return { success: true };
   }
 
+  // ──────── GOOGLE LOGIN ────────
+  googleLogin(credential: string): { success: boolean; error?: string } {
+    // Decode the JWT payload from Google (base64url-encoded)
+    const payload = JSON.parse(
+      atob(credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))
+    );
+    const email: string = payload.email;
+    const name: string = payload.name || email.split('@')[0];
+
+    // Use email as username (sanitised)
+    const username = email.replace(/[^a-zA-Z0-9_]/g, '_');
+    const users = this.getRegisteredUsers();
+    let match = users.find((u) => u.username.toLowerCase() === username.toLowerCase());
+
+    if (!match) {
+      // Auto-register on first Google login
+      const newUser: StoredUser = { username, password: '', displayName: name };
+      users.push(newUser);
+      this.saveRegisteredUsers(users);
+      match = newUser;
+    }
+
+    const user: User = { username: match.username, displayName: match.displayName };
+    this.currentUser.set(user);
+    this.isLoggedIn.set(true);
+    if (this.isBrowser) localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+
+    this.http.post(`${API}/google_login`, { email, name }).subscribe({
+      next: (res) => console.log('Google Login API:', res),
+      error: (err) => console.log('Google Login API Error:', err),
+    });
+
+    return { success: true };
+  }
+
   // ──────── LOGOUT ────────
   logout() {
     const user = this.currentUser();

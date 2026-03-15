@@ -15,8 +15,11 @@
   padding: 28px 36px;
 
   background: #0a0a1a;
-  background-image:
-    radial-gradient(ellipse 80% 50% at 20% 40%, rgba(120, 40, 200, 0.25) 0%, transparent 60%),
+  background-image: radial-gradient(
+      ellipse 80% 50% at 20% 40%,
+      rgba(120, 40, 200, 0.25) 0%,
+      transparent 60%
+    ),
     radial-gradient(ellipse 60% 40% at 80% 20%, rgba(0, 180, 220, 0.2) 0%, transparent 55%),
     radial-gradient(ellipse 50% 60% at 60% 80%, rgba(233, 69, 96, 0.15) 0%, transparent 55%),
     radial-gradient(ellipse 40% 40% at 10% 90%, rgba(15, 155, 88, 0.12) 0%, transparent 50%);
@@ -53,16 +56,32 @@
 }
 
 @keyframes floatOrb1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(100px, 80px) scale(1.1); }
-  50% { transform: translate(50px, 150px) scale(0.95); }
-  75% { transform: translate(-50px, 60px) scale(1.05); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(100px, 80px) scale(1.1);
+  }
+  50% {
+    transform: translate(50px, 150px) scale(0.95);
+  }
+  75% {
+    transform: translate(-50px, 60px) scale(1.05);
+  }
 }
 
 @keyframes floatOrb2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(-80px, -60px) scale(1.08); }
-  66% { transform: translate(-120px, -100px) scale(0.92); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-80px, -60px) scale(1.08);
+  }
+  66% {
+    transform: translate(-120px, -100px) scale(0.92);
+  }
 }
 
 /* ── Top Navigation ── */
@@ -114,7 +133,7 @@
 }
 
 .back-arrow {
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1;
 }
 
@@ -131,7 +150,7 @@
 
 .page-title {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: rgba(255, 255, 255, 0.95);
   letter-spacing: 0.3px;
@@ -142,8 +161,8 @@
 
 .page-subtitle {
   margin: 2px 0 0;
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 400;
 }
 
@@ -169,7 +188,7 @@
 }
 
 .nav-user-name {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.65);
 }
@@ -264,7 +283,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   font-weight: 800;
   color: rgba(255, 255, 255, 0.9);
 }
@@ -277,23 +296,23 @@
 }
 
 .qs-big-value {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 800;
   color: rgba(255, 255, 255, 0.92);
   line-height: 1;
 }
 
 .qs-label {
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
   letter-spacing: 0.8px;
 }
 
 .qs-detail {
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.65);
   font-weight: 500;
 }
 
@@ -326,9 +345,9 @@
 
 .card-title {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.75);
   letter-spacing: 0.6px;
   text-transform: uppercase;
   text-align: center;
@@ -369,16 +388,16 @@
 }
 
 .donut-count {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 800;
   color: rgba(255, 255, 255, 0.9);
   line-height: 1;
 }
 
 .donut-label {
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.65);
   letter-spacing: 0.5px;
   margin-top: 2px;
   text-transform: lowercase;
@@ -396,7 +415,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.75rem;
+  font-size: 0.88rem;
 }
 
 .legend-dot {
@@ -407,7 +426,7 @@
 }
 
 .legend-name {
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.75);
   font-weight: 500;
   min-width: 0;
   flex-shrink: 1;
@@ -438,12 +457,12 @@
   font-weight: 700;
   min-width: 30px;
   text-align: right;
-  font-size: 0.72rem;
+  font-size: 0.85rem;
 }
 
 .legend-cnt {
-  color: rgba(255, 255, 255, 0.28);
-  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
   font-weight: 400;
   min-width: 24px;
 }
@@ -474,19 +493,19 @@
 }
 
 .priority-bar-icon {
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   line-height: 1;
 }
 
 .priority-bar-label {
-  font-size: 0.78rem;
+  font-size: 0.92rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.75);
   flex: 1;
 }
 
 .priority-bar-count {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   font-weight: 800;
   line-height: 1;
 }
@@ -508,9 +527,9 @@
 }
 
 .priority-bar-pct {
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.65);
   letter-spacing: 0.3px;
 }
 
@@ -526,9 +545,9 @@
 }
 
 .priority-stacked-label {
-  font-size: 0.62rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.8);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -588,7 +607,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.75rem;
+  font-size: 0.88rem;
 }
 
 .gauge-legend-dot {
@@ -599,7 +618,7 @@
 }
 
 .gauge-legend-label {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.75);
   font-weight: 500;
   flex: 1;
   white-space: nowrap;
@@ -607,7 +626,7 @@
 
 .gauge-legend-value {
   font-weight: 800;
-  font-size: 0.85rem;
+  font-size: 1rem;
   min-width: 20px;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -624,7 +643,7 @@
 
 .section-title {
   margin: 0 0 18px;
-  font-size: 0.9rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.75);
   letter-spacing: 0.3px;
@@ -635,8 +654,8 @@
 
 /* ── Task Timeline (Gantt-inspired) ── */
 .section-subtitle {
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.85);
   margin-top: -4px;
   margin-bottom: 20px;
   letter-spacing: 0.2px;
@@ -661,9 +680,9 @@
 .timeline-axis-label {
   position: absolute;
   transform: translateX(-50%);
-  font-size: 0.62rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.8);
   text-transform: uppercase;
   letter-spacing: 0.3px;
   white-space: nowrap;
@@ -719,16 +738,16 @@
 }
 
 .timeline-group-name {
-  font-size: 0.76rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.85);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .timeline-group-count {
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
   background: rgba(255, 255, 255, 0.05);
   padding: 1px 7px;
   border-radius: 8px;
@@ -752,9 +771,9 @@
 .timeline-task-name {
   min-width: 120px;
   max-width: 160px;
-  font-size: 0.74rem;
+  font-size: 0.88rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.75);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -835,14 +854,14 @@
 }
 
 .marker-tooltip-title {
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.85);
 }
 
 .marker-tooltip-due {
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.65);
   font-weight: 500;
 }
 
@@ -856,14 +875,14 @@
 
 /* ── Due badge ── */
 .timeline-due-badge {
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 6px;
   white-space: nowrap;
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.65);
 }
 
 .due-overdue {
@@ -892,8 +911,8 @@
 }
 
 .timeline-nodate-label {
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.2);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
   white-space: nowrap;
   min-width: 70px;
@@ -910,8 +929,8 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 3px 10px;
@@ -929,8 +948,8 @@
 .timeline-empty {
   text-align: center;
   padding: 32px 16px;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.2);
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.8);
   font-style: italic;
 }
 
@@ -947,7 +966,7 @@
 .attention-count-badge {
   background: rgba(239, 68, 68, 0.15);
   color: #fca5a5;
-  font-size: 0.68rem;
+  font-size: 0.82rem;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 20px;
@@ -1029,8 +1048,13 @@
 }
 
 @keyframes overdueGlow {
-  0%, 100% { box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
-  50% { box-shadow: 0 0 16px rgba(239, 68, 68, 0.7); }
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.7);
+  }
 }
 
 .attention-info {
@@ -1041,7 +1065,7 @@
 }
 
 .attention-title {
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.85);
   white-space: nowrap;
@@ -1050,20 +1074,20 @@
 }
 
 .attention-meta {
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.32);
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 400;
 }
 
 .attention-badge {
   padding: 5px 12px;
   border-radius: 20px;
-  font-size: 0.68rem;
+  font-size: 0.82rem;
   font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .badge-overdue {

@@ -1,7 +1,18 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  inject,
+  AfterViewInit,
+  NgZone,
+  PLATFORM_ID,
+} from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { trigger, transition, style, animate } from '@angular/animations';
+
+declare const google: any;
 
 @Component({
   selector: 'app-login',
@@ -30,9 +41,11 @@ import { trigger, transition, style, animate } from '@angular/animations';
     ]),
   ],
 })
-export class Login {
+export class Login implements AfterViewInit {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private ngZone = inject(NgZone);
+  private platformId = inject(PLATFORM_ID);
 
   username = signal('');
   password = signal('');
@@ -91,6 +104,48 @@ export class Login {
       this.router.navigate(['/board']);
     }
   }
+  //google sign in
+
+  ngAfterViewInit() {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    const initGoogle = () => {
+      if (typeof google === 'undefined' || !google.accounts) {
+        setTimeout(initGoogle, 200);
+        return;
+      }
+      google.accounts.id.initialize({
+        client_id: '325727943798-d2ujckdtrigvg69qpjkf5lee05mf9quc.apps.googleusercontent.com',
+        callback: (response: any) => this.handleGoogleCredential(response),
+      });
+      google.accounts.id.renderButton(document.getElementById('google-signin-btn'), {
+        type: 'standard',
+        theme: 'filled_black',
+        size: 'large',
+        text: 'signin_with',
+        shape: 'pill',
+        width: 368,
+      });
+    };
+    initGoogle();
+  }
+
+  handleGoogleCredential(response: any) {
+    this.ngZone.run(() => {
+      this.isLoading.set(true);
+      this.error.set(null);
+
+      const result = this.authService.googleLogin(response.credential);
+      if (result.success) {
+        this.router.navigate(['/board']);
+      } else {
+        this.error.set(result.error ?? 'Google sign-in failed');
+        this.shakeState.set('error');
+        setTimeout(() => this.shakeState.set(''), 500);
+      }
+      this.isLoading.set(false);
+    });
+  } ///
 
   togglePassword() {
     this.showPassword.update((v) => !v);

@@ -2,3 +2,32 @@
    🔐 LOGIN PAGE — Component-specific overrides only.
    All shared auth styles live in src/styles.css
 */
+
+/* ── "or" Divider ── */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 4px 0;
+}
+
+.auth-divider-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-divider-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+/* ── Google Button Wrapper ── */
+.google-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}

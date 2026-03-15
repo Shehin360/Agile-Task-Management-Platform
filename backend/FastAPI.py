@@ -86,6 +86,20 @@ class UpdateProfileRequest(BaseModel):
     new_username: str | None = None
     new_display_name: str | None = None
 
+    # Google login
+
+class GoogleLoginRequest(BaseModel):
+    email: str
+    name: str
+
+@app.post("/google_login")
+def google_login(data: GoogleLoginRequest):
+    return {
+        "status": "success",
+        "message": f"Google user '{data.name}' ({data.email}) logged in successfully."
+    }
+
+
 @app.put("/update_profile")
 def update_profile(data: UpdateProfileRequest):
     changes = []
