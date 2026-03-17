@@ -75,6 +75,8 @@ interface Task {
   priority: TaskPriority;
   order: number;
   dueDate: string | null;
+  imageData: string | null;
+  imageName: string | null;
 }
 
 @Component({
@@ -566,6 +568,8 @@ export class Kanban {
   newTaskDescription = signal('');
   newTaskPriority = signal<TaskPriority>('medium');
   newTaskDueDate = signal<string | null>(null);
+  newTaskImageData = signal<string | null>(null);
+  newTaskImageName = signal<string | null>(null);
   nextId = signal(this.getNextId());
 
   editingTaskId = signal<number | null>(null);
@@ -573,10 +577,74 @@ export class Kanban {
   editingDescription = signal('');
   editingPriority = signal<TaskPriority>('medium');
   editingDueDate = signal<string | null>(null);
+  editingImageData = signal<string | null>(null);
+  editingImageName = signal<string | null>(null);
+
+  addTaskDragOver = signal(false);
+  editTaskDragOver = signal(false);
+
+  showImagePreviewModal = signal(false);
+  previewImageData = signal<string | null>(null);
+  previewImageName = signal<string>('Task image');
+  previewTaskId = signal<number | null>(null);
 
   openAddTaskModal(columnId: string) {
     this.addTaskColumnId.set(columnId);
     this.showAddTaskModal.set(true);
+  }
+
+  closeAddTaskModal() {
+    this.showAddTaskModal.set(false);
+    this.newTaskTitle.set('');
+    this.newTaskDescription.set('');
+    this.newTaskPriority.set('medium');
+    this.newTaskDueDate.set(null);
+    this.newTaskImageData.set(null);
+    this.newTaskImageName.set(null);
+  }
+
+  onAddTaskImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.readImageAsDataUrl(file, (dataUrl) => {
+      this.newTaskImageData.set(dataUrl);
+      this.newTaskImageName.set(file.name);
+      this.showToast('Image attached to new task', 'info');
+    });
+
+    input.value = '';
+  }
+
+  onAddTaskImageDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.addTaskDragOver.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (!file) return;
+    this.readImageAsDataUrl(file, (dataUrl) => {
+      this.newTaskImageData.set(dataUrl);
+      this.newTaskImageName.set(file.name);
+      this.showToast('Image attached to new task', 'info');
+    });
+  }
+
+  onAddTaskDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.addTaskDragOver.set(true);
+  }
+
+  onAddTaskDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.addTaskDragOver.set(false);
+  }
+
+  removeNewTaskImage() {
+    this.newTaskImageData.set(null);
+    this.newTaskImageName.set(null);
   }
 
   addTask() {
@@ -586,6 +654,8 @@ export class Kanban {
     const description = this.newTaskDescription().trim();
     const priority = this.newTaskPriority();
     const dueDate = this.newTaskDueDate();
+    const imageData = this.newTaskImageData();
+    const imageName = this.newTaskImageName();
     const columnId = this.addTaskColumnId();
 
     this.http
@@ -618,6 +688,8 @@ export class Kanban {
           priority,
           order: maxOrder + 1,
           dueDate,
+          imageData,
+          imageName,
         },
       ];
       this.saveTasks(updated);
@@ -625,10 +697,7 @@ export class Kanban {
     });
 
     this.nextId.update((id) => id + 1);
-    this.newTaskTitle.set('');
-    this.newTaskDescription.set('');
-    this.newTaskPriority.set('medium');
-    this.newTaskDueDate.set(null);
+    this.closeAddTaskModal();
     this.showToast(`Task "${title}" created`, 'success');
   }
 
@@ -638,7 +707,53 @@ export class Kanban {
     this.editingDescription.set(task.description || '');
     this.editingPriority.set(task.priority || 'medium');
     this.editingDueDate.set(task.dueDate || null);
+    this.editingImageData.set(task.imageData || null);
+    this.editingImageName.set(task.imageName || null);
     this.showEditTaskModal.set(true);
+  }
+
+  onEditTaskImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.readImageAsDataUrl(file, (dataUrl) => {
+      this.editingImageData.set(dataUrl);
+      this.editingImageName.set(file.name);
+      this.showToast('Image updated for task', 'info');
+    });
+
+    input.value = '';
+  }
+
+  onEditTaskImageDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.editTaskDragOver.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (!file) return;
+    this.readImageAsDataUrl(file, (dataUrl) => {
+      this.editingImageData.set(dataUrl);
+      this.editingImageName.set(file.name);
+      this.showToast('Image updated for task', 'info');
+    });
+  }
+
+  onEditTaskDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.editTaskDragOver.set(true);
+  }
+
+  onEditTaskDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.editTaskDragOver.set(false);
+  }
+
+  removeEditingTaskImage() {
+    this.editingImageData.set(null);
+    this.editingImageName.set(null);
   }
 
   cancelEdit() {
@@ -647,6 +762,8 @@ export class Kanban {
     this.editingDescription.set('');
     this.editingPriority.set('medium');
     this.editingDueDate.set(null);
+    this.editingImageData.set(null);
+    this.editingImageName.set(null);
     this.showEditTaskModal.set(false);
   }
 
@@ -657,6 +774,8 @@ export class Kanban {
     const newDescription = (this.editingDescription() || '').trim();
     const newPriority = this.editingPriority() || 'medium';
     const newDueDate = this.editingDueDate();
+    const newImageData = this.editingImageData();
+    const newImageName = this.editingImageName();
 
     this.http
       .put('http://localhost:8000/update_task', {
@@ -684,6 +803,8 @@ export class Kanban {
               description: newDescription,
               priority: newPriority,
               dueDate: newDueDate,
+              imageData: newImageData,
+              imageName: newImageName,
             }
           : t
       );
@@ -740,6 +861,39 @@ export class Kanban {
     this.showToast(`Task "${taskTitle}" deleted`, 'error');
   }
 
+  openTaskImagePreview(task: Task) {
+    if (!task.imageData) return;
+    this.previewImageData.set(task.imageData);
+    this.previewImageName.set(task.imageName || task.title || 'Task image');
+    this.previewTaskId.set(task.id);
+    this.showImagePreviewModal.set(true);
+  }
+
+  closeTaskImagePreview() {
+    this.showImagePreviewModal.set(false);
+    this.previewImageData.set(null);
+    this.previewImageName.set('Task image');
+    this.previewTaskId.set(null);
+  }
+
+  removeTaskImage(taskId: number) {
+    this.tasks.update((tasks) => {
+      const updated = tasks.map((t) =>
+        t.id === taskId ? { ...t, imageData: null, imageName: null } : t
+      );
+      this.saveTasks(updated);
+      return updated;
+    });
+    this.showToast('Task image deleted', 'warning');
+  }
+
+  removeTaskImageFromPreview() {
+    const taskId = this.previewTaskId();
+    if (taskId == null) return;
+    this.removeTaskImage(taskId);
+    this.closeTaskImagePreview();
+  }
+
   // ──────── DUE DATE HELPERS ────────
 
   getDueDateStatus(dueDate: string | null): 'overdue' | 'today' | 'upcoming' | 'none' {
@@ -794,6 +948,8 @@ export class Kanban {
       description: task.description || '',
       priority: task.priority || 'medium',
       order: task.order ?? index + 1,
+      imageData: task.imageData || null,
+      imageName: task.imageName || null,
     }));
   }
 
@@ -806,6 +962,31 @@ export class Kanban {
     if (!stored) return 1;
     const tasks = JSON.parse(stored) as Task[];
     return tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
+  }
+
+  private readImageAsDataUrl(file: File, onLoad: (dataUrl: string) => void) {
+    if (!file.type.startsWith('image/')) {
+      this.showToast('Please select a valid image file', 'error');
+      return;
+    }
+
+    const maxSizeBytes = 2 * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      this.showToast('Image must be smaller than 2MB', 'warning');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result === 'string') {
+        onLoad(result);
+      } else {
+        this.showToast('Could not read selected image', 'error');
+      }
+    };
+    reader.onerror = () => this.showToast('Failed to read image file', 'error');
+    reader.readAsDataURL(file);
   }
 
   // ── Profile Modal ──

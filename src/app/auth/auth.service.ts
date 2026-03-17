@@ -90,7 +90,7 @@ export class AuthService {
     this.isLoggedIn.set(true);
     if (this.isBrowser) localStorage.setItem(AUTH_KEY, JSON.stringify(user));
 
-    this.http.post(`${API}/login`, { username: match?.username, password: '' }).subscribe({
+    this.http.post(`${API}/login`, { username: match?.username }).subscribe({
       next: (res) => console.log('Login API:', res),
       error: (err) => console.log('Login API Error', err),
     });
@@ -136,7 +136,7 @@ export class AuthService {
   logout() {
     const user = this.currentUser();
     if (user) {
-      this.http.post(`${API}/logout`, { username: user.username, password: '' }).subscribe({
+      this.http.post(`${API}/logout`, { username: user.username }).subscribe({
         next: (res) => console.log('Logout API:', res),
         error: (err) => console.log('Logout API Error:', err),
       });

@@ -275,6 +275,27 @@
               <span class="due-date-badge" [class]="'due-' + getDueDateStatus(task.dueDate)">
                 📅 {{ formatDueDate(task.dueDate) }}
               </span>
+              } @if (task.imageData) {
+              <div class="task-image-card">
+                <button
+                  class="task-image-thumb"
+                  (click)="openTaskImagePreview(task)"
+                  title="View image"
+                >
+                  <img [src]="task.imageData!" [alt]="task.imageName || task.title" />
+                </button>
+                <div class="task-image-meta">
+                  <span class="task-image-label">Image attached</span>
+                  <div class="task-image-actions-inline">
+                    <button class="task-image-chip" (click)="openTaskImagePreview(task)">
+                      View
+                    </button>
+                    <button class="task-image-chip danger" (click)="removeTaskImage(task.id)">
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
               }
             </div>
             <div class="task-actions">
@@ -388,11 +409,11 @@
 
   <!-- ADD TASK MODAL -->
   @if (showAddTaskModal()) {
-  <div class="modal-backdrop" (click)="showAddTaskModal.set(false)">
+  <div class="modal-backdrop" (click)="closeAddTaskModal()">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>Add New Task</h2>
-        <button class="modal-close" (click)="showAddTaskModal.set(false)">✕</button>
+        <button class="modal-close" (click)="closeAddTaskModal()">✕</button>
       </div>
 
       <div class="modal-body">
@@ -403,7 +424,7 @@
           placeholder="Enter task title..."
           [value]="newTaskTitle()"
           (input)="newTaskTitle.set($any($event.target).value)"
-          (keyup.enter)="addTask(); showAddTaskModal.set(false)"
+          (keyup.enter)="addTask()"
         />
 
         <label class="modal-label">Description</label>
@@ -432,13 +453,54 @@
           [value]="newTaskDueDate() || ''"
           (input)="newTaskDueDate.set($any($event.target).value || null)"
         />
+
+        <label class="modal-label">Task Image</label>
+        <div
+          class="image-dropzone"
+          [class.drag-active]="addTaskDragOver()"
+          [class.has-image]="!!newTaskImageData()"
+          (dragover)="onAddTaskDragOver($event)"
+          (dragleave)="onAddTaskDragLeave($event)"
+          (drop)="onAddTaskImageDrop($event)"
+        >
+          <input
+            id="new-task-image-input"
+            class="image-upload-input"
+            type="file"
+            accept="image/*"
+            (change)="onAddTaskImageSelected($event)"
+          />
+
+          @if (!newTaskImageData()) {
+          <label class="dropzone-content" for="new-task-image-input">
+            <span class="dropzone-icon">📁</span>
+            <span class="dropzone-title">Drag & drop an image here</span>
+            <span class="dropzone-subtitle">or click to browse · Max 2MB</span>
+          </label>
+          } @else {
+          <div class="dropzone-preview">
+            <img [src]="newTaskImageData()!" [alt]="newTaskImageName() || 'Task image'" />
+            <div class="dropzone-preview-overlay">
+              <label class="dropzone-action-btn" for="new-task-image-input" title="Replace image"
+                >🔄</label
+              >
+              <button
+                class="dropzone-action-btn danger"
+                (click)="removeNewTaskImage()"
+                title="Remove image"
+              >
+                ✕
+              </button>
+            </div>
+            <span class="dropzone-filename">{{ newTaskImageName() }}</span>
+          </div>
+          }
+        </div>
       </div>
 
       <div class="modal-actions">
-        <button class="modal-btn cancel" (click)="showAddTaskModal.set(false)">Cancel</button>
-        <button class="modal-btn add" (click)="addTask(); showAddTaskModal.set(false)">
-          Add Task
-        </button>
+        <button class="modal-btn cancel" (click)="closeAddTaskModal()">Cancel</button>
+        <button class="modal-btn add" (click)="addTask()">Add Task</button>
       </div>
     </div>
   </div>
@@ -492,11 +554,74 @@
           [value]="editingDueDate() || ''"
           (input)="editingDueDate.set($any($event.target).value || null)"
         />
+
+        <label class="modal-label">Task Image</label>
+        <div
+          class="image-dropzone"
+          [class.drag-active]="editTaskDragOver()"
+          [class.has-image]="!!editingImageData()"
+          (dragover)="onEditTaskDragOver($event)"
+          (dragleave)="onEditTaskDragLeave($event)"
+          (drop)="onEditTaskImageDrop($event)"
+        >
+          <input
+            id="edit-task-image-input"
+            class="image-upload-input"
+            type="file"
+            accept="image/*"
+            (change)="onEditTaskImageSelected($event)"
+          />
+
+          @if (!editingImageData()) {
+          <label class="dropzone-content" for="edit-task-image-input">
+            <span class="dropzone-icon">📁</span>
+            <span class="dropzone-title">Drag & drop an image here</span>
+            <span class="dropzone-subtitle">or click to browse · Max 2MB</span>
+          </label>
+          } @else {
+          <div class="dropzone-preview">
+            <img [src]="editingImageData()!" [alt]="editingImageName() || 'Task image'" />
+            <div class="dropzone-preview-overlay">
+              <label class="dropzone-action-btn" for="edit-task-image-input" title="Replace image"
+                >🔄</label
+              >
+              <button
+                class="dropzone-action-btn danger"
+                (click)="removeEditingTaskImage()"
+                title="Remove image"
+              >
+                ✕
+              </button>
+            </div>
+            <span class="dropzone-filename">{{ editingImageName() }}</span>
+          </div>
+          }
+        </div>
       </div>
 
       <div class="modal-actions">
         <button class="modal-btn cancel" (click)="cancelEdit()">Cancel</button>
         <button class="modal-btn add" (click)="saveEdit(editingTaskId()!)">Save Changes</button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- TASK IMAGE PREVIEW MODAL -->
+  @if (showImagePreviewModal() && previewImageData()) {
+  <div class="modal-backdrop" (click)="closeTaskImagePreview()">
+    <div class="modal image-preview-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ previewImageName() }}</h2>
+        <button class="modal-close" (click)="closeTaskImagePreview()">✕</button>
+      </div>
+
+      <div class="modal-body image-preview-body">
+        <img class="task-preview-image" [src]="previewImageData()!" [alt]="previewImageName()" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn cancel" (click)="closeTaskImagePreview()">Close</button>
       </div>
     </div>
   </div>
