@@ -106,13 +106,35 @@ export class AuthService {
     const email: string = payload.email;
     const name: string = payload.name || email.split('@')[0];
 
-    // Use email as username (sanitised)
-    const username = email.replace(/[^a-zA-Z0-9_]/g, '_');
+    // Use a clean username without separators like '-' or '_'.
     const users = this.getRegisteredUsers();
-    let match = users.find((u) => u.username.toLowerCase() === username.toLowerCase());
+    const legacyUsername = email.replace(/[^a-zA-Z0-9_]/g, '_');
+    const legacyFullEmailClean = email.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+    const baseUsername = this.getGoogleUsernameBase(email);
+    let match = users.find(
+      (u) =>
+        u.username.toLowerCase() === baseUsername.toLowerCase() ||
+        u.username.toLowerCase() === legacyUsername.toLowerCase() ||
+        u.username.toLowerCase() === legacyFullEmailClean
+    );
+
+    if (
+      match &&
+      (match.username.toLowerCase() === legacyUsername.toLowerCase() ||
+        match.username.toLowerCase() === legacyFullEmailClean)
+    ) {
+      const canMigrate = !users.some(
+        (u) => u !== match && u.username.toLowerCase() === baseUsername.toLowerCase()
+      );
+      if (canMigrate) {
+        match.username = baseUsername;
+        this.saveRegisteredUsers(users);
+      }
+    }
 
     if (!match) {
       // Auto-register on first Google login
+      const username = this.getUniqueUsername(baseUsername, users);
       const newUser: StoredUser = { username, password: '', displayName: name };
       users.push(newUser);
       this.saveRegisteredUsers(users);
@@ -211,5 +233,21 @@ export class AuthService {
 
   private saveRegisteredUsers(users: StoredUser[]) {
     if (this.isBrowser) localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  }
+
+  private getGoogleUsernameBase(email: string): string {
+    const localPart = email.split('@')[0] ?? '';
+    const cleaned = localPart.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
+    return cleaned.length >= 3 ? cleaned : 'user';
+  }
+
+  private getUniqueUsername(base: string, users: StoredUser[]): string {
+    let candidate = base;
+    let suffix = 1;
+    while (users.some((u) => u.username.toLowerCase() === candidate.toLowerCase())) {
+      candidate = `${base}${suffix}`;
+      suffix++;
+    }
+    return candidate;
   }
 }

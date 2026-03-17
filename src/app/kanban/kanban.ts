@@ -460,11 +460,17 @@ export class Kanban {
   dragOverColumn = signal<string | null>(null);
   dropTargetTaskId = signal<number | null>(null);
 
+  // ──────── COLUMN DRAG STATE ────────
+  draggedColumnId = signal<string | null>(null);
+  dragOverColumnId = signal<string | null>(null);
+  columnDropSide = signal<'left' | 'right' | null>(null);
+
   onDragStart(event: DragEvent, taskId: number) {
     this.draggedTaskId.set(taskId);
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/plain', taskId.toString());
+      event.dataTransfer.setData('drag-type', 'task');
     }
   }
 
@@ -474,6 +480,7 @@ export class Kanban {
   }
 
   onDragOver(event: DragEvent, column: string) {
+    if (this.draggedColumnId()) return;
     event.preventDefault();
     if (event.dataTransfer) {
       event.dataTransfer.dropEffect = 'move';
@@ -486,6 +493,7 @@ export class Kanban {
   }
 
   onDrop(event: DragEvent, newStatus: string) {
+    if (this.draggedColumnId()) return;
     event.preventDefault();
     const taskId = this.draggedTaskId();
     if (taskId == null) return;
@@ -550,12 +558,143 @@ export class Kanban {
   }
 
   onDragOverTask(event: DragEvent, taskId: number) {
+    if (this.draggedColumnId()) return;
     event.preventDefault();
     event.stopPropagation();
     if (event.dataTransfer) {
       event.dataTransfer.dropEffect = 'move';
     }
     this.dropTargetTaskId.set(taskId);
+  }
+
+  // ──────── COLUMN DRAG HANDLERS ────────
+
+  onColumnDragStart(event: DragEvent, columnId: string) {
+    // Don't start column drag if a task is being dragged
+    if (this.draggedTaskId()) {
+      event.preventDefault();
+      return;
+    }
+    event.stopPropagation();
+    this.draggedColumnId.set(columnId);
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', columnId);
+      event.dataTransfer.setData('drag-type', 'column');
+
+      // Set the drag image to the column element so it looks like we're dragging the whole column
+      const target = event.currentTarget as HTMLElement;
+      // Get the parent column
+      const columnEl = target.closest('.column');
+      if (columnEl) {
+        // Set drag image, offset by 20px so Mouse isn't top left
+        event.dataTransfer.setDragImage(columnEl, 40, 20);
+      }
+    }
+  }
+
+  onColumnDragEnd() {
+    this.draggedColumnId.set(null);
+    this.dragOverColumnId.set(null);
+    this.columnDropSide.set(null);
+  }
+
+  onColumnDragOver(event: DragEvent, columnId: string) {
+    // If a task is being dragged, let the existing task handlers deal with it
+    if (this.draggedTaskId()) return;
+    // Don't highlight the column being dragged
+    if (!this.draggedColumnId() || this.draggedColumnId() === columnId) {
+      this.dragOverColumnId.set(null);
+      this.columnDropSide.set(null);
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+
+    // Determine left/right half of the target column
+    const target = (event.currentTarget as HTMLElement);
+    const rect = target.getBoundingClientRect();
+    const midX = rect.left + rect.width / 2;
+    const side = event.clientX < midX ? 'left' : 'right';
+
+    this.dragOverColumnId.set(columnId);
+    this.columnDropSide.set(side);
+  }
+
+  onColumnDragLeave(event: DragEvent) {
+    if (this.draggedTaskId()) return;
+    // Only clear if leaving the column element itself
+    const relatedTarget = event.relatedTarget as HTMLElement | null;
+    const currentTarget = event.currentTarget as HTMLElement;
+    if (relatedTarget && currentTarget.contains(relatedTarget)) return;
+    this.dragOverColumnId.set(null);
+    this.columnDropSide.set(null);
+  }
+
+  onColumnDrop(event: DragEvent, targetColumnId: string) {
+    // If a task is being dragged, let existing task drop handle it
+    if (this.draggedTaskId()) return;
+
+    const draggedId = this.draggedColumnId();
+    if (!draggedId || draggedId === targetColumnId) {
+      this.onColumnDragEnd();
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const side = this.columnDropSide();
+
+    this.columns.update((cols) => {
+      const draggedIndex = cols.findIndex((c) => c.id === draggedId);
+      const targetIndex = cols.findIndex((c) => c.id === targetColumnId);
+      if (draggedIndex < 0 || targetIndex < 0) return cols;
+
+      const updated = [...cols];
+      const [draggedCol] = updated.splice(draggedIndex, 1);
+
+      // Compute the new insert index after removing the dragged column
+      let insertIndex = updated.findIndex((c) => c.id === targetColumnId);
+      if (side === 'right') {
+        insertIndex += 1;
+      }
+
+      updated.splice(insertIndex, 0, draggedCol);
+      this.saveColumns(updated);
+      return updated;
+    });
+
+    const draggedCol = this.columns().find((c) => c.id === draggedId);
+    this.showToast(`Column "${draggedCol?.name ?? 'Column'}" moved`, 'info');
+    this.onColumnDragEnd();
+  }
+
+  // ──────── BOARD DRAG LEVEL ────────
+
+  onBoardDragOver(event: DragEvent) {
+    // Allows drops on the gaps between columns
+    if (this.draggedColumnId()) {
+      event.preventDefault();
+      // We don't need to specify exactly which column yet, but preventing default
+      // keeps the drag active if the user's mouse floats over the .board gap
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = 'move';
+      }
+    }
+  }
+
+  onBoardDrop(event: DragEvent) {
+    // If we dropped on the board but not on a column (e.g. in a gap)
+    if (this.draggedColumnId() && this.dragOverColumnId()) {
+      event.preventDefault();
+      // Just drop on the currently hovered column target
+      this.onColumnDrop(event, this.dragOverColumnId()!);
+    }
   }
 
   // ──────── TASK MODALS ────────

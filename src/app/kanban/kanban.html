@@ -194,15 +194,23 @@
       <div class="section-divider-line"></div>
     </div>
 
-    <div class="board">
+    <div
+      class="board"
+      (dragover)="onBoardDragOver($event)"
+      (drop)="onBoardDrop($event)"
+    >
       <!-- DYNAMIC COLUMNS -->
       @for (column of columns(); track column.id) {
       <div
         class="column"
+        (dragenter)="$event.preventDefault()"
         [class.drag-over]="dragOverColumn() === column.id"
-        (dragover)="onDragOver($event, column.id)"
-        (dragleave)="onDragLeave()"
-        (drop)="onDrop($event, column.id)"
+        [class.column-dragging]="draggedColumnId() === column.id"
+        [class.column-drop-left]="dragOverColumnId() === column.id && columnDropSide() === 'left'"
+        [class.column-drop-right]="dragOverColumnId() === column.id && columnDropSide() === 'right'"
+        (dragover)="onDragOver($event, column.id); onColumnDragOver($event, column.id)"
+        (dragleave)="onDragLeave(); onColumnDragLeave($event)"
+        (drop)="onColumnDrop($event, column.id); onDrop($event, column.id)"
       >
         <!-- Column Header with dynamic color -->
         <div
@@ -210,6 +218,17 @@
           [style.background]="getColumnColor(column.colorIndex).gradient"
           [style.box-shadow]="'0 4px 20px ' + getColumnColor(column.colorIndex).glow"
         >
+          <!-- Dedicated Drag Handle for Column, now positioned absolute inside the header -->
+          <div 
+            class="column-drag-handle"
+            draggable="true"
+            (dragstart)="onColumnDragStart($event, column.id)"
+            (dragend)="onColumnDragEnd()"
+            title="Drag to reorder column"
+          >
+            <span class="drag-handle-icon">⠿</span>
+          </div>
+          
           @if (editingColumnId() === column.id) {
           <div class="column-header-edit">
             <input
@@ -695,8 +714,7 @@
           (input)="profileUsername.set($any($event.target).value)"
         />
         <span class="profile-field-hint"
-          >Letters, numbers, and underscores only. Min 3 characters.</span
-        >
+          >The gmail should be valid</span>
 
         <label class="modal-label">Display Name</label>
         <input

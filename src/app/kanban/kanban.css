@@ -1,6 +1,3 @@
-/* 
-   🎨 AGILE TASK BOARD — MODERN GLASSMORPHISM DESIGN
-    */
 
 /*  ANIMATED BACKGROUND */
 .page {
@@ -869,7 +866,7 @@
   font-weight: 700;
   font-size: 0.75rem;
   letter-spacing: 3px;
-  padding: 14px 16px;
+  padding: 22px 16px 14px 16px; /* Increased top padding to make room for absolute drag handle */
   color: white;
   text-transform: uppercase;
   gap: 8px;
@@ -1837,9 +1834,100 @@
   box-shadow: 0 0 40px rgba(196, 77, 255, 0.1);
 }
 
-/* 
-   RESPONSIVE — TABLET & MOBILE
-   */
+/* ── COLUMN DRAG & DROP ── */
+
+.column-drag-handle {
+  width: 100%;
+  padding: 4px 0 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+  color: rgba(255, 255, 255, 0.4);
+  /* Use the column header's gradient by letting it inherit/blend, or placing it inside the header */
+  background: transparent;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  /* Make it overlap or sit tightly flush with the header */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.column-drag-handle:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.column-drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-handle-icon {
+  font-size: 1.2rem;
+  line-height: 0.5;
+}
+
+/* Column being dragged — faded ghost */
+.column.column-dragging {
+  opacity: 0.3;
+  transform: scale(0.96);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 12px 40px rgba(196, 77, 255, 0.2);
+}
+
+/* Drop indicators — glowing edge lines */
+.column.column-drop-left {
+  position: relative;
+}
+
+.column.column-drop-left::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: -12px;
+  width: 4px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #c44dff, #00d4ff);
+  box-shadow: 0 0 16px rgba(196, 77, 255, 0.6), 0 0 32px rgba(196, 77, 255, 0.3);
+  z-index: 10;
+  animation: columnDropPulse 1.2s ease-in-out infinite;
+}
+
+.column.column-drop-right {
+  position: relative;
+}
+
+.column.column-drop-right::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  right: -12px;
+  width: 4px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #c44dff, #00d4ff);
+  box-shadow: 0 0 16px rgba(196, 77, 255, 0.6), 0 0 32px rgba(196, 77, 255, 0.3);
+  z-index: 10;
+  animation: columnDropPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes columnDropPulse {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(196, 77, 255, 0.6), 0 0 32px rgba(196, 77, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(196, 77, 255, 0.8), 0 0 48px rgba(196, 77, 255, 0.5);
+  }
+}
+
+/* Edit profile hint */
+
+.profile-field-hint{
+  color:rgb(152, 16, 16);
+}
 
 /* ADD COLUMN CARD */
 .add-column-card {

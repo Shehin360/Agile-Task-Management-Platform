@@ -12,7 +12,7 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   position: relative;
   overflow: hidden;
-  padding: 28px 36px;
+  padding: 32px 40px;
 
   background: #0a0a1a;
   background-image: radial-gradient(
@@ -91,8 +91,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
-  margin-bottom: 16px;
+  padding: 14px 22px;
+  margin-bottom: 20px;
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(20px);
@@ -112,13 +112,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 9px 18px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.05);
   color: rgba(255, 255, 255, 0.7);
   font-family: inherit;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -144,26 +144,58 @@
   flex-shrink: 0;
 }
 
-.nav-title-group {
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   min-width: 0;
 }
 
-.page-title {
+.nav-brand-logo-wrap {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(196, 77, 255, 0.2), rgba(0, 180, 216, 0.2));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.nav-brand-logo {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.nav-brand-text {
+  min-width: 0;
+}
+
+.nav-brand-name {
   margin: 0;
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: rgba(255, 255, 255, 0.95);
-  letter-spacing: 0.3px;
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #ff6b9d, #c44dff, #00d4ff, #ff6b9d);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.page-subtitle {
+.nav-brand-subtitle {
   margin: 2px 0 0;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 400;
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 600;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
 }
 
 .nav-right {
@@ -173,22 +205,35 @@
   flex-shrink: 0;
 }
 
+.nav-insight-chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(233, 69, 96, 0.18), rgba(0, 180, 216, 0.16));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
+}
+
 .nav-avatar {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #fff;
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .nav-user-name {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.65);
 }
@@ -201,7 +246,7 @@
   overflow-x: hidden;
   position: relative;
   z-index: 1;
-  padding: 0 4px 20px;
+  padding: 0 6px 24px;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
 }
@@ -227,15 +272,15 @@
 .quick-stats-row {
   display: grid;
   grid-template-columns: 2fr repeat(5, 1fr);
-  gap: 14px;
-  margin-bottom: 24px;
+  gap: 16px;
+  margin-bottom: 28px;
 }
 
 .quick-stat-card {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
-  padding: 18px 16px;
+  border-radius: 18px;
+  padding: 20px 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -254,8 +299,8 @@
 /* First card (progress ring) is a row layout */
 .quick-stat-card.accent-purple {
   flex-direction: row;
-  gap: 16px;
-  padding: 16px 20px;
+  gap: 18px;
+  padding: 18px 24px;
   border-color: rgba(196, 77, 255, 0.15);
   background: rgba(196, 77, 255, 0.04);
 }
@@ -267,8 +312,8 @@
 
 .qs-icon-wrap {
   position: relative;
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   flex-shrink: 0;
 }
 
@@ -283,7 +328,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 800;
   color: rgba(255, 255, 255, 0.9);
 }
@@ -296,22 +341,22 @@
 }
 
 .qs-big-value {
-  font-size: 1.8rem;
+  font-size: 2.15rem;
   font-weight: 800;
   color: rgba(255, 255, 255, 0.92);
   line-height: 1;
 }
 
 .qs-label {
-  font-size: 0.8rem;
+  font-size: 0.86rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 1px;
 }
 
 .qs-detail {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: rgba(255, 255, 255, 0.65);
   font-weight: 500;
 }
@@ -320,19 +365,19 @@
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  margin-bottom: 24px;
+  gap: 22px;
+  margin-bottom: 28px;
 }
 
 .chart-card {
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 18px;
-  padding: 24px 20px 20px;
+  border-radius: 20px;
+  padding: 28px 24px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 20px;
   transition: all 0.25s ease;
 }
 
@@ -345,7 +390,7 @@
 
 .card-title {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 1.02rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.75);
   letter-spacing: 0.6px;
@@ -356,8 +401,8 @@
 /* ── Donut Chart ── */
 .donut-wrapper {
   position: relative;
-  width: 150px;
-  height: 150px;
+  width: 170px;
+  height: 170px;
   flex-shrink: 0;
 }
 
@@ -388,14 +433,14 @@
 }
 
 .donut-count {
-  font-size: 1.8rem;
+  font-size: 2.05rem;
   font-weight: 800;
   color: rgba(255, 255, 255, 0.9);
   line-height: 1;
 }
 
 .donut-label {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.65);
   letter-spacing: 0.5px;
@@ -408,19 +453,19 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
 }
 
 .legend-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.88rem;
+  gap: 10px;
+  font-size: 0.95rem;
 }
 
 .legend-dot {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -437,7 +482,7 @@
 
 .legend-bar-wrap {
   flex: 1;
-  height: 4px;
+  height: 5px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   overflow: hidden;
@@ -457,12 +502,12 @@
   font-weight: 700;
   min-width: 30px;
   text-align: right;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .legend-cnt {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 0.8rem;
+  font-size: 0.86rem;
   font-weight: 400;
   min-width: 24px;
 }
@@ -498,21 +543,21 @@
 }
 
 .priority-bar-label {
-  font-size: 0.92rem;
+  font-size: 1rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.75);
   flex: 1;
 }
 
 .priority-bar-count {
-  font-size: 1.25rem;
+  font-size: 1.45rem;
   font-weight: 800;
   line-height: 1;
 }
 
 .priority-bar-track {
   width: 100%;
-  height: 10px;
+  height: 12px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   overflow: hidden;
@@ -527,7 +572,7 @@
 }
 
 .priority-bar-pct {
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.65);
   letter-spacing: 0.3px;
@@ -545,7 +590,7 @@
 }
 
 .priority-stacked-label {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.8);
   text-transform: uppercase;
@@ -554,7 +599,7 @@
 
 .priority-stacked-bar {
   display: flex;
-  height: 8px;
+  height: 10px;
   border-radius: 10px;
   overflow: hidden;
   gap: 2px;
@@ -574,8 +619,8 @@
 }
 
 .gauge-wrapper {
-  width: 200px;
-  height: 120px;
+  width: 230px;
+  height: 138px;
   flex-shrink: 0;
   margin: 4px 0;
 }
@@ -607,7 +652,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
 }
 
 .gauge-legend-dot {
@@ -626,7 +671,7 @@
 
 .gauge-legend-value {
   font-weight: 800;
-  font-size: 1rem;
+  font-size: 1.1rem;
   min-width: 20px;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -636,14 +681,14 @@
 .section-card {
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 18px;
-  padding: 24px;
-  margin-bottom: 20px;
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 24px;
 }
 
 .section-title {
-  margin: 0 0 18px;
-  font-size: 1.05rem;
+  margin: 0 0 20px;
+  font-size: 1.2rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.75);
   letter-spacing: 0.3px;
@@ -654,16 +699,16 @@
 
 /* ── Task Timeline (Gantt-inspired) ── */
 .section-subtitle {
-  font-size: 0.92rem;
+  font-size: 1rem;
   color: rgba(255, 255, 255, 0.85);
   margin-top: -4px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   letter-spacing: 0.2px;
 }
 
 .timeline-wrapper {
   position: relative;
-  padding-top: 28px;
+  padding-top: 32px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   min-height: 80px;
@@ -672,15 +717,15 @@
 /* ── Day axis ── */
 .timeline-axis {
   position: relative;
-  height: 20px;
-  margin-bottom: 10px;
+  height: 22px;
+  margin-bottom: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .timeline-axis-label {
   position: absolute;
   transform: translateX(-50%);
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.8);
   text-transform: uppercase;
@@ -697,7 +742,7 @@
 /* ── Today marker ── */
 .timeline-today-line {
   position: absolute;
-  top: 28px;
+  top: 32px;
   bottom: 0;
   width: 1.5px;
   background: linear-gradient(180deg, rgba(99, 102, 241, 0.7), rgba(99, 102, 241, 0.05));
@@ -719,26 +764,26 @@
 
 /* ── Column groups ── */
 .timeline-group {
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .timeline-group-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 10px;
   padding: 6px 0;
 }
 
 .timeline-group-dot {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .timeline-group-name {
-  font-size: 0.9rem;
+  font-size: 0.96rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.85);
   text-transform: uppercase;
@@ -746,7 +791,7 @@
 }
 
 .timeline-group-count {
-  font-size: 0.8rem;
+  font-size: 0.86rem;
   color: rgba(255, 255, 255, 0.8);
   background: rgba(255, 255, 255, 0.05);
   padding: 1px 7px;
@@ -758,20 +803,20 @@
 .timeline-rows {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .timeline-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 32px;
+  gap: 14px;
+  height: 36px;
 }
 
 .timeline-task-name {
-  min-width: 120px;
-  max-width: 160px;
-  font-size: 0.88rem;
+  min-width: 140px;
+  max-width: 180px;
+  font-size: 0.95rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.75);
   white-space: nowrap;
@@ -798,8 +843,8 @@
 }
 
 .marker-dot {
-  width: 12px;
-  height: 12px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   border: 2px solid rgba(10, 10, 26, 0.6);
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
@@ -854,13 +899,13 @@
 }
 
 .marker-tooltip-title {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.85);
 }
 
 .marker-tooltip-due {
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   color: rgba(255, 255, 255, 0.65);
   font-weight: 500;
 }
@@ -875,9 +920,9 @@
 
 /* ── Due badge ── */
 .timeline-due-badge {
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   font-weight: 600;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 6px;
   white-space: nowrap;
   flex-shrink: 0;
@@ -911,7 +956,7 @@
 }
 
 .timeline-nodate-label {
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
   white-space: nowrap;
@@ -929,7 +974,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   color: rgba(255, 255, 255, 0.8);
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -1152,11 +1197,16 @@
     border-radius: 14px;
   }
 
-  .page-title {
-    font-size: 1rem;
+  .nav-brand-name {
+    font-size: clamp(1rem, 4vw, 1.4rem);
+    letter-spacing: 2px;
   }
 
-  .page-subtitle {
+  .nav-brand-subtitle {
+    display: none;
+  }
+
+  .nav-insight-chip {
     display: none;
   }
 
@@ -1246,8 +1296,20 @@
     display: none;
   }
 
-  .page-title {
-    font-size: 0.88rem;
+  .nav-brand-logo-wrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .nav-brand-logo {
+    width: 22px;
+    height: 22px;
+  }
+
+  .nav-brand-name {
+    font-size: 0.9rem;
+    letter-spacing: 1.5px;
   }
 
   .quick-stats-row {
