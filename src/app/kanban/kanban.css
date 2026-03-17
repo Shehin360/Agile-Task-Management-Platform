@@ -1923,10 +1923,9 @@
   }
 }
 
-/* Edit profile hint */
-
-.profile-field-hint{
-  color:rgb(152, 16, 16);
+/* Edit profile success colour */
+.profile-alert-success {
+  color: #22c55e;
 }
 
 /* ADD COLUMN CARD */
