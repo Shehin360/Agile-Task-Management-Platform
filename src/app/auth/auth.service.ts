@@ -1,6 +1,7 @@
 import { Injectable, signal, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { FirebaseAuthService } from './firebase.auth.service';
 
 const AUTH_KEY = 'kanban_user';
 const USERS_KEY = 'kanban_registered_users';
@@ -22,6 +23,7 @@ export class AuthService {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
   private http = inject(HttpClient);
+  private firebaseAuthService = inject(FirebaseAuthService);
 
   currentUser = signal<User | null>(this.loadSession());
   isLoggedIn = signal<boolean>(this.loadSession() !== null);
@@ -90,7 +92,7 @@ export class AuthService {
     this.isLoggedIn.set(true);
     if (this.isBrowser) localStorage.setItem(AUTH_KEY, JSON.stringify(user));
 
-    this.http.post(`${API}/login`, { username: match?.username }).subscribe({
+    this.http.post(`${API}/login`, { username: match?.username, password }).subscribe({
       next: (res) => console.log('Login API:', res),
       error: (err) => console.log('Login API Error', err),
     });
@@ -163,6 +165,8 @@ export class AuthService {
         error: (err) => console.log('Logout API Error:', err),
       });
     }
+
+    this.firebaseAuthService.logout();
 
     this.currentUser.set(null);
     this.isLoggedIn.set(false);

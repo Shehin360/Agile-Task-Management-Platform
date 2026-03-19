@@ -10,9 +10,8 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import { FirebaseAuthService } from '../auth/firebase.auth.service';
 import { trigger, transition, style, animate } from '@angular/animations';
-
-declare const google: any;
 
 @Component({
   selector: 'app-login',
@@ -43,6 +42,7 @@ declare const google: any;
 })
 export class Login implements AfterViewInit {
   private authService = inject(AuthService);
+  private firebaseAuthService = inject(FirebaseAuthService);
   private router = inject(Router);
   private ngZone = inject(NgZone);
   private platformId = inject(PLATFORM_ID);
@@ -105,29 +105,29 @@ export class Login implements AfterViewInit {
     }
   }
   //google sign in
-
   ngAfterViewInit() {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    const initGoogle = () => {
-      if (typeof google === 'undefined' || !google.accounts) {
-        setTimeout(initGoogle, 200);
-        return;
-      }
-      google.accounts.id.initialize({
-        client_id: '325727943798-d2ujckdtrigvg69qpjkf5lee05mf9quc.apps.googleusercontent.com',
-        callback: (response: any) => this.handleGoogleCredential(response),
+    this.firebaseAuthService
+      .completeRedirectSignIn()
+      .then((userData) => {
+        if (!userData) return;
+        this.ngZone.run(() => {
+          const user = {
+            username: userData.username,
+            displayName: userData.displayName,
+          };
+          this.authService.currentUser.set(user);
+          this.authService.isLoggedIn.set(true);
+          this.router.navigate(['/board']);
+        });
+      })
+      .catch((error) => {
+        this.ngZone.run(() => {
+          console.error('Redirect login error:', error);
+          this.error.set(this.getGoogleErrorMessage(error));
+        });
       });
-      google.accounts.id.renderButton(document.getElementById('google-signin-btn'), {
-        type: 'standard',
-        theme: 'filled_black',
-        size: 'large',
-        text: 'signin_with',
-        shape: 'pill',
-        width: 368,
-      });
-    };
-    initGoogle();
   }
 
   handleGoogleCredential(response: any) {
@@ -180,5 +180,53 @@ export class Login implements AfterViewInit {
 
       this.isLoading.set(false);
     }, 700);
+  }
+  //New firebase signin code
+  loginWithGoogle() {
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    this.firebaseAuthService
+      .signInWithGoogle()
+      .then((userData) => {
+        if (userData?.redirecting) return;
+        this.ngZone.run(() => {
+          // Update currentUser signal (from AuthService)
+          const user = {
+            username: userData.username,
+            displayName: userData.displayName,
+          };
+          this.authService.currentUser.set(user);
+          this.authService.isLoggedIn.set(true);
+
+          // Navigate to board
+          this.router.navigate(['/board']);
+        });
+      })
+      .catch((error) => {
+        this.ngZone.run(() => {
+          console.error('Login error:', error);
+          this.error.set(this.getGoogleErrorMessage(error));
+          this.shakeState.set('error');
+          setTimeout(() => this.shakeState.set(''), 500);
+          this.isLoading.set(false);
+        });
+      });
+  }
+
+  private getGoogleErrorMessage(error: any): string {
+    const code = error?.code as string | undefined;
+    switch (code) {
+      case 'auth/unauthorized-domain':
+        return 'This domain is not authorized in Firebase Authentication.';
+      case 'auth/popup-blocked':
+        return 'Popup blocked by browser. Redirecting to Google sign-in...';
+      case 'auth/popup-closed-by-user':
+        return 'Google sign-in popup was closed before completion.';
+      case 'auth/cancelled-popup-request':
+        return 'Another sign-in attempt is already in progress.';
+      default:
+        return 'Google sign-in failed. Please try again.';
+    }
   }
 }
