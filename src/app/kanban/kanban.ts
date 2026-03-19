@@ -1071,6 +1071,17 @@ export class Kanban {
     return due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
+  isCompletedColumn(columnName: string): boolean {
+    const name = columnName.toLowerCase();
+    return /done|deliver|ship|complete/i.test(name);
+  }
+
+  formatDueDateForCompletedTask(dueDate: string | null): string {
+    if (!dueDate) return '';
+    const due = new Date(dueDate + 'T00:00:00');
+    return due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
   // ──────── PERSISTENCE ────────
 
   private loadColumns(): Column[] {

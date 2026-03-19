@@ -194,11 +194,7 @@
       <div class="section-divider-line"></div>
     </div>
 
-    <div
-      class="board"
-      (dragover)="onBoardDragOver($event)"
-      (drop)="onBoardDrop($event)"
-    >
+    <div class="board" (dragover)="onBoardDragOver($event)" (drop)="onBoardDrop($event)">
       <!-- DYNAMIC COLUMNS -->
       @for (column of columns(); track column.id) {
       <div
@@ -219,7 +215,7 @@
           [style.box-shadow]="'0 4px 20px ' + getColumnColor(column.colorIndex).glow"
         >
           <!-- Dedicated Drag Handle for Column, now positioned absolute inside the header -->
-          <div 
+          <div
             class="column-drag-handle"
             draggable="true"
             (dragstart)="onColumnDragStart($event, column.id)"
@@ -228,7 +224,7 @@
           >
             <span class="drag-handle-icon">⠿</span>
           </div>
-          
+
           @if (editingColumnId() === column.id) {
           <div class="column-header-edit">
             <input
@@ -290,11 +286,15 @@
               </div>
               @if (task.description) {
               <span class="task-description">{{ task.description }}</span>
-              } @if (task.dueDate) {
+              } @if (task.dueDate) { @if (isCompletedColumn(column.name)) {
+              <span class="due-date-badge due-completed">
+                📅 {{ formatDueDateForCompletedTask(task.dueDate) }}
+              </span>
+              } @else {
               <span class="due-date-badge" [class]="'due-' + getDueDateStatus(task.dueDate)">
                 📅 {{ formatDueDate(task.dueDate) }}
               </span>
-              } @if (task.imageData) {
+              } } @if (task.imageData) {
               <div class="task-image-card">
                 <button
                   class="task-image-thumb"

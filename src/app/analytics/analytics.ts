@@ -191,6 +191,16 @@ export class Analytics {
     return due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
+  isCompletedColumn(columnName: string): boolean {
+    return /done|deliver|ship|complete/i.test(columnName);
+  }
+
+  formatDueDateForCompletedTask(dueDate: string | null): string {
+    const due = this.parseDateOnly(dueDate);
+    if (!due) return '';
+    return due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
   getColumnTasks(columnId: string): Task[] {
     return this.tasks().filter((t) => t.status === columnId);
   }
@@ -431,7 +441,9 @@ export class Analytics {
               title: t.title,
               priority: t.priority,
               color: priorityColors[t.priority] ?? '#64748b',
-              dueLabel: this.formatDueDate(t.dueDate),
+              dueLabel: this.isCompletedColumn(col.name)
+                ? this.formatDueDateForCompletedTask(t.dueDate)
+                : this.formatDueDate(t.dueDate),
               dueStatus,
               diffDays,
               offset, // % from left
@@ -498,9 +510,11 @@ export class Analytics {
         if (t.status === lastColId) return false;
 
         const dueStatus = this.getDueDateStatus(t.dueDate);
+        const columnName = cols.find((c) => c.id === t.status)?.name ?? '';
+        const isCompleted = this.isCompletedColumn(columnName);
 
-        if (t.status === doneColId) {
-          // "Done" column: only flag if overdue (gentle "ship it" reminder)
+        if (isCompleted) {
+          // Completed columns: only flag if overdue (gentle "ship it" reminder)
           return dueStatus === 'overdue';
         }
 
@@ -509,14 +523,15 @@ export class Analytics {
       })
       .map((t) => {
         const dueStatus = this.getDueDateStatus(t.dueDate);
-        const isDoneCol = t.status === doneColId;
+        const columnName = cols.find((c) => c.id === t.status)?.name ?? t.status;
+        const isCompleted = this.isCompletedColumn(columnName);
 
         return {
           title: t.title,
           priority: t.priority,
-          status: isDoneCol ? ('ship' as const) : dueStatus,
-          dueLabel: isDoneCol ? 'Ready to ship' : this.formatDueDate(t.dueDate),
-          columnName: cols.find((c) => c.id === t.status)?.name ?? t.status,
+          status: isCompleted ? ('ship' as const) : dueStatus,
+          dueLabel: isCompleted ? 'Ready to ship' : this.formatDueDate(t.dueDate),
+          columnName: columnName,
         };
       })
       .sort((a, b) => {
