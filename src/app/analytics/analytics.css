@@ -708,6 +708,11 @@
 
 .timeline-wrapper {
   position: relative;
+  --timeline-row-gap: 14px;
+  --timeline-name-col: 180px;
+  --timeline-badge-col: 120px;
+  --timeline-left-offset: calc(var(--timeline-name-col) + var(--timeline-row-gap));
+  --timeline-right-offset: calc(var(--timeline-badge-col) + var(--timeline-row-gap));
   padding-top: 32px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -718,6 +723,8 @@
 .timeline-axis {
   position: relative;
   height: 22px;
+  margin-left: var(--timeline-left-offset);
+  margin-right: var(--timeline-right-offset);
   margin-bottom: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -734,6 +741,14 @@
   user-select: none;
 }
 
+.timeline-axis-label-start {
+  transform: translateX(0);
+}
+
+.timeline-axis-label-end {
+  transform: translateX(-100%);
+}
+
 .timeline-today-label {
   color: rgba(99, 102, 241, 0.8);
   font-weight: 700;
@@ -744,6 +759,11 @@
   position: absolute;
   top: 32px;
   bottom: 0;
+  left: calc(
+    var(--timeline-left-offset) +
+      (100% - var(--timeline-left-offset) - var(--timeline-right-offset)) * var(--today-ratio)
+  );
+  transform: translateX(-50%);
   width: 1.5px;
   background: linear-gradient(180deg, rgba(99, 102, 241, 0.7), rgba(99, 102, 241, 0.05));
   z-index: 2;
@@ -809,13 +829,14 @@
 .timeline-row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--timeline-row-gap);
   height: 36px;
 }
 
 .timeline-task-name {
-  min-width: 140px;
-  max-width: 180px;
+  width: var(--timeline-name-col);
+  min-width: var(--timeline-name-col);
+  max-width: var(--timeline-name-col);
   font-size: 0.95rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.75);
@@ -920,6 +941,10 @@
 
 /* ── Due badge ── */
 .timeline-due-badge {
+  width: var(--timeline-badge-col);
+  min-width: var(--timeline-badge-col);
+  max-width: var(--timeline-badge-col);
+  text-align: right;
   font-size: 0.84rem;
   font-weight: 600;
   padding: 4px 10px;
@@ -1192,6 +1217,12 @@
     padding: 14px 16px;
   }
 
+  .timeline-wrapper {
+    --timeline-name-col: 100px;
+    --timeline-badge-col: 0px;
+    --timeline-right-offset: 0px;
+  }
+
   .analytics-nav {
     padding: 10px 14px;
     border-radius: 14px;
@@ -1215,11 +1246,15 @@
   }
 
   .quick-stats-row {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
 
   .quick-stat-card.accent-purple {
+    grid-column: 1 / -1;
+  }
+
+  .quick-stat-card:last-child {
     grid-column: 1 / -1;
   }
 
@@ -1276,6 +1311,10 @@
     padding: 10px 10px;
   }
 
+  .timeline-wrapper {
+    --timeline-name-col: 80px;
+  }
+
   .analytics-nav {
     padding: 8px 10px;
     border-radius: 12px;
@@ -1313,7 +1352,7 @@
   }
 
   .quick-stats-row {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
 

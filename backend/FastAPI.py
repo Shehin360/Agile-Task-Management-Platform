@@ -56,18 +56,34 @@ def delete_task(task: DeleteTask):
         "message": f"Task {task.task} with Task ID {task.task_id} deleted successfully."
     }
 
-# newly added Login,Logout and Register mock api's
-
-
 class LoginRequest(BaseModel):
     username:str
     password:str
 
 @app.post("/login")
 def login(data: LoginRequest):
+    # Validate username and password
+    if not data.username or not data.password:
+        return {
+            "status": "error",
+            "message": "Username and password are required."
+        }
+    
     return {
         "status": "success",
-        "message": f"User '{data.username}' logged in successfully."
+        "message": f"User '{data.username}' logged in successfully with password validated."
+    }
+
+# google sign in 
+class GoogleLoginRequest(BaseModel):
+    email: str
+    name: str
+
+@app.post("/google_login")
+def google_login(data: GoogleLoginRequest):
+    return {
+        "status": "success",
+        "message": f"Google user '{data.name}' ({data.email}) logged in successfully."
     }
 
 class Registerrequest(BaseModel):
@@ -81,24 +97,20 @@ def register(data: Registerrequest):
         "message": f"User '{data.username}' with display name '{data.display_name}' registered successfully."
     }
 
+class LogoutRequest(BaseModel):
+    username:str
+
+@app.post("/logout")
+def Logout(data: LogoutRequest):
+    responce = {"message" : f"User '{data.username}' logged out successfully."}
+    return responce
+
+# profile update
+
 class UpdateProfileRequest(BaseModel):
     username: str
     new_username: str | None = None
     new_display_name: str | None = None
-
-    # Google login
-
-class GoogleLoginRequest(BaseModel):
-    email: str
-    name: str
-
-@app.post("/google_login")
-def google_login(data: GoogleLoginRequest):
-    return {
-        "status": "success",
-        "message": f"Google user '{data.name}' ({data.email}) logged in successfully."
-    }
-
 
 @app.put("/update_profile")
 def update_profile(data: UpdateProfileRequest):
@@ -111,11 +123,3 @@ def update_profile(data: UpdateProfileRequest):
         "status": "success",
         "message": f"Profile for '{data.username}' updated: {', '.join(changes) if changes else 'no changes'}."
     }
-
-class LogoutRequest(BaseModel):
-    username:str
-
-@app.post("/logout")
-def Logout(data: LogoutRequest):
-    responce = {"message" : f"User '{data.username}' logged out successfully."}
-    return responce

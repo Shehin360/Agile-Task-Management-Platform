@@ -43,7 +43,7 @@ export class AuthService {
   // ──────── REGISTER ────────
   isUsernameTaken(username: string): boolean {
     const users = this.getRegisteredUsers();
-    return users.some((u) => u.username.toLowerCase() === username.toLowerCase());
+    return users.some((u) => u.username === username);
   }
 
   register(
@@ -53,9 +53,13 @@ export class AuthService {
   ): { success: boolean; error?: string } {
     const users = this.getRegisteredUsers();
 
-    const exists = users.some((u) => u.username.toLowerCase() === username.toLowerCase());
+    const exists = users.some((u) => u.username === username);
     if (exists) {
       return { success: false, error: 'Username is already taken' };
+    }
+
+    if (password.length < 8) {
+      return { success: false, error: 'Password must be at least 8 characters' };
     }
 
     users.push({ username, password, displayName });
@@ -79,9 +83,7 @@ export class AuthService {
   login(username: string, password: string): { success: boolean; error?: string } {
     const users = this.getRegisteredUsers();
 
-    const match = users.find(
-      (u) => u.username.toLowerCase() === username.toLowerCase() && u.password === password
-    );
+    const match = users.find((u) => u.username === username && u.password === password);
 
     if (!match) {
       return { success: false, error: 'Invalid username or password' };
@@ -157,7 +159,7 @@ export class AuthService {
   }
 
   // ──────── LOGOUT ────────
-  logout() {
+  logout(): Promise<void> {
     const user = this.currentUser();
     if (user) {
       this.http.post(`${API}/logout`, { username: user.username }).subscribe({
@@ -166,11 +168,18 @@ export class AuthService {
       });
     }
 
-    this.firebaseAuthService.logout();
+    const finalizeLocalLogout = () => {
+      this.currentUser.set(null);
+      this.isLoggedIn.set(false);
+      if (this.isBrowser) localStorage.removeItem(AUTH_KEY);
+    };
 
-    this.currentUser.set(null);
-    this.isLoggedIn.set(false);
-    if (this.isBrowser) localStorage.removeItem(AUTH_KEY);
+    return this.firebaseAuthService
+      .logout()
+      .catch((err) => {
+        console.log('Firebase Logout Error:', err);
+      })
+      .finally(finalizeLocalLogout);
   }
 
   // Updating user Profile
@@ -184,15 +193,13 @@ export class AuthService {
     if (!current) return { success: false, error: 'Not logged in' };
 
     const users = this.getRegisteredUsers();
-    const idx = users.findIndex((u) => u.username.toLowerCase() === current.username.toLowerCase());
+    const idx = users.findIndex((u) => u.username === current.username);
 
     if (idx === -1) return { success: false, error: 'User not found' };
 
     // Validate new username uniqueness (if changed)
-    if (newUsername && newUsername.toLowerCase() !== current.username.toLowerCase()) {
-      const taken = users.some(
-        (u, i) => i !== idx && u.username.toLowerCase() === newUsername.toLowerCase()
-      );
+    if (newUsername && newUsername !== current.username) {
+      const taken = users.some((u, i) => i !== idx && u.username === newUsername);
       if (taken) return { success: false, error: 'Username is already taken.' };
     }
 
@@ -200,6 +207,9 @@ export class AuthService {
     users[idx].username = finalUsername;
     users[idx].displayName = newDisplayName;
     if (newPassword && newPassword.trim().length > 0) {
+      if (newPassword.length < 8) {
+        return { success: false, error: 'Password must be at least 8 characters.' };
+      }
       users[idx].password = newPassword;
     }
     this.saveRegisteredUsers(users);
@@ -248,7 +258,7 @@ export class AuthService {
   private getUniqueUsername(base: string, users: StoredUser[]): string {
     let candidate = base;
     let suffix = 1;
-    while (users.some((u) => u.username.toLowerCase() === candidate.toLowerCase())) {
+    while (users.some((u) => u.username === candidate)) {
       candidate = `${base}${suffix}`;
       suffix++;
     }

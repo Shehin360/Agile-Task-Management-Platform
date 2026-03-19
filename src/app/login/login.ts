@@ -71,14 +71,14 @@ export class Login implements AfterViewInit {
     if (!this.passwordTouched()) return null;
     const val = this.password();
     if (!val) return 'Password is required';
-    if (val.length < 4) return 'Password must be at least 4 characters';
+    if (val.length < 8) return 'Password must be at least 8 characters';
     return null;
   });
 
   isFormValid = computed(() => {
     const u = this.username().trim();
     const p = this.password();
-    return u.length >= 3 && !/[^a-zA-Z0-9_]/.test(u) && p.length >= 4;
+    return u.length >= 3 && !/[^a-zA-Z0-9_]/.test(u) && p.length >= 8;
   });
 
   onUsernameInput(value: string) {

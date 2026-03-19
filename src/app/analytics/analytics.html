@@ -245,10 +245,13 @@
       <div class="timeline-wrapper">
         <!-- Day axis -->
         <div class="timeline-axis">
-          @for (dl of timelineData().dayLabels; track dl.label) {
+          @for (dl of timelineData().dayLabels; track dl.label; let isFirst = $first; let isLast =
+          $last) {
           <span
             class="timeline-axis-label"
             [class.timeline-today-label]="dl.label === 'Today'"
+            [class.timeline-axis-label-start]="isFirst"
+            [class.timeline-axis-label-end]="isLast"
             [style.left.%]="dl.offset"
             >{{ dl.label }}</span
           >
@@ -256,7 +259,10 @@
         </div>
 
         <!-- Today marker line -->
-        <div class="timeline-today-line" [style.left.%]="timelineData().todayOffset"></div>
+        <div
+          class="timeline-today-line"
+          [style.--today-ratio]="timelineData().todayOffset / 100"
+        ></div>
 
         <!-- Column groups -->
         @for (group of timelineData().groups; track group.columnName) {

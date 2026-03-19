@@ -129,35 +129,61 @@ export class Analytics {
 
   getAvatarColor(username: string): string {
     const colors = [
-      '#6366f1', '#8b5cf6', '#ec4899', '#f59e0b',
-      '#10b981', '#3b82f6', '#ef4444', '#14b8a6',
+      '#6366f1',
+      '#8b5cf6',
+      '#ec4899',
+      '#f59e0b',
+      '#10b981',
+      '#3b82f6',
+      '#ef4444',
+      '#14b8a6',
     ];
     let hash = 0;
-    for (let i = 0; i < username.length; i++)
-      hash = username.charCodeAt(i) + ((hash << 5) - hash);
+    for (let i = 0; i < username.length; i++) hash = username.charCodeAt(i) + ((hash << 5) - hash);
     return colors[Math.abs(hash) % colors.length];
   }
 
   // ── Due Date Helpers ──
-  getDueDateStatus(dueDate: string | null): 'overdue' | 'today' | 'upcoming' | 'none' {
-    if (!dueDate) return 'none';
+  private getTodayStart(): Date {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const due = new Date(dueDate + 'T00:00:00');
-    const diffTime = due.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return today;
+  }
+
+  private parseDateOnly(value: string | null): Date | null {
+    if (!value) return null;
+    // Normalize to YYYY-MM-DD, even if older data contains an ISO timestamp.
+    const normalized = value.slice(0, 10);
+    const match = normalized.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return null;
+
+    const year = Number(match[1]);
+    const monthIndex = Number(match[2]) - 1;
+    const day = Number(match[3]);
+    return new Date(year, monthIndex, day);
+  }
+
+  private getDayDiffFromToday(dueDate: string | null): number | null {
+    const due = this.parseDateOnly(dueDate);
+    if (!due) return null;
+    const today = this.getTodayStart();
+    const dayMs = 86_400_000;
+    return Math.round((due.getTime() - today.getTime()) / dayMs);
+  }
+
+  getDueDateStatus(dueDate: string | null): 'overdue' | 'today' | 'upcoming' | 'none' {
+    const diffDays = this.getDayDiffFromToday(dueDate);
+    if (diffDays == null) return 'none';
     if (diffDays < 0) return 'overdue';
     if (diffDays === 0) return 'today';
     return 'upcoming';
   }
 
   formatDueDate(dueDate: string | null): string {
-    if (!dueDate) return '';
-    const due = new Date(dueDate + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diffTime = due.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const due = this.parseDateOnly(dueDate);
+    if (!due) return '';
+    const diffDays = this.getDayDiffFromToday(dueDate);
+    if (diffDays == null) return '';
     if (diffDays < 0) return `${Math.abs(diffDays)}d overdue`;
     if (diffDays === 0) return 'Due today';
     if (diffDays === 1) return 'Due tomorrow';
@@ -228,9 +254,24 @@ export class Analytics {
     const medium = allTasks.filter((t) => t.priority === 'medium').length;
     const low = allTasks.filter((t) => t.priority === 'low').length;
     return [
-      { label: 'High', count: high, percent: total > 0 ? Math.round((high / total) * 100) : 0, color: '#ef4444' },
-      { label: 'Medium', count: medium, percent: total > 0 ? Math.round((medium / total) * 100) : 0, color: '#f59e0b' },
-      { label: 'Low', count: low, percent: total > 0 ? Math.round((low / total) * 100) : 0, color: '#10b981' },
+      {
+        label: 'High',
+        count: high,
+        percent: total > 0 ? Math.round((high / total) * 100) : 0,
+        color: '#ef4444',
+      },
+      {
+        label: 'Medium',
+        count: medium,
+        percent: total > 0 ? Math.round((medium / total) * 100) : 0,
+        color: '#f59e0b',
+      },
+      {
+        label: 'Low',
+        count: low,
+        percent: total > 0 ? Math.round((low / total) * 100) : 0,
+        color: '#10b981',
+      },
     ];
   });
 
@@ -257,7 +298,12 @@ export class Analytics {
     const stats = this.dueDateStats();
     const total = stats.reduce((sum, s) => sum + s.count, 0);
     if (total === 0) return 100;
-    const weights: Record<string, number> = { 'On Track': 1, 'Due Soon': 0.6, 'No Date': 0.4, 'Overdue': 0 };
+    const weights: Record<string, number> = {
+      'On Track': 1,
+      'Due Soon': 0.6,
+      'No Date': 0.4,
+      Overdue: 0,
+    };
     const weighted = stats.reduce((sum, s) => sum + s.count * (weights[s.label] ?? 0), 0);
     return Math.round((weighted / total) * 100);
   });
@@ -271,7 +317,9 @@ export class Analytics {
     const segments: { path: string; color: string; label: string }[] = [];
     // Semi-circle from 180° to 0° (left to right, bottom arc)
     // Arc center at (100, 110), radius 80
-    const cx = 100, cy = 110, r = 80;
+    const cx = 100,
+      cy = 110,
+      r = 80;
     const startAngleDeg = 180; // left
     const totalSweep = 180; // semi-circle
     let currentAngle = startAngleDeg;
@@ -289,7 +337,7 @@ export class Analytics {
         const y1 = cy + r * Math.sin(a1Rad);
         const x2 = cx + r * Math.cos(a2Rad);
         const y2 = cy + r * Math.sin(a2Rad);
-        const largeArc = (a2 - a1) > 180 ? 1 : 0;
+        const largeArc = a2 - a1 > 180 ? 1 : 0;
         // Note: arcs go clockwise from left to right which means top half
         // SVG coordinate: angle 180° = left, 0° = right, with y going down
         // We need the arc to go from left to right along the top half
@@ -328,15 +376,15 @@ export class Analytics {
   timelineData = computed(() => {
     const allTasks = this.tasks();
     const cols = this.columns();
-    if (allTasks.length === 0 || cols.length === 0) return { groups: [], dayLabels: [], todayOffset: 50 };
+    if (allTasks.length === 0 || cols.length === 0)
+      return { groups: [], dayLabels: [], todayOffset: 50 };
 
     // Timeline window: 14 days back ← today → 21 days ahead  (35-day span)
     const PAST_DAYS = 14;
     const FUTURE_DAYS = 21;
     const TOTAL_DAYS = PAST_DAYS + FUTURE_DAYS;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = this.getTodayStart();
     const todayMs = today.getTime();
     const dayMs = 86_400_000;
     const windowStart = todayMs - PAST_DAYS * dayMs;
@@ -347,7 +395,8 @@ export class Analytics {
     for (let d = -PAST_DAYS; d <= FUTURE_DAYS; d += 7) {
       const date = new Date(todayMs + d * dayMs);
       dayLabels.push({
-        label: d === 0 ? 'Today' : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        label:
+          d === 0 ? 'Today' : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         offset: ((d + PAST_DAYS) / TOTAL_DAYS) * 100,
       });
     }
@@ -355,52 +404,74 @@ export class Analytics {
     const todayOffset = (PAST_DAYS / TOTAL_DAYS) * 100;
 
     const priorityColors: Record<string, string> = {
-      high: '#ef4444', medium: '#f59e0b', low: '#10b981',
+      high: '#ef4444',
+      medium: '#f59e0b',
+      low: '#10b981',
     };
 
-    const groups = cols.map((col) => {
-      const colTasks = allTasks
-        .filter((t) => t.status === col.id && t.dueDate)
-        .map((t) => {
-          const due = new Date(t.dueDate + 'T00:00:00');
-          const dueMs = due.getTime();
-          const diffDays = Math.round((dueMs - todayMs) / dayMs);
-          const dueStatus = this.getDueDateStatus(t.dueDate);
+    const groups = cols
+      .map((col) => {
+        const colTasks = allTasks
+          .filter((t) => t.status === col.id && t.dueDate)
+          .map((t) => {
+            const due = this.parseDateOnly(t.dueDate);
+            if (!due) {
+              return null;
+            }
 
-          // Position: clamp within window
-          const clampedMs = Math.max(windowStart, Math.min(windowEnd, dueMs));
-          const offset = ((clampedMs - windowStart) / (windowEnd - windowStart)) * 100;
+            const dueMs = due.getTime();
+            const diffDays = this.getDayDiffFromToday(t.dueDate) ?? 0;
+            const dueStatus = this.getDueDateStatus(t.dueDate);
 
-          return {
+            // Position: clamp within window
+            const clampedMs = Math.max(windowStart, Math.min(windowEnd, dueMs));
+            const offset = ((clampedMs - windowStart) / (windowEnd - windowStart)) * 100;
+
+            return {
+              title: t.title,
+              priority: t.priority,
+              color: priorityColors[t.priority] ?? '#64748b',
+              dueLabel: this.formatDueDate(t.dueDate),
+              dueStatus,
+              diffDays,
+              offset, // % from left
+              clamped: dueMs < windowStart || dueMs > windowEnd,
+            };
+          })
+          .filter(
+            (
+              t
+            ): t is {
+              title: string;
+              priority: TaskPriority;
+              color: string;
+              dueLabel: string;
+              dueStatus: 'overdue' | 'today' | 'upcoming' | 'none';
+              diffDays: number;
+              offset: number;
+              clamped: boolean;
+            } => t !== null
+          )
+          .sort((a, b) => a.offset - b.offset);
+
+        // Tasks without a due date
+        const noDueTasks = allTasks
+          .filter((t) => t.status === col.id && !t.dueDate)
+          .map((t) => ({
             title: t.title,
             priority: t.priority,
             color: priorityColors[t.priority] ?? '#64748b',
-            dueLabel: this.formatDueDate(t.dueDate),
-            dueStatus,
-            diffDays,
-            offset,              // % from left
-            clamped: dueMs < windowStart || dueMs > windowEnd,
-          };
-        })
-        .sort((a, b) => a.offset - b.offset);
+          }));
 
-      // Tasks without a due date
-      const noDueTasks = allTasks
-        .filter((t) => t.status === col.id && !t.dueDate)
-        .map((t) => ({
-          title: t.title,
-          priority: t.priority,
-          color: priorityColors[t.priority] ?? '#64748b',
-        }));
-
-      return {
-        columnName: col.name,
-        accent: this.getColumnColor(col.colorIndex).accent,
-        tasks: colTasks,
-        noDueTasks,
-        totalTasks: allTasks.filter((t) => t.status === col.id).length,
-      };
-    }).filter((g) => g.totalTasks > 0);
+        return {
+          columnName: col.name,
+          accent: this.getColumnColor(col.colorIndex).accent,
+          tasks: colTasks,
+          noDueTasks,
+          totalTasks: allTasks.filter((t) => t.status === col.id).length,
+        };
+      })
+      .filter((g) => g.totalTasks > 0);
 
     return { groups, dayLabels, todayOffset };
   });
@@ -443,10 +514,8 @@ export class Analytics {
         return {
           title: t.title,
           priority: t.priority,
-          status: isDoneCol ? 'ship' as const : dueStatus,
-          dueLabel: isDoneCol
-            ? 'Ready to ship'
-            : this.formatDueDate(t.dueDate),
+          status: isDoneCol ? ('ship' as const) : dueStatus,
+          dueLabel: isDoneCol ? 'Ready to ship' : this.formatDueDate(t.dueDate),
           columnName: cols.find((c) => c.id === t.status)?.name ?? t.status,
         };
       })
@@ -494,7 +563,13 @@ export class Analytics {
   ): { path: string; color: string; label: string; count: number; percent: number }[] {
     const total = stats.reduce((sum, s) => sum + s.count, 0);
     if (total === 0) return [];
-    const segments: { path: string; color: string; label: string; count: number; percent: number }[] = [];
+    const segments: {
+      path: string;
+      color: string;
+      label: string;
+      count: number;
+      percent: number;
+    }[] = [];
     let currentAngle = 0;
     const GAP = 2;
 

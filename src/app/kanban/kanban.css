@@ -1855,12 +1855,13 @@
 
 .column-drag-handle {
   width: 100%;
-  padding: 4px 0 0 0;
+  height: 18px;
+  padding: 2px 0 0 0;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: grab;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.5);
   /* Use the column header's gradient by letting it inherit/blend, or placing it inside the header */
   background: transparent;
   transition: all 0.2s ease;
@@ -1874,7 +1875,8 @@
 }
 
 .column-drag-handle:hover {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .column-drag-handle:active {
@@ -1883,7 +1885,7 @@
 
 .drag-handle-icon {
   font-size: 1.2rem;
-  line-height: 0.5;
+  line-height: 1;
 }
 
 /* Column being dragged — faded ghost */

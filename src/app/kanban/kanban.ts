@@ -146,12 +146,12 @@ export class Kanban {
 
   logout() {
     this.closeUserMenu();
-    this.showLogoutConfirm.set(true);
+    this.confirmLogout();
   }
 
-  confirmLogout() {
+  async confirmLogout() {
     this.showLogoutConfirm.set(false);
-    this.authService.logout();
+    await this.authService.logout();
     this.router.navigate(['/login']);
   }
 
@@ -616,7 +616,7 @@ export class Kanban {
     }
 
     // Determine left/right half of the target column
-    const target = (event.currentTarget as HTMLElement);
+    const target = event.currentTarget as HTMLElement;
     const rect = target.getBoundingClientRect();
     const midX = rect.left + rect.width / 2;
     const side = event.clientX < midX ? 'left' : 'right';
@@ -649,11 +649,19 @@ export class Kanban {
     event.stopPropagation();
 
     const side = this.columnDropSide();
+    let movedColumnName: string | null = null;
 
     this.columns.update((cols) => {
       const draggedIndex = cols.findIndex((c) => c.id === draggedId);
       const targetIndex = cols.findIndex((c) => c.id === targetColumnId);
       if (draggedIndex < 0 || targetIndex < 0) return cols;
+
+      // Determine the final index after accounting for removal shift.
+      const insertBase = side === 'right' ? targetIndex + 1 : targetIndex;
+      const normalizedInsertIndex = draggedIndex < insertBase ? insertBase - 1 : insertBase;
+
+      // No-op drop: same resulting position.
+      if (normalizedInsertIndex === draggedIndex) return cols;
 
       const updated = [...cols];
       const [draggedCol] = updated.splice(draggedIndex, 1);
@@ -665,12 +673,14 @@ export class Kanban {
       }
 
       updated.splice(insertIndex, 0, draggedCol);
+      movedColumnName = draggedCol.name;
       this.saveColumns(updated);
       return updated;
     });
 
-    const draggedCol = this.columns().find((c) => c.id === draggedId);
-    this.showToast(`Column "${draggedCol?.name ?? 'Column'}" moved`, 'info');
+    if (movedColumnName) {
+      this.showToast(`Column "${movedColumnName}" moved`, 'info');
+    }
     this.onColumnDragEnd();
   }
 

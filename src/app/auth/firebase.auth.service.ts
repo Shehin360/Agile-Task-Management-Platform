@@ -1,6 +1,5 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Router } from '@angular/router';
 
 declare const firebase: any;
 
@@ -18,7 +17,6 @@ const FIREBASE_CONFIG = {
 export class FirebaseAuthService {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
-  private router = inject(Router);
   private firebaseReady = false;
 
   constructor() {

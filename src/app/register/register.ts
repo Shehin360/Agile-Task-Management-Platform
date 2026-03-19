@@ -73,7 +73,7 @@ export class Register {
     if (!this.passwordTouched()) return null;
     const val = this.password();
     if (!val) return 'Password is required';
-    if (val.length < 4) return 'Password must be at least 4 characters';
+    if (val.length < 8) return 'Password must be at least 8 characters';
     return null;
   });
 
@@ -95,7 +95,7 @@ export class Register {
       u.length >= 3 &&
       !/[^a-zA-Z0-9_]/.test(u) &&
       !this.authService.isUsernameTaken(u) &&
-      p.length >= 4 &&
+      p.length >= 8 &&
       p === cp
     );
   });
@@ -155,7 +155,12 @@ export class Register {
     this.confirmPasswordTouched.set(true);
 
     if (!this.isFormValid()) {
-      this.error.set(null);
+      const username = this.username().trim();
+      if (username && this.authService.isUsernameTaken(username)) {
+        this.error.set('Username is already taken. Please choose a different username.');
+      } else {
+        this.error.set(null);
+      }
       this.shakeState.set('error');
       setTimeout(() => this.shakeState.set(''), 500);
       return;
