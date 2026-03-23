@@ -56,6 +56,42 @@ def delete_task(task: DeleteTask):
         "message": f"Task {task.task} with Task ID {task.task_id} deleted successfully."
     }
 
+class CreateColumnRequest(BaseModel):
+    column_id: str
+    column_name: str
+    color_index: int
+
+@app.post("/create_column")
+def create_column(data: CreateColumnRequest):
+    return {
+        "status": "success",
+        "message": f"Column '{data.column_name}' created successfully with ID '{data.column_id}' and color index {data.color_index}."
+    }
+
+class UpdateColumnRequest(BaseModel):
+    column_id: str
+    column_name: str
+
+@app.put("/update_column")
+def update_column(data: UpdateColumnRequest):
+    return {
+        "status": "success",
+        "message": f"Column '{data.column_id}' renamed to '{data.column_name}' successfully."
+    }
+
+class DeleteColumnRequest(BaseModel):
+    column_id: str
+    column_name: str
+    fallback_column_id: str | None = None
+
+@app.delete("/delete_column")
+def delete_column(data: DeleteColumnRequest):
+    fallback_text = f" Tasks moved to '{data.fallback_column_id}'." if data.fallback_column_id else " Tasks deleted because no columns remain."
+    return {
+        "status": "success",
+        "message": f"Column '{data.column_name}' with ID '{data.column_id}' deleted successfully.{fallback_text}"
+    }
+
 class LoginRequest(BaseModel):
     username:str
     password:str

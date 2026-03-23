@@ -100,13 +100,13 @@ interface Task {
         style({ opacity: 0, transform: 'translateX(100%)' }),
         animate(
           '350ms cubic-bezier(0.4, 0, 0.2, 1)',
-          style({ opacity: 1, transform: 'translateX(0)' })
+          style({ opacity: 1, transform: 'translateX(0)' }),
         ),
       ]),
       transition(':leave', [
         animate(
           '250ms cubic-bezier(0.4, 0, 0.2, 1)',
-          style({ opacity: 0, transform: 'translateX(100%)' })
+          style({ opacity: 0, transform: 'translateX(100%)' }),
         ),
       ]),
     ]),
@@ -115,7 +115,7 @@ interface Task {
         style({ opacity: 0, transform: 'scale(0.92) translateY(-10px)' }),
         animate(
           '220ms cubic-bezier(0.4, 0, 0.2, 1)',
-          style({ opacity: 1, transform: 'scale(1) translateY(0)' })
+          style({ opacity: 1, transform: 'scale(1) translateY(0)' }),
         ),
       ]),
       transition(':leave', [
@@ -358,7 +358,7 @@ export class Kanban {
         (t) =>
           t.title.toLowerCase().includes(query) ||
           t.description.toLowerCase().includes(query) ||
-          t.priority.toLowerCase().includes(query)
+          t.priority.toLowerCase().includes(query),
       );
     }
     return this.sortTasks([...filtered]);
@@ -386,6 +386,21 @@ export class Kanban {
       Date.now();
     const colorIndex = this.columns().length % COLUMN_COLORS.length;
 
+    this.http
+      .post('http://localhost:8000/create_column', {
+        column_id: id,
+        column_name: name,
+        color_index: colorIndex,
+      })
+      .subscribe({
+        next: (response) => {
+          console.log('API response:', response);
+        },
+        error: (err: any) => {
+          console.log('API Error:', err);
+        },
+      });
+
     this.columns.update((cols) => {
       const updated = [...cols, { id, name, colorIndex }];
       this.saveColumns(updated);
@@ -406,6 +421,23 @@ export class Kanban {
     const cols = this.columns();
     const remaining = cols.filter((c) => c.id !== columnId);
     const fallbackColumn = remaining.length > 0 ? remaining[0].id : null;
+
+    this.http
+      .delete('http://localhost:8000/delete_column', {
+        body: {
+          column_id: columnId,
+          column_name: columnName,
+          fallback_column_id: fallbackColumn,
+        },
+      })
+      .subscribe({
+        next: (response) => {
+          console.log('API response:', response);
+        },
+        error: (err: any) => {
+          console.log('API Error:', err);
+        },
+      });
 
     this.tasks.update((tasks) => {
       let updated: Task[];
@@ -437,6 +469,20 @@ export class Kanban {
     const id = this.editingColumnId();
     const name = this.editingColumnName().trim();
     if (!id || !name) return;
+
+    this.http
+      .put('http://localhost:8000/update_column', {
+        column_id: id,
+        column_name: name,
+      })
+      .subscribe({
+        next: (response) => {
+          console.log('API response:', response);
+        },
+        error: (err: any) => {
+          console.log('API Error:', err);
+        },
+      });
 
     this.columns.update((cols) => {
       const updated = cols.map((c) => (c.id === id ? { ...c, name } : c));
@@ -536,7 +582,7 @@ export class Kanban {
           newColumnTasks.length > 0 ? Math.max(...newColumnTasks.map((t) => t.order)) : 0;
 
         const updated: Task[] = tasks.map((t: Task) =>
-          t.id === taskId ? { ...t, status: newStatus, order: maxOrder + 1 } : t
+          t.id === taskId ? { ...t, status: newStatus, order: maxOrder + 1 } : t,
         );
 
         this.saveTasks(updated);
@@ -955,7 +1001,7 @@ export class Kanban {
               imageData: newImageData,
               imageName: newImageName,
             }
-          : t
+          : t,
       );
       this.saveTasks(updated);
       return updated;
@@ -1028,7 +1074,7 @@ export class Kanban {
   removeTaskImage(taskId: number) {
     this.tasks.update((tasks) => {
       const updated = tasks.map((t) =>
-        t.id === taskId ? { ...t, imageData: null, imageName: null } : t
+        t.id === taskId ? { ...t, imageData: null, imageName: null } : t,
       );
       this.saveTasks(updated);
       return updated;
