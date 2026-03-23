@@ -1,17 +1,8 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { firebaseConfig } from '../../environments/firebase.config.local';
 
 declare const firebase: any;
-
-const FIREBASE_CONFIG = {
-  apiKey: 'AIzaSyBffL6zLdO4bBIF9Sr-9oSMjbBulUGWTNE',
-  authDomain: 'sprintly-61099.firebaseapp.com',
-  projectId: 'sprintly-61099',
-  storageBucket: 'sprintly-61099.firebasestorage.app',
-  messagingSenderId: '504777175672',
-  appId: '1:504777175672:web:fc9b43c9262c4fe92bb38d',
-  measurementId: 'G-P9TVLF0F3S',
-};
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseAuthService {
@@ -39,7 +30,7 @@ export class FirebaseAuthService {
 
     if (!this.firebaseReady) {
       if (!firebase.apps?.length) {
-        firebase.initializeApp(FIREBASE_CONFIG);
+        firebase.initializeApp(firebaseConfig);
       }
       this.firebaseReady = true;
     }

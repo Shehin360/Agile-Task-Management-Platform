@@ -47,6 +47,7 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+src/environments/firebase.config.local.ts
 
 # Build artifacts
 *.log
