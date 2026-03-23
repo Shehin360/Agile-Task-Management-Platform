@@ -1,60 +1,21 @@
 # Sprintly - Agile Task Management Platform
 
-Sprintly is an Angular + FastAPI project for task planning with a dynamic Kanban board, local authentication, optional Google sign-in (Firebase), and an analytics dashboard.
+Sprintly is an Angular frontend with a FastAPI backend for Kanban-style task management, authentication, and analytics.
 
-## Current Project Scope
+## What Is Included
 
-### Frontend
+- Login and register pages
+- Protected board and analytics routes
+- Dynamic Kanban columns (add, rename, delete, reorder)
+- Task CRUD, drag-and-drop, priority, due date, optional image
+- Analytics dashboard (reads board state)
+- Firebase Google sign-in integration
+- FastAPI endpoints for auth, tasks, and columns
 
-- Routes: login, register, board, analytics
-- Route guards on board and analytics
-- Local auth state and registered users persisted in localStorage
-- Google sign-in via Firebase Auth SDK (loaded from CDN)
-- Dynamic column management:
-  - add column
-  - rename column
-  - delete column (with fallback task move when possible)
-  - drag-and-drop column reordering
-- Task management:
-  - create / edit / delete
-  - drag-and-drop across columns
-  - reorder inside a column
-  - due date
-  - priority (low / medium / high)
-  - optional image attachment (stored as Data URL)
-- Analytics page using board data from localStorage:
-  - quick stats
-  - column donut chart
-  - priority distribution
-  - due-date status gauge
-  - task timeline
-  - attention list
+## Important Data Flow
 
-### Backend
-
-FastAPI endpoints exist for task, column, and auth/profile operations.
-
-## Important Data Flow Note
-
-The current source of truth for board/analytics data is localStorage on the frontend.
-
-The frontend still calls backend endpoints for create/update/delete and auth/profile events, but board rendering and analytics metrics are computed from locally persisted state.
-
-## Tech Stack
-
-### Frontend
-
-- Angular 21
-- TypeScript
-- Angular animations
-- Angular HttpClient
-- Angular signals/computed
-
-### Backend
-
-- FastAPI
-- Uvicorn
-- Pydantic
+- Board and analytics data are currently stored in browser localStorage.
+- The frontend also sends API calls to FastAPI for operations.
 
 ## Project Structure
 
@@ -63,20 +24,16 @@ agile_project/
   backend/
     FastAPI.py
     requirements.txt
-  public/
   src/
     app/
-      analytics/
       auth/
       kanban/
+      analytics/
       login/
       register/
-      app.routes.ts
     environments/
       firebase.config.example.ts
-      firebase.config.local.ts   # local only, gitignored
-    index.html
-  angular.json
+      firebase.config.local.ts
   package.json
   README.md
 ```
@@ -87,31 +44,27 @@ agile_project/
 - npm
 - Python 3.10+
 
-## Frontend Setup
+## Setup For A New Teammate
 
-From project root:
+1. Clone the repository.
+2. Open a terminal in the project root (`agile_project`).
+3. Install frontend dependencies:
 
 ```bash
 npm install
 ```
 
-## Firebase Setup (Sensitive Config Moved Out)
-
-Firebase keys were moved out of source code into a local file.
-
-1. Create your local config from the example:
+4. Create local Firebase config from template:
 
 ```bash
 cp src/environments/firebase.config.example.ts src/environments/firebase.config.local.ts
 ```
 
-2. Put your Firebase Web App values in:
+5. Open `src/environments/firebase.config.local.ts` and paste your Firebase web app values.
 
-- src/environments/firebase.config.local.ts
+## Run The Frontend
 
-3. This file is ignored by git and should not be committed.
-
-## Run Frontend
+From project root:
 
 ```bash
 npm start
@@ -121,12 +74,12 @@ Frontend URL:
 
 - http://localhost:4200
 
-## Backend Setup And Run
+## Run The Backend
 
-- Please copy the FastAPI.py file and the requirements.txt file outside the frontend folder which is the ideal choice
+Make sure `FastAPI.py` and `requirements.txt` are copied and put it outside the agile_project folder and make new folder by `mkdir backend/` then `cd backend` which need to be created seperatedly and paste the `FastAPI.py` and `requirements.txt` there
 
 ```bash
-cd backend
+# cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -137,74 +90,87 @@ Backend URL:
 
 - http://localhost:8000
 
-Current backend CORS allowlist includes:
+## Typical Day-To-Day Workflow
 
-- http://localhost:4200
+1. Start backend terminal:
 
-## Available Frontend Scripts
+```bash
+cd backend
+source .venv/bin/activate
+uvicorn FastAPI:app --reload --port 8000
+```
 
-From package.json:
+2. Start frontend terminal:
 
-- npm start -> ng serve
-- npm run build -> ng build
-- npm run watch -> ng build --watch --configuration development
-- npm test -> ng test
-- npm run serve:ssr:newproject -> node dist/newproject/server/server.mjs
+```bash
+npm start
+```
 
-## FastAPI Endpoints Currently Implemented
+3. Open http://localhost:4200
 
-### Task
+## Frontend Scripts
 
-- POST /create_task
-- PUT /update_task
-- DELETE /delete_task
+- `npm start` -> `ng serve`
+- `npm run build` -> `ng build`
+- `npm run watch` -> `ng build --watch --configuration development`
+- `npm test` -> `ng test`
+- `npm run serve:ssr:newproject` -> serves SSR output
 
-### Column
+## Backend Requirements
 
-- POST /create_column
-- PUT /update_column
-- DELETE /delete_column
+From `backend/requirements.txt`:
 
-### Auth and Profile
+- fastapi==0.135.0
+- uvicorn==0.41.0
+- pydantic==2.12.5
 
-- POST /login
-- POST /google_login
-- POST /register
-- POST /logout
-- PUT /update_profile
+## API Endpoints
+
+Auth and profile:
+
+- POST `/login`
+- POST `/google_login`
+- POST `/register`
+- POST `/logout`
+- PUT `/update_profile`
+
+Tasks:
+
+- POST `/create_task`
+- PUT `/update_task`
+- DELETE `/delete_task`
+
+Columns:
+
+- POST `/create_column`
+- PUT `/update_column`
+- DELETE `/delete_column`
 
 ## Team Sharing Notes
 
-- Keep src/environments/firebase.config.local.ts private.
-- Each teammate should create the api credentials from Firebase on there own
-- Share src/environments/firebase.config.example.ts as the template.
-- Each teammate should create their own local firebase.config.local.ts.
+- Do not commit `src/environments/firebase.config.local.ts`.
+- Share only `src/environments/firebase.config.example.ts` as the template.
+- Each teammate should create their own Firebase API credentials and local config file on their machine.
 
 ## Troubleshooting
 
-### Frontend install/run issues
+Frontend install issues:
 
 ```bash
 rm -rf node_modules package-lock.json
 npm install
-npm start
 ```
 
-### Port 4200 already in use
+Frontend port already in use:
 
 ```bash
 npx ng serve --port 4300
 ```
 
-### Backend dependency issues
+Backend dependency issues:
 
 ```bash
 cd backend
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
-
-## Extra Notes
-
-- Firebase SDK scripts are loaded in src/index.html.
-- Analytics currently reads from localStorage snapshots shared with board state.
