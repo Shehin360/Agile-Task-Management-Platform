@@ -5,17 +5,18 @@
   flex-direction: column;
   padding: 32px 40px;
   box-sizing: border-box;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   position: relative;
   overflow: hidden;
 
   /* Rich animated gradient background */
   background: #0a0a1a;
-  background-image: radial-gradient(
-      ellipse 80% 50% at 20% 40%,
-      rgba(120, 40, 200, 0.25) 0%,
-      transparent 60%
-    ),
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% 40%, rgba(120, 40, 200, 0.25) 0%, transparent 60%),
     radial-gradient(ellipse 60% 40% at 80% 20%, rgba(0, 180, 220, 0.2) 0%, transparent 55%),
     radial-gradient(ellipse 50% 60% at 60% 80%, rgba(233, 69, 96, 0.15) 0%, transparent 55%),
     radial-gradient(ellipse 40% 40% at 10% 90%, rgba(15, 155, 88, 0.12) 0%, transparent 50%);
@@ -94,7 +95,9 @@
   border-radius: 10px;
   flex-shrink: 0;
   filter: drop-shadow(0 2px 8px rgba(196, 77, 255, 0.3));
-  transition: transform 0.3s ease, filter 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    filter 0.3s ease;
 }
 
 .brand-logo:hover {
@@ -255,7 +258,9 @@
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
   z-index: 1000;
   overflow: hidden;
   padding: 6px;
@@ -1282,7 +1287,9 @@
   padding: 0;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -1383,7 +1390,9 @@
 .image-dropzone.drag-active {
   border-color: rgba(139, 92, 246, 0.6);
   background: rgba(139, 92, 246, 0.08);
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.15), inset 0 0 30px rgba(139, 92, 246, 0.05);
+  box-shadow:
+    0 0 30px rgba(139, 92, 246, 0.15),
+    inset 0 0 30px rgba(139, 92, 246, 0.05);
 }
 
 .image-upload-input {
@@ -1410,7 +1419,9 @@
   font-size: 2rem;
   line-height: 1;
   opacity: 0.5;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .dropzone-content:hover .dropzone-icon {
@@ -1595,7 +1606,9 @@
   border-radius: 24px;
   width: 440px;
   max-width: 90vw;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.5),
+    0 0 1px rgba(255, 255, 255, 0.1) inset;
   animation: modalSlideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
@@ -1899,7 +1912,9 @@
 .column.column-dragging {
   opacity: 0.3;
   transform: scale(0.96);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
   box-shadow: 0 12px 40px rgba(196, 77, 255, 0.2);
 }
 
@@ -1917,7 +1932,9 @@
   width: 4px;
   border-radius: 4px;
   background: linear-gradient(180deg, #c44dff, #00d4ff);
-  box-shadow: 0 0 16px rgba(196, 77, 255, 0.6), 0 0 32px rgba(196, 77, 255, 0.3);
+  box-shadow:
+    0 0 16px rgba(196, 77, 255, 0.6),
+    0 0 32px rgba(196, 77, 255, 0.3);
   z-index: 10;
   animation: columnDropPulse 1.2s ease-in-out infinite;
 }
@@ -1935,7 +1952,9 @@
   width: 4px;
   border-radius: 4px;
   background: linear-gradient(180deg, #c44dff, #00d4ff);
-  box-shadow: 0 0 16px rgba(196, 77, 255, 0.6), 0 0 32px rgba(196, 77, 255, 0.3);
+  box-shadow:
+    0 0 16px rgba(196, 77, 255, 0.6),
+    0 0 32px rgba(196, 77, 255, 0.3);
   z-index: 10;
   animation: columnDropPulse 1.2s ease-in-out infinite;
 }
@@ -1943,10 +1962,14 @@
 @keyframes columnDropPulse {
   0%,
   100% {
-    box-shadow: 0 0 16px rgba(196, 77, 255, 0.6), 0 0 32px rgba(196, 77, 255, 0.3);
+    box-shadow:
+      0 0 16px rgba(196, 77, 255, 0.6),
+      0 0 32px rgba(196, 77, 255, 0.3);
   }
   50% {
-    box-shadow: 0 0 24px rgba(196, 77, 255, 0.8), 0 0 48px rgba(196, 77, 255, 0.5);
+    box-shadow:
+      0 0 24px rgba(196, 77, 255, 0.8),
+      0 0 48px rgba(196, 77, 255, 0.5);
   }
 }
 
@@ -1970,7 +1993,7 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
-  align-self: center;  
+  align-self: center;
 }
 
 .add-column-card:hover {
@@ -2060,7 +2083,9 @@
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 1px rgba(255, 255, 255, 0.1) inset;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -2091,7 +2116,9 @@
 }
 .toast-success {
   border-left: none;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(16, 185, 129, 0.08);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(16, 185, 129, 0.08);
 }
 
 .toast-error::before {
@@ -2100,7 +2127,9 @@
 }
 .toast-error {
   border-left: none;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(239, 68, 68, 0.08);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(239, 68, 68, 0.08);
 }
 
 .toast-info::before {
@@ -2109,7 +2138,9 @@
 }
 .toast-info {
   border-left: none;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.08);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(59, 130, 246, 0.08);
 }
 
 .toast-warning::before {
@@ -2118,7 +2149,9 @@
 }
 .toast-warning {
   border-left: none;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(245, 158, 11, 0.08);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(245, 158, 11, 0.08);
 }
 
 .toast-icon {
@@ -2179,6 +2212,18 @@
     width: 0%;
   }
 }
+
+/* Compact desktops (e.g., 1080px portrait monitors): keep columns comfortably wide */
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .column {
+    width: clamp(320px, 36vw, 420px);
+  }
+
+  .add-column-card {
+    min-width: 260px;
+  }
+}
+
 @media (max-width: 1024px) {
   .page {
     padding: 16px 14px;
@@ -2550,7 +2595,9 @@
   border-radius: 24px;
   padding: 36px 32px 28px;
   text-align: center;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.5),
+    0 0 1px rgba(255, 255, 255, 0.1) inset;
   animation: modalSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

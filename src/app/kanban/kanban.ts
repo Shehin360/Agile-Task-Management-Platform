@@ -1,4 +1,4 @@
-import { Component, signal, computed, PLATFORM_ID, inject } from '@angular/core';
+import { Component, signal, computed, PLATFORM_ID, inject, HostListener } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
@@ -142,6 +142,18 @@ export class Kanban {
 
   closeUserMenu() {
     this.showUserMenu.set(false);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.showUserMenu()) return;
+
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    if (!target.closest('.user-menu-wrapper')) {
+      this.closeUserMenu();
+    }
   }
 
   logout() {
