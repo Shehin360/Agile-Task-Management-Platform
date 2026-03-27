@@ -60,6 +60,30 @@ npm install
 cp src/environments/firebase.config.example.ts src/environments/firebase.config.local.ts
 ```
 
+### Getting Firebase Credentials
+
+If you're new to Firebase, follow these steps to get your web app credentials:
+
+1. Go to [Firebase Console](https://console.firebase.google.com)
+2. Sign in with your Google account
+3. Click **"Create a new project"** or select an existing project
+4. In the project dashboard, click the **Web icon** (</>) to add a web app
+5. Register the app with a name like "Sprintly" and click **Register**
+6. Copy the Firebase config object that appears. It will look like:
+   ```javascript
+   {
+     apiKey: "YOUR_API_KEY",
+     authDomain: "your-project.firebaseapp.com",
+     projectId: "your-project-id",
+     storageBucket: "your-project.appspot.com",
+     messagingSenderId: "123456789",
+     appId: "1:123456789:web:abcdef123456"
+   }
+   ```
+7. Save this config—you'll need it for the next step.
+
+**Note:** Keep your `apiKey` and credentials private. Never commit them to the repository.
+
 5. Open `src/environments/firebase.config.local.ts` and paste your Firebase web app values.
 
 ## Run The Frontend
