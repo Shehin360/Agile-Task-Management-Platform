@@ -800,14 +800,7 @@ export class Kanban implements OnDestroy {
     event.preventDefault();
     event.stopPropagation();
 
-    const targetElement = event.currentTarget as HTMLElement | null;
-    const inferredSide = targetElement
-      ? event.clientX <
-        targetElement.getBoundingClientRect().left + targetElement.getBoundingClientRect().width / 2
-        ? 'left'
-        : 'right'
-      : 'left';
-    const side = this.columnDropSide() ?? inferredSide;
+    const side = this.resolveColumnDropSide(event, targetColumnId, draggedId);
     let movedColumnName: string | null = null;
 
     this.columns.update((cols) => {
@@ -816,8 +809,24 @@ export class Kanban implements OnDestroy {
       if (draggedIndex < 0 || targetIndex < 0) return cols;
 
       // Determine the final index after accounting for removal shift.
-      const insertBase = side === 'right' ? targetIndex + 1 : targetIndex;
-      const normalizedInsertIndex = draggedIndex < insertBase ? insertBase - 1 : insertBase;
+      const getNormalizedInsertIndex = (dropSide: 'left' | 'right') => {
+        const insertBase = dropSide === 'right' ? targetIndex + 1 : targetIndex;
+        return draggedIndex < insertBase ? insertBase - 1 : insertBase;
+      };
+
+      let effectiveSide: 'left' | 'right' = side;
+      let normalizedInsertIndex = getNormalizedInsertIndex(effectiveSide);
+
+      // If side inference results in a no-op, force directional movement.
+      if (normalizedInsertIndex === draggedIndex) {
+        if (draggedIndex < targetIndex) {
+          effectiveSide = 'right';
+          normalizedInsertIndex = getNormalizedInsertIndex(effectiveSide);
+        } else if (draggedIndex > targetIndex) {
+          effectiveSide = 'left';
+          normalizedInsertIndex = getNormalizedInsertIndex(effectiveSide);
+        }
+      }
 
       // No-op drop: same resulting position.
       if (normalizedInsertIndex === draggedIndex) return cols;
@@ -827,7 +836,7 @@ export class Kanban implements OnDestroy {
 
       // Compute the new insert index after removing the dragged column
       let insertIndex = updated.findIndex((c) => c.id === targetColumnId);
-      if (side === 'right') {
+      if (effectiveSide === 'right') {
         insertIndex += 1;
       }
 
@@ -841,6 +850,35 @@ export class Kanban implements OnDestroy {
       this.showToast(`Column "${movedColumnName}" moved`, 'info');
     }
     this.onColumnDragEnd();
+  }
+
+  private resolveColumnDropSide(
+    event: DragEvent,
+    targetColumnId: string,
+    draggedColumnId: string,
+  ): 'left' | 'right' {
+    const hoveredSide = this.columnDropSide();
+    if (hoveredSide) return hoveredSide;
+
+    if (this.isBrowser) {
+      const targetElement = document.querySelector(
+        `.column[data-column-id="${targetColumnId}"]`,
+      ) as HTMLElement | null;
+      if (targetElement) {
+        const rect = targetElement.getBoundingClientRect();
+        return event.clientX < rect.left + rect.width / 2 ? 'left' : 'right';
+      }
+    }
+
+    // Deterministic fallback when pointer geometry is unavailable.
+    const cols = this.columns();
+    const draggedIndex = cols.findIndex((c) => c.id === draggedColumnId);
+    const targetIndex = cols.findIndex((c) => c.id === targetColumnId);
+    if (draggedIndex >= 0 && targetIndex >= 0) {
+      return draggedIndex < targetIndex ? 'right' : 'left';
+    }
+
+    return 'left';
   }
 
   // ──────── BOARD DRAG LEVEL ────────
