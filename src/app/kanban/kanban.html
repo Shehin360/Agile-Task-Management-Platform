@@ -17,10 +17,10 @@
           type="text"
           placeholder="Search tasks..."
           [value]="searchQuery()"
-          (input)="searchQuery.set($any($event.target).value)"
+          (input)="onSearchInput($any($event.target).value)"
         />
         @if (searchQuery()) {
-        <button class="search-clear" (click)="searchQuery.set('')">✕</button>
+        <button class="search-clear" (click)="clearSearch()">✕</button>
         }
       </div>
       <button
@@ -199,6 +199,7 @@
       @for (column of columns(); track column.id) {
       <div
         class="column"
+        [attr.data-column-id]="column.id"
         (dragenter)="$event.preventDefault()"
         [class.drag-over]="dragOverColumn() === column.id"
         [class.column-dragging]="draggedColumnId() === column.id"
@@ -275,6 +276,9 @@
             (dragstart)="onDragStart($event, task.id)"
             (dragend)="onDragEnd()"
             (dragover)="onDragOverTask($event, task.id)"
+            (touchstart)="onTaskTouchStart($event, task.id)"
+            (touchmove)="onTaskTouchMove($event)"
+            (touchend)="onTaskTouchEnd($event)"
             [style.--col-accent]="getColumnColor(column.colorIndex).accent"
           >
             <div class="task-content">
@@ -363,8 +367,7 @@
       </div>
       <div class="modal-body">
         <p class="confirm-text">
-          Are you sure you want to delete this column? All tasks will be moved to the first
-          remaining column.
+          Are you sure you want to delete this column? All tasks in this column will be deleted.
         </p>
       </div>
       <div class="modal-actions">

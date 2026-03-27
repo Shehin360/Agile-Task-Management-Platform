@@ -1,6 +1,8 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import date
+from typing import Literal
 
 
 app = FastAPI()
@@ -8,17 +10,34 @@ app = FastAPI()
 # cors
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"],
+    allow_origins=["http://localhost:4200","http://127.0.0.1:4200"],
     allow_credentials= True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 class Task(BaseModel):
-    task: str
-    task_description: str
-    priority: str
-    task_date: str
+    task: str = Field(..., min_length=1, max_length=255)
+    task_description: str = Field(default="", max_length=2000)
+    priority: Literal["low", "medium", "high"]
+    task_date: str = Field(default="")
+
+    @field_validator("task")
+    @classmethod
+    def task_title_not_blank(cls, value: str) -> str:
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("Task title cannot be empty.")
+        return cleaned
+
+    @field_validator("task_date")
+    @classmethod
+    def validate_task_date(cls, value: str) -> str:
+        cleaned = value.strip()
+        if not cleaned:
+            return ""
+        date.fromisoformat(cleaned)
+        return cleaned
 
 @app.post("/create_task")
 def create_task(task: Task):
@@ -30,10 +49,27 @@ def create_task(task: Task):
 
 class UpdateTask(BaseModel):
     task_id: int
-    task: str
-    task_description: str
-    priority: str
-    task_date: str
+    task: str = Field(..., min_length=1, max_length=255)
+    task_description: str = Field(default="", max_length=2000)
+    priority: Literal["low", "medium", "high"]
+    task_date: str = Field(default="")
+
+    @field_validator("task")
+    @classmethod
+    def update_task_title_not_blank(cls, value: str) -> str:
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("Task title cannot be empty.")
+        return cleaned
+
+    @field_validator("task_date")
+    @classmethod
+    def validate_update_task_date(cls, value: str) -> str:
+        cleaned = value.strip()
+        if not cleaned:
+            return ""
+        date.fromisoformat(cleaned)
+        return cleaned
 
 
 @app.put("/update_task")
@@ -45,8 +81,8 @@ def update_task(task: UpdateTask):
 
 
 class DeleteTask(BaseModel):
-    task_id: int
-    task: str
+    task_id: int = Field(..., ge=1)
+    task: str = Field(..., min_length=1, max_length=255)
 
 
 @app.delete("/delete_task")
@@ -57,9 +93,9 @@ def delete_task(task: DeleteTask):
     }
 
 class CreateColumnRequest(BaseModel):
-    column_id: str
-    column_name: str
-    color_index: int
+    column_id: str = Field(..., min_length=1, max_length=128)
+    column_name: str = Field(..., min_length=1, max_length=64)
+    color_index: int = Field(..., ge=0)
 
 @app.post("/create_column")
 def create_column(data: CreateColumnRequest):
@@ -69,8 +105,8 @@ def create_column(data: CreateColumnRequest):
     }
 
 class UpdateColumnRequest(BaseModel):
-    column_id: str
-    column_name: str
+    column_id: str = Field(..., min_length=1, max_length=128)
+    column_name: str = Field(..., min_length=1, max_length=64)
 
 @app.put("/update_column")
 def update_column(data: UpdateColumnRequest):
@@ -80,21 +116,21 @@ def update_column(data: UpdateColumnRequest):
     }
 
 class DeleteColumnRequest(BaseModel):
-    column_id: str
-    column_name: str
+    column_id: str = Field(..., min_length=1, max_length=128)
+    column_name: str = Field(..., min_length=1, max_length=64)
     fallback_column_id: str | None = None
 
 @app.delete("/delete_column")
 def delete_column(data: DeleteColumnRequest):
-    fallback_text = f" Tasks moved to '{data.fallback_column_id}'." if data.fallback_column_id else " Tasks deleted because no columns remain."
+    fallback_text = " Tasks in this column were deleted."
     return {
         "status": "success",
         "message": f"Column '{data.column_name}' with ID '{data.column_id}' deleted successfully.{fallback_text}"
     }
 
 class LoginRequest(BaseModel):
-    username:str
-    password:str
+    username: str = Field(..., min_length=1, max_length=64)
+    password: str = Field(..., min_length=1, max_length=128)
 
 @app.post("/login")
 def login(data: LoginRequest):
@@ -112,8 +148,8 @@ def login(data: LoginRequest):
 
 # google sign in 
 class GoogleLoginRequest(BaseModel):
-    email: str
-    name: str
+    email: str = Field(..., min_length=3, max_length=254)
+    name: str = Field(..., min_length=1, max_length=100)
 
 @app.post("/google_login")
 def google_login(data: GoogleLoginRequest):
@@ -123,8 +159,8 @@ def google_login(data: GoogleLoginRequest):
     }
 
 class Registerrequest(BaseModel):
-    username:str
-    display_name: str
+    username: str = Field(..., min_length=3, max_length=64)
+    display_name: str = Field(..., min_length=1, max_length=100)
 
 @app.post("/register")
 def register(data: Registerrequest):
@@ -134,17 +170,17 @@ def register(data: Registerrequest):
     }
 
 class LogoutRequest(BaseModel):
-    username:str
+    username: str = Field(..., min_length=1, max_length=64)
 
 @app.post("/logout")
-def Logout(data: LogoutRequest):
-    responce = {"message" : f"User '{data.username}' logged out successfully."}
-    return responce
+def logout(data: LogoutRequest):
+    response = {"message" : f"User '{data.username}' logged out successfully."}
+    return response
 
 # profile update
 
 class UpdateProfileRequest(BaseModel):
-    username: str
+    username: str = Field(..., min_length=1, max_length=64)
     new_username: str | None = None
     new_display_name: str | None = None
 

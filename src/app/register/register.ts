@@ -15,7 +15,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
         style({ opacity: 0, transform: 'translateY(20px)' }),
         animate(
           '500ms cubic-bezier(0.4, 0, 0.2, 1)',
-          style({ opacity: 1, transform: 'translateY(0)' })
+          style({ opacity: 1, transform: 'translateY(0)' }),
         ),
       ]),
     ]),
@@ -74,6 +74,12 @@ export class Register {
     const val = this.password();
     if (!val) return 'Password is required';
     if (val.length < 8) return 'Password must be at least 8 characters';
+    if (!/[A-Z]/.test(val)) return 'Password must include an uppercase letter';
+    if (!/[a-z]/.test(val)) return 'Password must include a lowercase letter';
+    if (!/[0-9]/.test(val)) return 'Password must include a number';
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(val)) {
+      return 'Password must include a special character';
+    }
     return null;
   });
 
@@ -96,6 +102,10 @@ export class Register {
       !/[^a-zA-Z0-9_]/.test(u) &&
       !this.authService.isUsernameTaken(u) &&
       p.length >= 8 &&
+      /[A-Z]/.test(p) &&
+      /[a-z]/.test(p) &&
+      /[0-9]/.test(p) &&
+      /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(p) &&
       p === cp
     );
   });
@@ -173,7 +183,7 @@ export class Register {
       const result = this.authService.register(
         this.username().trim(),
         this.password(),
-        this.displayName().trim()
+        this.displayName().trim(),
       );
 
       if (result.success) {

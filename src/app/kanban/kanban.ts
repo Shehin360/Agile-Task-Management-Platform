@@ -1,4 +1,12 @@
-import { Component, signal, computed, PLATFORM_ID, inject, HostListener } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  PLATFORM_ID,
+  inject,
+  HostListener,
+  OnDestroy,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
@@ -124,7 +132,7 @@ interface Task {
     ]),
   ],
 })
-export class Kanban {
+export class Kanban implements OnDestroy {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
   private authService = inject(AuthService);
@@ -231,6 +239,31 @@ export class Kanban {
 
   // Search
   searchQuery = signal('');
+  private searchDebounceHandle: ReturnType<typeof setTimeout> | null = null;
+
+  onSearchInput(value: string) {
+    if (!this.isBrowser) {
+      this.searchQuery.set(value);
+      return;
+    }
+
+    if (this.searchDebounceHandle) {
+      clearTimeout(this.searchDebounceHandle);
+    }
+
+    this.searchDebounceHandle = setTimeout(() => {
+      this.searchQuery.set(value);
+      this.searchDebounceHandle = null;
+    }, 180);
+  }
+
+  clearSearch() {
+    if (this.searchDebounceHandle) {
+      clearTimeout(this.searchDebounceHandle);
+      this.searchDebounceHandle = null;
+    }
+    this.searchQuery.set('');
+  }
 
   taskMatchesSearch(task: Task): boolean {
     const query = this.searchQuery().toLowerCase().trim();
@@ -429,17 +462,12 @@ export class Kanban {
     const deletedColumn = this.columns().find((c) => c.id === columnId);
     const columnName = deletedColumn?.name ?? 'Column';
 
-    // Move tasks from deleted column to the first column, or delete them if no columns left
-    const cols = this.columns();
-    const remaining = cols.filter((c) => c.id !== columnId);
-    const fallbackColumn = remaining.length > 0 ? remaining[0].id : null;
-
     this.http
       .delete('http://localhost:8000/delete_column', {
         body: {
           column_id: columnId,
           column_name: columnName,
-          fallback_column_id: fallbackColumn,
+          fallback_column_id: null,
         },
       })
       .subscribe({
@@ -452,12 +480,7 @@ export class Kanban {
       });
 
     this.tasks.update((tasks) => {
-      let updated: Task[];
-      if (fallbackColumn) {
-        updated = tasks.map((t) => (t.status === columnId ? { ...t, status: fallbackColumn } : t));
-      } else {
-        updated = tasks.filter((t) => t.status !== columnId);
-      }
+      const updated = tasks.filter((t) => t.status !== columnId);
       this.saveTasks(updated);
       return updated;
     });
@@ -535,6 +558,77 @@ export class Kanban {
   onDragEnd() {
     this.draggedTaskId.set(null);
     this.dragOverColumn.set(null);
+    this.dropTargetTaskId.set(null);
+  }
+
+  onTaskTouchStart(event: TouchEvent, taskId: number) {
+    if (this.draggedColumnId()) return;
+    this.draggedTaskId.set(taskId);
+    const touch = event.touches[0];
+    if (!touch) return;
+    this.updateTouchDragColumn(touch.clientX, touch.clientY);
+  }
+
+  onTaskTouchMove(event: TouchEvent) {
+    if (this.draggedTaskId() == null || this.draggedColumnId()) return;
+    const touch = event.touches[0];
+    if (!touch) return;
+    event.preventDefault();
+    this.updateTouchDragColumn(touch.clientX, touch.clientY);
+  }
+
+  onTaskTouchEnd(event: TouchEvent) {
+    const taskId = this.draggedTaskId();
+    if (taskId == null || this.draggedColumnId()) {
+      this.draggedTaskId.set(null);
+      this.dragOverColumn.set(null);
+      return;
+    }
+
+    const touch = event.changedTouches[0];
+    if (touch) {
+      this.updateTouchDragColumn(touch.clientX, touch.clientY);
+    }
+
+    const targetColumnId = this.dragOverColumn();
+    if (targetColumnId) {
+      this.moveTaskToColumn(taskId, targetColumnId);
+    }
+
+    this.draggedTaskId.set(null);
+    this.dragOverColumn.set(null);
+    this.dropTargetTaskId.set(null);
+  }
+
+  private updateTouchDragColumn(clientX: number, clientY: number) {
+    if (!this.isBrowser) return;
+    const element = document.elementFromPoint(clientX, clientY) as HTMLElement | null;
+    const columnElement = element?.closest('.column') as HTMLElement | null;
+    const columnId = columnElement?.getAttribute('data-column-id');
+    if (columnId) {
+      this.dragOverColumn.set(columnId);
+    }
+  }
+
+  private moveTaskToColumn(taskId: number, newStatus: string) {
+    const draggedTask = this.tasks().find((t) => t.id === taskId);
+    if (!draggedTask || draggedTask.status === newStatus) return;
+
+    this.tasks.update((tasks: Task[]) => {
+      const newColumnTasks = tasks.filter((t) => t.status === newStatus);
+      const maxOrder =
+        newColumnTasks.length > 0 ? Math.max(...newColumnTasks.map((t) => t.order)) : 0;
+
+      const updated: Task[] = tasks.map((t: Task) =>
+        t.id === taskId ? { ...t, status: newStatus, order: maxOrder + 1 } : t,
+      );
+
+      this.saveTasks(updated);
+      return updated;
+    });
+
+    const targetCol = this.columns().find((c) => c.id === newStatus);
+    this.showToast(`Task moved to "${targetCol?.name ?? newStatus}"`, 'info');
   }
 
   onDragOver(event: DragEvent, column: string) {
@@ -706,7 +800,14 @@ export class Kanban {
     event.preventDefault();
     event.stopPropagation();
 
-    const side = this.columnDropSide();
+    const targetElement = event.currentTarget as HTMLElement | null;
+    const inferredSide = targetElement
+      ? event.clientX <
+        targetElement.getBoundingClientRect().left + targetElement.getBoundingClientRect().width / 2
+        ? 'left'
+        : 'right'
+      : 'left';
+    const side = this.columnDropSide() ?? inferredSide;
     let movedColumnName: string | null = null;
 
     this.columns.update((cols) => {
@@ -856,7 +957,10 @@ export class Kanban {
 
   addTask() {
     const title = this.newTaskTitle().trim();
-    if (!title) return;
+    if (!title) {
+      this.showToast('Task title cannot be empty', 'warning');
+      return;
+    }
 
     const description = this.newTaskDescription().trim();
     const priority = this.newTaskPriority();
@@ -875,37 +979,39 @@ export class Kanban {
       .subscribe({
         next: (response) => {
           console.log('API response:', response);
+
+          this.tasks.update((tasks) => {
+            const columnTasks = tasks.filter((t) => t.status === columnId);
+            const maxOrder =
+              columnTasks.length > 0 ? Math.max(...columnTasks.map((t) => t.order)) : 0;
+
+            const updated: Task[] = [
+              ...tasks,
+              {
+                id: this.nextId(),
+                title,
+                description,
+                status: columnId,
+                priority,
+                order: maxOrder + 1,
+                dueDate,
+                imageData,
+                imageName,
+              },
+            ];
+            this.saveTasks(updated);
+            return updated;
+          });
+
+          this.nextId.update((id) => id + 1);
+          this.closeAddTaskModal();
+          this.showToast(`Task "${title}" created`, 'success');
         },
         error: (err: any) => {
           console.log('API Error:', err);
+          this.showToast('Failed to create task. Please try again.', 'error');
         },
       });
-
-    this.tasks.update((tasks) => {
-      const columnTasks = tasks.filter((t) => t.status === columnId);
-      const maxOrder = columnTasks.length > 0 ? Math.max(...columnTasks.map((t) => t.order)) : 0;
-
-      const updated: Task[] = [
-        ...tasks,
-        {
-          id: this.nextId(),
-          title,
-          description,
-          status: columnId,
-          priority,
-          order: maxOrder + 1,
-          dueDate,
-          imageData,
-          imageName,
-        },
-      ];
-      this.saveTasks(updated);
-      return updated;
-    });
-
-    this.nextId.update((id) => id + 1);
-    this.closeAddTaskModal();
-    this.showToast(`Task "${title}" created`, 'success');
   }
 
   startEdit(task: Task) {
@@ -1258,8 +1364,17 @@ export class Kanban {
       return;
     }
 
-    if (password && password.length < 6) {
-      this.profileError.set('Password must be at least 6 characters.');
+    if (
+      password &&
+      (password.length < 8 ||
+        !/[A-Z]/.test(password) ||
+        !/[a-z]/.test(password) ||
+        !/[0-9]/.test(password) ||
+        !/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password))
+    ) {
+      this.profileError.set(
+        'Password must be 8+ chars and include uppercase, lowercase, number, and special character.',
+      );
       return;
     }
 
@@ -1283,5 +1398,12 @@ export class Kanban {
   navigateToAnalytics() {
     this.closeUserMenu();
     this.router.navigate(['/analytics']);
+  }
+
+  ngOnDestroy() {
+    if (this.searchDebounceHandle) {
+      clearTimeout(this.searchDebounceHandle);
+      this.searchDebounceHandle = null;
+    }
   }
 }

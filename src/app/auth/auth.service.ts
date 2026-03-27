@@ -14,7 +14,14 @@ export interface User {
 
 interface StoredUser {
   username: string;
-  password: string;
+  passwordHash: string;
+  displayName: string;
+}
+
+interface LegacyStoredUser {
+  username: string;
+  password?: string;
+  passwordHash?: string;
   displayName: string;
 }
 
@@ -34,7 +41,11 @@ export class AuthService {
       const users = this.getRegisteredUsers();
       if (users.length === 0) {
         this.saveRegisteredUsers([
-          { username: 'demo', password: 'demo1234', displayName: 'Demo User' },
+          {
+            username: 'demo',
+            passwordHash: this.hashPassword('Demo1234!'),
+            displayName: 'Demo User',
+          },
         ]);
       }
     }
@@ -49,7 +60,7 @@ export class AuthService {
   register(
     username: string,
     password: string,
-    displayName: string
+    displayName: string,
   ): { success: boolean; error?: string } {
     const users = this.getRegisteredUsers();
 
@@ -58,11 +69,12 @@ export class AuthService {
       return { success: false, error: 'Username is already taken' };
     }
 
-    if (password.length < 8) {
-      return { success: false, error: 'Password must be at least 8 characters' };
+    const passwordValidation = this.validatePasswordStrength(password);
+    if (!passwordValidation.valid) {
+      return { success: false, error: passwordValidation.message };
     }
 
-    users.push({ username, password, displayName });
+    users.push({ username, passwordHash: this.hashPassword(password), displayName });
     this.saveRegisteredUsers(users);
 
     // Auto-login after registration
@@ -83,7 +95,9 @@ export class AuthService {
   login(username: string, password: string): { success: boolean; error?: string } {
     const users = this.getRegisteredUsers();
 
-    const match = users.find((u) => u.username === username && u.password === password);
+    const match = users.find(
+      (u) => u.username === username && this.verifyPassword(password, u.passwordHash),
+    );
 
     if (!match) {
       return { success: false, error: 'Invalid username or password' };
@@ -105,7 +119,7 @@ export class AuthService {
   googleLogin(credential: string): { success: boolean; error?: string } {
     // Decode the JWT payload from Google (base64url-encoded)
     const payload = JSON.parse(
-      atob(credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))
+      atob(credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')),
     );
     const email: string = payload.email;
     const name: string = payload.name || email.split('@')[0];
@@ -119,7 +133,7 @@ export class AuthService {
       (u) =>
         u.username.toLowerCase() === baseUsername.toLowerCase() ||
         u.username.toLowerCase() === legacyUsername.toLowerCase() ||
-        u.username.toLowerCase() === legacyFullEmailClean
+        u.username.toLowerCase() === legacyFullEmailClean,
     );
 
     if (
@@ -128,7 +142,7 @@ export class AuthService {
         match.username.toLowerCase() === legacyFullEmailClean)
     ) {
       const canMigrate = !users.some(
-        (u) => u !== match && u.username.toLowerCase() === baseUsername.toLowerCase()
+        (u) => u !== match && u.username.toLowerCase() === baseUsername.toLowerCase(),
       );
       if (canMigrate) {
         match.username = baseUsername;
@@ -139,7 +153,7 @@ export class AuthService {
     if (!match) {
       // Auto-register on first Google login
       const username = this.getUniqueUsername(baseUsername, users);
-      const newUser: StoredUser = { username, password: '', displayName: name };
+      const newUser: StoredUser = { username, passwordHash: '', displayName: name };
       users.push(newUser);
       this.saveRegisteredUsers(users);
       match = newUser;
@@ -187,7 +201,7 @@ export class AuthService {
   updateProfile(
     newDisplayName: string,
     newPassword?: string,
-    newUsername?: string
+    newUsername?: string,
   ): { success: boolean; error?: string } {
     const current = this.currentUser();
     if (!current) return { success: false, error: 'Not logged in' };
@@ -207,10 +221,11 @@ export class AuthService {
     users[idx].username = finalUsername;
     users[idx].displayName = newDisplayName;
     if (newPassword && newPassword.trim().length > 0) {
-      if (newPassword.length < 8) {
-        return { success: false, error: 'Password must be at least 8 characters.' };
+      const passwordValidation = this.validatePasswordStrength(newPassword);
+      if (!passwordValidation.valid) {
+        return { success: false, error: passwordValidation.message };
       }
-      users[idx].password = newPassword;
+      users[idx].passwordHash = this.hashPassword(newPassword);
     }
     this.saveRegisteredUsers(users);
 
@@ -242,11 +257,71 @@ export class AuthService {
   private getRegisteredUsers(): StoredUser[] {
     if (!this.isBrowser) return [];
     const raw = localStorage.getItem(USERS_KEY);
-    return raw ? (JSON.parse(raw) as StoredUser[]) : [];
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw) as LegacyStoredUser[];
+    let migrated = false;
+    const normalized = parsed.map((user) => {
+      if (user.passwordHash) {
+        return {
+          username: user.username,
+          passwordHash: user.passwordHash,
+          displayName: user.displayName,
+        };
+      }
+
+      migrated = true;
+      return {
+        username: user.username,
+        passwordHash: this.hashPassword(user.password ?? ''),
+        displayName: user.displayName,
+      };
+    });
+
+    if (migrated) {
+      this.saveRegisteredUsers(normalized);
+    }
+
+    return normalized;
   }
 
   private saveRegisteredUsers(users: StoredUser[]) {
     if (this.isBrowser) localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  }
+
+  private validatePasswordStrength(password: string): { valid: boolean; message?: string } {
+    if (password.length < 8) {
+      return { valid: false, message: 'Password must be at least 8 characters.' };
+    }
+    if (!/[A-Z]/.test(password)) {
+      return { valid: false, message: 'Password must include at least one uppercase letter.' };
+    }
+    if (!/[a-z]/.test(password)) {
+      return { valid: false, message: 'Password must include at least one lowercase letter.' };
+    }
+    if (!/[0-9]/.test(password)) {
+      return { valid: false, message: 'Password must include at least one number.' };
+    }
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
+      return { valid: false, message: 'Password must include at least one special character.' };
+    }
+    return { valid: true };
+  }
+
+  private hashPassword(password: string): string {
+    // Client-side hashing is only a mitigation for localStorage exposure, not a full auth solution.
+    let hash = 2166136261;
+    for (let i = 0; i < password.length; i++) {
+      hash ^= password.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+      hash ^= hash >>> 13;
+    }
+    return `hashv1:${(hash >>> 0).toString(16).padStart(8, '0')}`;
+  }
+
+  private verifyPassword(password: string, storedHash: string): boolean {
+    if (!storedHash) return false;
+    return this.hashPassword(password) === storedHash;
   }
 
   private getGoogleUsernameBase(email: string): string {
